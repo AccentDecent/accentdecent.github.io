@@ -29,7 +29,7 @@
     </style>
 </head>
 <body>
-    <h1>File Explorer</h1>
+    <h1 id="fileName"></h1>
     <input type="file" id="fileInput">
     <div id="fileList"></div>
 
@@ -53,7 +53,7 @@
                         listItem.textContent = relativePath;
                         listItem.addEventListener('click', function() {
                             file.async('string').then(function(content) {
-                                displayContent(content);
+                                displayContent(relativePath, content);
                             });
                         });
 
@@ -63,21 +63,17 @@
             }
         });
 
-        function displayContent(content) {
+        function displayContent(fileName, content) {
             const fileList = document.getElementById('fileList');
             fileList.style.display = 'none';
 
             const contentDisplay = document.getElementById('contentDisplay');
             contentDisplay.style.display = 'block';
 
-            // Create a pre element for code formatting
             const codeElement = document.createElement('pre');
-            
-            // Add 'language' class to specify the language for highlighting (e.g., 'language-javascript')
             codeElement.className = 'language-javascript';
             codeElement.textContent = content;
 
-            // Append the pre element to contentDisplay
             contentDisplay.innerHTML = ''; // Clear any previous content
             contentDisplay.appendChild(codeElement);
 
@@ -87,20 +83,18 @@
                 fileList.style.display = 'block';
                 contentDisplay.style.display = 'none';
                 backButton.style.display = 'none';
+                document.getElementById('fileName').textContent = ''; // Clear file name
             });
 
-            // Highlight the code using Prism
             Prism.highlightElement(codeElement);
+
+            // Display the file name
+            document.getElementById('fileName').textContent = fileName;
         }
-
-
-
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
-
-
 </body>
 </html>
