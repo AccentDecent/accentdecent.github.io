@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Explorer</title>
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            cursor: pointer;
+            margin: 5px 0;
+        }
+
+        li:hover {
+            background-color: #f0f0f0;
+        }
+
+        #contentDisplay {
+            display: none;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+
+        #backButton {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Explorer</h1>
+    <input type="file" id="fileInput">
+    <div id="fileList"></div>
+
+    <div id="contentDisplay"></div>
+
+    <button id="backButton">Back</button>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            const files = event.target.files;
+            if (files.length > 0) {
+                const zipFile = files[0];
+                const zip = new JSZip();
+
+                zip.loadAsync(zipFile).then(function(contents) {
+                    contents.forEach(function (relativePath, file) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = relativePath;
+                        listItem.addEventListener('click', function() {
+                            file.async('string').then(function(content) {
+                                displayContent(content);
+                            });
+                        });
+
+                        fileList.appendChild(listItem);
+                    });
+                });
+            }
+        });
+
+        function displayContent(content) {
+            const fileList = document.getElementById('fileList');
+            fileList.style.display = 'none';
+
+            const contentDisplay = document.getElementById('contentDisplay');
+            contentDisplay.style.display = 'block';
+
+            // Create a pre element for code formatting
+            const codeElement = document.createElement('pre');
+            
+            // Add 'language' class to specify the language for highlighting (e.g., 'language-javascript')
+            codeElement.className = 'language-javascript';
+            codeElement.textContent = content;
+
+            // Append the pre element to contentDisplay
+            contentDisplay.innerHTML = ''; // Clear any previous content
+            contentDisplay.appendChild(codeElement);
+
+            const backButton = document.getElementById('backButton');
+            backButton.style.display = 'block';
+            backButton.addEventListener('click', function() {
+                fileList.style.display = 'block';
+                contentDisplay.style.display = 'none';
+                backButton.style.display = 'none';
+            });
+
+            // Highlight the code using Prism
+            Prism.highlightElement(codeElement);
+        }
+
+
+
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+
+
+</body>
+</html>
