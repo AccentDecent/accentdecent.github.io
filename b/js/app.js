@@ -21,7 +21,7 @@ document.getElementById('generateButton').addEventListener('click', async functi
     translatedLines.push(translatedLine);
 
     if(translatedLine.includes("Failed to translate")) {
-      nlines[i - 1] = "# ERR " + line + " " + await getPinyin(line);
+      nlines[i - 1] = "# ERR " + await getPinyin(line) + " " + line + "\t";
     }
 
     i++;
