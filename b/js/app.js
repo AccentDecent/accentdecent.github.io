@@ -1,84 +1,211 @@
-function convertToPinyin() {
-    const inputText = document.getElementById('inputText').value.trim();
-    const output = document.getElementById('output');
+document.getElementById('generateButton').addEventListener('click', async function() {
+  const inputTextElement = document.getElementById('inputText');
+  const outText = document.getElementById('outputText');
+  outText.innerText = "Generating...";
 
-    // Clear previous output
-    output.innerText = "";
+  const inputText = inputTextElement.value;
 
-    if (inputText === "") {
-        output.innerText = "Please enter Chinese characters.";
-        return;
+  const lines = inputText.split("\n");
+  const nlines = inputText.split("\n");
+  let translatedLines = [];
+  let i = 1;
+  for (const line of lines) {
+
+    if(line.startsWith("#")) {
+      translatedLines.push(line.replaceAll("#", "").replaceAll("# ", ""));
+      i++;
+      continue;
     }
 
-    // Parse XML data
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlData, "text/xml");
+    const translatedLine = await translate(line, i);
+    translatedLines.push(translatedLine);
 
-    const items = xmlDoc.getElementsByTagName('item');
-    const pinyinMap = new Map();
-
-    for (const item of items) {
-        const unicode = item.getAttribute('unicode');
-        const hanyu = item.getAttribute('hanyu');
-        pinyinMap.set(unicode, hanyu);
+    if(translatedLine.includes("Failed to translate")) {
+      nlines[i - 1] = "# ERR " + await getPinyin(line) + " " + line + ",";
     }
 
-    const lines = inputText.split("\n");
-    let result = "";
+    i++;
+  }
 
+  outText.innerText = translatedLines.join("\n");
+  inputTextElement.value = nlines.join("\n");
+});
+
+document.getElementById('testButton').addEventListener('click', function() {
+  test("爱");
+});
+
+document.getElementById('copyButton').addEventListener('click', function() {
+  const outputText = document.getElementById('outputText').innerText;
+  navigator.clipboard.writeText(outputText)
+    .then(() => {
+      alert('Text copied to clipboard');
+    })
+    .catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+});
+
+async function translate(chinese, index) {
+  const link = `https://en.pons.com/translate?q=${chinese}&in=&l=dezh&lf=zh&rt=de&qnac=`;
+
+  const headers = new Headers();
+  headers.append('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8');
+  headers.append('Accept-Encoding', 'gzip, deflate, br');
+  headers.append('access-control-allow-origin', '*');
+
+  const subtitleResponse = await fetch(link, {
+    method: 'GET',
+    headers: headers
+  });
+
+  const subtitleBody = await subtitleResponse.text();
+
+  if (subtitleResponse.status === 200) {
+    const lines = subtitleBody.split("\n");
+
+    let found = false, found2 = false;
+    var pinyin = "";
     for (const line of lines) {
-        const characters = line.trim();
-        let pinyin = "";
-        for (let i = 0; i < characters.length; i += 1) {
-            // get unicode of character
-            const unicode = characters.charCodeAt(i).toString(16).toUpperCase();
-            const hanyu = pinyinMap.get(unicode);
-
-            console.log("Unidcode: " + unicode + " Hanyu: " + hanyu);
-
-            if (hanyu) {
-                const toneNumber = getToneNumber(hanyu);
-                const syllableWithoutTone = hanyu.substring(0, hanyu.length - 1);
-                var to = applyTone(syllableWithoutTone, toneNumber) + " ";
-                console.log(to);
-                pinyin += to;
-
-                console.log("Tone Number: " + toneNumber);
-
-            } else {
-                pinyin += characters[i] + " (No Pinyin)";
-            }
+      if (found) {
+        if (line.includes("<dd class=\"dd-inner\">") && !found2) {
+          found2 = true;
+        } else if (found2) {
+          if (line.includes("<a href=")) {
+            var translation = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<")).replace("</a>", "");
+            return pinyin + " " + chinese + "," + translation;
+          }
         }
-        result += pinyin + "\n";
-    }
+      } else {
+        if (line.includes("1.")) {
+          found = true;
+        }
+      }
 
-    output.innerText = result;
+      if(line.includes("headword pinyin")) {
+        pinyin = line
+          .substring(
+            line.indexOf("headword pinyin") + 15 + 2, line.lastIndexOf("<"))
+          .replaceAll("</span>", "").replace(" ", "");
+      }
+    }
+  }
+  return index + ". Failed to translate: " + chinese;
+}
+
+async function test(chinese) {
+  const link = `https://www.purpleculture.net/dictionary-details/?word=${chinese}`;
+  const subtitleResponse = await fetch(link);
+  const subtitleBody = await subtitleResponse.text();
+
+  if (subtitleResponse.status === 200) {
+    console.log(subtitleBody);
+  }
+}
+
+async function getPinyin(chineseChar) {
+  /*const link = `https://www.purpleculture.net/dictionary-details/?word=${chineseChar}`;
+  const subtitleResponse = await fetch(link);
+  const subtitleBody = await subtitleResponse.text();
+
+  if (subtitleResponse.status === 200) {
+    const lines = subtitleBody.split("\n");
+
+    let found = false, found2 = false;
+    var pinyin = "";
+    for (const line of lines) {
+      if (found) {
+        if (line.includes("<dd class=\"dd-inner\">") && !found2) {
+          found2 = true;
+        } else if (found2) {
+          if (line.includes("<a href=")) {
+            var translation = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<")).replace("</a>", "");
+            return pinyin + " " + chineseChar + "\t" + translation;
+          }
+        }
+      } else {
+        if (line.includes("1.")) {
+          found = true;
+        }
+      }
+
+      if(line.includes("headword pinyin")) {
+        pinyin = line
+          .substring(
+            line.indexOf("headword pinyin") + 15 + 2, line.lastIndexOf("<"))
+          .replaceAll("</span>", "").replace(" ", "");
+      }
+    }
+  }
+  return "Failed to translate: " + chineseChar; */
+
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlData, "text/xml");
+
+  const items = xmlDoc.getElementsByTagName('item');
+  const pinyinMap = new Map();
+
+  for (const item of items) {
+    const unicode = item.getAttribute('unicode');
+    const hanyu = item.getAttribute('hanyu');
+    pinyinMap.set(unicode, hanyu);
+  }
+  let result = "";
+  const characters = chineseChar.trim();
+  let pinyin = "";
+  for (let i = 0; i < characters.length; i += 1) {
+    // get unicode of character
+    const unicode = characters.charCodeAt(i).toString(16).toUpperCase();
+    let hanyu = pinyinMap.get(unicode);
+
+    console.log("Unidcode: " + unicode + " Hanyu: " + hanyu);
+
+    if (hanyu) {
+
+      if(hanyu.includes(",")) {
+        hanyu = hanyu.split(",")[0];
+      }
+
+      const toneNumber = getToneNumber(hanyu);
+      const syllableWithoutTone = hanyu.substring(0, hanyu.length - 1);
+      var to = applyTone(syllableWithoutTone, toneNumber) + " ";
+      console.log(to);
+      pinyin += to;
+
+      console.log("Tone Number: " + toneNumber);
+
+    } else {
+      pinyin += characters[i] + " (No Pinyin)";
+    }
+  }
+
+  return pinyin;
 }
 
 function getToneNumber(hanyu) {
-    const toneChar = hanyu[hanyu.length - 1];
-    return parseInt(toneChar);
+  const toneChar = hanyu[hanyu.length - 1];
+  return parseInt(toneChar);
 }
 
 function applyTone(syllable, toneNumber) {
-    const toneMap = {
-        "a": "āáǎàa",
-        "e": "ēéěèe",
-        "i": "īíǐìi",
-        "o": "ōóǒòo",
-        "u": "ūúǔùu",
-    };
+  const toneMap = {
+    "a": "āáǎàa",
+    "e": "ēéěèe",
+    "i": "īíǐìi",
+    "o": "ōóǒòo",
+    "u": "ūúǔùu",
+  };
 
-    console.log("Syllable: " + syllable + " Tone Number: " + toneNumber);
+  console.log("Syllable: " + syllable + " Tone Number: " + toneNumber);
 
-    // logic for pinyin: alphabetically the tones are assigned, so for example for bai with tone 1 it would be bāi (applied to the a instead of the i)
-    for (const [vowel, tones] of Object.entries(toneMap)) {
-        if (syllable.includes(vowel)) {
-            const tone = tones[toneNumber - 1];
-            syllable = syllable.replace(vowel, tone);
-            break;
-        }
+  // logic for pinyin: alphabetically the tones are assigned, so for example for bai with tone 1 it would be bāi (applied to the a instead of the i)
+  for (const [vowel, tones] of Object.entries(toneMap)) {
+    if (syllable.includes(vowel)) {
+      const tone = tones[toneNumber - 1];
+      syllable = syllable.replace(vowel, tone);
+      break;
     }
+  }
 
-    return syllable;
+  return syllable;
 }
