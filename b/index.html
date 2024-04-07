@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quizlet Gen</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    #outputText {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Quizlet Gen</h1>
+
+<textarea id="inputText" rows="4" cols="50" placeholder="Enter vocab" style="width: 400px; height: 180px;"></textarea><br><br>
+
+<button id="generateButton">Generate</button><br><br>
+
+<h2>Output</h2>
+
+<div id="outputText">Import Template</div><br>
+
+<button id="copyButton">Copy to Clipboard</button>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>
