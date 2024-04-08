@@ -1,7 +1,17 @@
+const slider = document.getElementById("mySlider");
+const output = document.getElementById("sliderValue");
+
+output.innerHTML = slider.value; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+  output.innerHTML = this.value;
+};
+
 document.getElementById('generateButton').addEventListener('click', async function() {
   const inputTextElement = document.getElementById('inputText');
   const outText = document.getElementById('outputText');
-  outText.innerText = "Generating...";
+  const info = document.getElementById('info');
 
   const inputText = inputTextElement.value;
 
@@ -9,26 +19,38 @@ document.getElementById('generateButton').addEventListener('click', async functi
   const nlines = inputText.split("\n");
   let translatedLines = [];
   let i = 1;
+
+  info.innerText = "Generating...";
+
   for (const line of lines) {
-
+    console.log("Next!")
     if(line.startsWith("#")) {
-      translatedLines.push(line.replaceAll("#", "").replaceAll("# ", ""));
-      i++;
-      continue;
+      translatedLines.push(line.replaceAll("# ", "").replaceAll("#", ""));
+    }
+    else {
+      const translatedLine = await translate(line, i);
+      translatedLines.push(translatedLine);
+
+      if(translatedLine.includes("Failed to translate")) {
+        nlines[i - 1] = "# ERR " + await getPinyin(line) + " " + line + ",";
+      }
     }
 
-    const translatedLine = await translate(line, i);
-    translatedLines.push(translatedLine);
-
-    if(translatedLine.includes("Failed to translate")) {
-      nlines[i - 1] = "# ERR " + await getPinyin(line) + " " + line + ",";
-    }
+    outText.innerText = translatedLines.join("\n");
+    inputTextElement.value = nlines.join("\n");
 
     i++;
+
+    console.log("Waiting...")
+    // timeout for slight delay
+    await new Promise(r => setTimeout(r, parseInt(slider.value)));
   }
+
+  console.log("Done!");
 
   outText.innerText = translatedLines.join("\n");
   inputTextElement.value = nlines.join("\n");
+  info.innerText = "Done!"
 });
 
 document.getElementById('testButton').addEventListener('click', function() {
@@ -38,25 +60,27 @@ document.getElementById('testButton').addEventListener('click', function() {
 document.getElementById('copyButton').addEventListener('click', function() {
   const outputText = document.getElementById('outputText').innerText;
   navigator.clipboard.writeText(outputText)
-    .then(() => {
-      alert('Text copied to clipboard');
-    })
-    .catch(err => {
-      console.error('Failed to copy: ', err);
-    });
+      .then(() => {
+        alert('Text copied to clipboard');
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err);
+      });
 });
 
 async function translate(chinese, index) {
-  const link = `https://en.pons.com/translate?q=${chinese}&in=&l=dezh&lf=zh&rt=de&qnac=`;
+  const link = `https://en.pons.com/translate?q=${chinese}&l=dezh&lf=zh&rt=de`;
 
   const headers = new Headers();
   headers.append('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8');
   headers.append('Accept-Encoding', 'gzip, deflate, br');
-  headers.append('access-control-allow-origin', '*');
+  headers.append('Accept-Language', 'en-GB,en;q=0.5');
 
   const subtitleResponse = await fetch(link, {
     method: 'GET',
-    headers: headers
+    headers: Object.fromEntries(headers)
+  }).catch(reason => {
+    return "Some error occurred: " + reason;
   });
 
   const subtitleBody = await subtitleResponse.text();
@@ -84,9 +108,9 @@ async function translate(chinese, index) {
 
       if(line.includes("headword pinyin")) {
         pinyin = line
-          .substring(
-            line.indexOf("headword pinyin") + 15 + 2, line.lastIndexOf("<"))
-          .replaceAll("</span>", "").replace(" ", "");
+            .substring(
+                line.indexOf("headword pinyin") + 15 + 2, line.lastIndexOf("<"))
+            .replaceAll("</span>", "").replace(" ", "");
       }
     }
   }
@@ -168,7 +192,7 @@ async function getPinyin(chineseChar) {
 
       const toneNumber = getToneNumber(hanyu);
       const syllableWithoutTone = hanyu.substring(0, hanyu.length - 1);
-      var to = applyTone(syllableWithoutTone, toneNumber) + " ";
+      var to = applyTone(syllableWithoutTone, toneNumber);
       console.log(to);
       pinyin += to;
 

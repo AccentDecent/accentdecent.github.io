@@ -19,6 +19,35 @@
       margin-left: auto;
       margin-right: auto;
     }
+    .slider-container {
+      width: 50%;
+      margin: 50px auto;
+    }
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 25px;
+      background: #d3d3d3;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+    .slider::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      background: #4CAF50;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -32,8 +61,14 @@
 <h2>Output</h2>
 
 <div id="outputText">Import Template</div><br>
-
+<h3 id="info">Idle</h3>
 <button id="copyButton">Copy to Clipboard</button>
+<button id="testButton">Test</button>
+
+<div class="slider-container">
+  <input type="range" min="10" max="200" value="100" class="slider" id="mySlider">
+  <p>Cooldown: <span id="sliderValue">100</span>ms</p>
+</div>
 
 <script src="js/app.js"></script>
 
