@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quizlet Gen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #outputText {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #helpArea, #newColumn {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: 47%; /* Adjust this value as needed */
+        }
+
+        #buttonContainer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #buttonContainer button {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Greek Quizlet Gen</h1>
+    <h2>by CorruptionHades</h2>
+
+    <div id="buttonContainer">
+        <button onclick="window.location.href='../b/index.html'">Chinese Quizlet Set Generator</button>
+        <button onclick="window.location.href='../index.html'">Zip File Viewer</button>
+    </div>
+
+    <div style="display: flex; justify-content: space-between;">
+        <div id="helpArea">Tones: <br>
+            Acute: a1 = ά <br>
+            Grave: a2 = ὰ <br>
+            Circumflex: a3 = ᾶ <br><br>
+            Smooth: a4 = ἀ<br>
+            Acute: a5 = ἄ<br>
+            Grave: a6 = ἂ<br>
+            Circumflex: a7 = ἆ<br><br>
+            Rough: a8 = ἁ<br>
+            Acute: a9 = ἅ<br>
+            Grave: a10 = ἃ<br>
+            Circumflex: a11 = ἇ<br><br>
+            Diaeresis: i12 = ϊ<br>
+            Acute: i13 = ΐ<br>
+            Grave: i14 = ῒ<br>
+            Circumflex: i15 = ῗ<br><br>
+            ι-Subscriptum: a_ = ᾳ<br>
+            Acute: a_1 = ᾴ<br>
+            ...<br>
+        </div>
+        <div id="newColumn">
+            <h3>How to use</h3>
+            <p>- Enter text which will be converted to greek.</p>
+            <p>- You can use numbers for the tones</p>
+            <p>- (optionally) you can make it a quizlet set by using this format:</p>
+            <p>vocab:translation</p>
+            <p>- use a # at the start to ignore the line</p>
+
+            <button id="template">Use Template</button>
+        </div>
+    </div>
+
+    <br>
+
+    <textarea id="inputText" rows="4" cols="50" placeholder="# Sentence:&#10;Dio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. &#10;&#10;# Quizlet:&#10;lüw:lösen" style="width: 400px; height: 180px;"></textarea><br><br>
+
+    <button id="generateButton">Generate</button><br><br>
+    <input type="checkbox" id="myCheckbox"> Generate Quizlet
+
+    <h2>Output</h2>
+
+    <div id="outputText"></div><br>
+    <h3 id="info">Idle</h3>
+    <button id="copyButton">Copy to Clipboard</button>
+
+    <script src="script.js"></script>
+</body>
+</html>

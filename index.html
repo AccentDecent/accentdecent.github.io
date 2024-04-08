@@ -26,9 +26,27 @@
         #backButton {
             display: none;
         }
+
+        #buttonContainer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #buttonContainer button {
+            margin: 0 10px;
+        }
     </style>
 </head>
 <body>
+
+    <h1>Zip File Viewer</h1>
+    <h2>by AccentDecent</h2>
+
+    <div id="buttonContainer">
+        <button onclick="window.location.href='b/index.html'">Chinese Quizlet Set Generator</button>
+        <button onclick="window.location.href='GreekQuizletGen/index.html'">Greek Converter</button>
+    </div>
+
     <h1 id="fileName"></h1>
     <input type="file" id="fileInput">
     <div id="fileList"></div>
