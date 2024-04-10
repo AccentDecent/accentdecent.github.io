@@ -18,7 +18,7 @@ document.getElementById("copyButton").addEventListener("click", function() {
 
 document.getElementById("template").addEventListener("click", function() {
     const inputTextElement = document.getElementById("inputText");
-    inputTextElement.value = "# Sentence:\nDio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. \n\n# Quizlet:\nlüw:lösen";
+    inputTextElement.value = "# Sentence:\nDio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. \n\n# Quizlet:\nlyw:lösen";
 });
 
 document.getElementById("generateButton").addEventListener("click", async function() {
@@ -38,7 +38,7 @@ document.getElementById("generateButton").addEventListener("click", async functi
         }
 
         const split = line.split(":");
-        const greek = convertToGreek(split[0]);
+        const greek = convert(split[0]);
         const translation = split[1];
 
         if(isCheckboxEnabled()) {
@@ -52,7 +52,19 @@ document.getElementById("generateButton").addEventListener("click", async functi
     info.innerText = "Done!";
 });
 
-//region Lowercase
+const
+    acuteIndex = 1,
+    graveIndex = 2,
+    circumflexIndex = 3,
+    smoothIndex = 4,
+    smoothAcuteIndex = 5,
+    smoothGraveIndex = 6,
+    smoothCircumflexIndex = 7,
+    roughIndex = 8,
+    roughAcuteIndex = 9,
+    roughGraveIndex = 10,
+    roughCircumflexIndex = 11,
+    iotaOffset = 1;
 
 const map = {
     "a": "α",
@@ -60,14 +72,11 @@ const map = {
     "g": "γ",
     "d": "δ",
     "e": "ε",
-    "z,f": "ζ",
+    "z": "ζ",
 
     "h": "η",
-    "ä": "η",
-    "hä": "η",
-    "he": "η",
 
-    "th": "θ",
+    "v": "θ",
     "i": "ι",
     "k": "κ",
     "l": "λ",
@@ -82,210 +91,152 @@ const map = {
 
     "u": "υ",
     "y": "υ",
-    "ü": "υ",
 
-    "ph": "φ",
+    "f": "φ",
     "x": "χ",
-    "ps": "ψ",
+    "j": "ψ",
     "w": "ω",
 }
 
+// acute, grave, circumflex
 const tones = {
-    "a": "άὰᾶἀἄἂἆἁἅἃἇ",
-    "e": "έὲ?ἐἔἒ?ἑἕἓ?",
-    "i": "ίὶῖἰἴἲἶἱἵἳἷ",
-    "o": "όὸ?ὀὄὂ?ὁὅὃ?",
-    "u": "ύὺῦὐὔὒὖὑὕὓὗ",
-    "h": "ήὴῆἠἤἢἦἡἥἣἧ",
-    "w": "ῶὼῳὠὤὢὦὡὥὣὧ",
+    "a": "ά" + "ὰ" + "ᾶ" +  "ἀ" + "ἄ" + "ἂ" +  "ἆ" +  "ἁ" + "ἅ" + "ἃ" + "ἇ",
+    "e": "έ" + "ὲ" + "?" +  "ἐ" + "ἔ" + "ἒ" +   "?" +  "ἑ" + "ἕ" + "ἓ" +  "?",
+    "i": "ί" + "ὶ" +  "ῖ" +  "ἰ" + "ἴ" +  "ἲ" +   "ἶ" +  "ἱ" +  "ἵ" +  "ἳ" +  "ἷ",
+    "o": "ό" + "ὸ" + "?" +  "ὀ" + "ὄ" + "ὂ" +  "?" +  "ὁ" + "ὅ" + "ὃ" +  "?",
+
+    "u": "ύ" + "ὺ" + "ῦ" +  "ὐ" + "ὔ" + "ὒ" +  "ὖ" +  "ὑ" + "ὕ" + "ὓ" +  "ὗ",
+    "y": "ύ" + "ὺ" + "ῦ" +  "ὐ" + "ὔ" + "ὒ" +  "ὖ" +  "ὑ" + "ὕ" + "ὓ" +  "ὗ",
+
+    "h": "ή" + "ὴ" + "ῆ" +  "ἠ" + "ἤ" + "ἢ" +  "ἦ" +  "ἡ" + "ἥ" + "ἣ" +  "ἧ",
+
+    "w": "ώ" + "ὼ" + "ῶ" + "ὠ" + "ὤ" + "ὢ" + "ὦ" + "ὡ" + "ὥ" + "ὣ" + "ὧ",
 }
 
-const subscripts = {
-    "a": "ᾳᾴᾲᾷᾀᾄᾂᾆᾁᾅᾃᾇ",
-    "h": "ῃῄῂῇἠἤἢἦἡἥἣἧ",
-    "w": "ῳῴῲῷὠὤὢὦὡὥὣὧ",
+const diaeresis = {
+    "i": "ϊ",
 }
 
-//endregion
-
-//region Uppercase
-
-const upMap = {
-    "A": "Α",
-    "B": "Β",
-    "G": "Γ",
-    "D": "Δ",
-    "E": "Ε",
-    "Z,F": "Ζ",
-
-    "H": "Η",
-    "Ä": "Η",
-    "HÄ": "Η",
-    "HE": "Η",
-
-    "TH": "Θ",
-    "I": "Ι",
-    "K": "Κ",
-    "L": "Λ",
-    "M": "Μ",
-    "N": "Ν",
-    "Ξ": "Ξ",
-    "O": "Ο",
-    "P": "Π",
-    "R": "Ρ",
-    "S": "Σ",
-    "T": "Τ",
-
-    "U": "Υ",
-    "Y": "Υ",
-    "Ü": "Υ",
-
-    "PH": "Φ",
-    "X": "Χ",
-    "PS": "Ψ",
-    "W": "Ω",
+// Iota subscript
+const subTones = {
+    "a": "ᾳ" + "ᾴ" +  "ᾲ" + "ᾷ" +  "ᾀ" + "ᾄ" +  "ᾂ" +  "ᾆ" +  "ᾁ" + "ᾅ" + "ᾃ" +  "ᾇ",
+    "h": "ῃ" + "ῄ" +  "ῂ" + "ῇ" +  "ῄ" + "ῄ" +  "ῂ" +  "ῇ" +  "ῇ" +  "ῇ" + "ῇ" +  "ῇ",
+    "ä": "ῃ" + "ῄ" +  "ῂ" + "ῇ" +  "ῄ" + "ῄ" +  "ῂ" +  "ῇ" +  "ῇ" +  "ῇ" + "ῇ" +  "ῇ",
+    "w": "ῳ" + "ῴ" + "ῲ" + "ῷ" + "ῴ" + "ῴ" + "ῲ" +  "ῷ" +  "ῷ" + "ῷ" + "ῷ" + "ῷ",
 }
 
-const upTones = {
-    "A": "ΆᾺ?ἈἌ?ἎἉἍἋἏ",
-    "E": "ΈῈ?ἘἜἚ?ἙἝἛ?",
-    "I": "ΊῚἸἼἺἾἹἽἻἿΪ",
-    "O": "ΌῸὈὌὊ?ὉὍὋ?",
-    "U": "ΎῪ?????ὙὝὛὟΫ",
-    "H": "ΉῊἨἬἪἮἩἭἫἯ",
-    "W": "ΏῺῳὨὬὢὦὩὭὣὧ",
-}
+function convert(text) {
 
-const upSubscripts = {
-    "A": "ᾼ???ᾈᾌᾊᾎᾉᾍᾋᾏ",
-    "H": "ῌ???ἨἬἪἮἩἭἫἯ",
-    "W": "ῼ???ᾨᾬᾪᾮᾩᾭᾫᾯ",
-}
+    let result = "";
 
-// endregion
+    console.log("TEXT:  " + text);
 
-function convertToGreek(text) {
-    let newText = "";
-
-    for(let i = 0; i < text.length; i++) {
-        const char = text[i];
-
-        if(char == " ") {
-            newText += " ";
-            continue;
-        }
-
-        let uppercase = false;
-        if(char === char.toUpperCase()) {
-            uppercase = true;
-        }
-
-        let tone = -1;
-        let sub = false;
-        // check if next character is a number and then check if the one after that is a number, if then next cahracter is a _ set sub to true and check next 2 cahracters to get tone number
-        if(i + 1 < text.length) {
-
-            const nextChar = text[i + 1];
-
-            if(nextChar.trim() !== "" && !isNaN(nextChar)) {
-                let skip = false;
-                if(i + 2 < text.length) {
-                    if(!isNaN(text[i + 2]) && text[i + 2].trim() !== "") {
-                        tone = parseInt(text[i + 1] + text[i + 2]);
-                        i += 2;
-                        skip = true;
-                    }
-                }
-
-                if(!skip) {
-                    tone = parseInt(text[i + 1]);
-                    i++;
-                }
-            }
-            else if(nextChar === "_") {
-                sub = true;
-                i++;
-                if(!isNaN(text[i + 1]) && text[i + 1].trim() !== "") {
-                    skip = false;
-                    if(i + 2 < text.length) {
-                        if(!isNaN(text[i + 2]) && text[i + 2].trim() !== "") {
-                            tone = parseInt(text[i + 1] + text[i + 2]);
-                            i += 2;
-                            skip = true;
-                        }
-                    }
-
-                    if(!skip) {
-                        tone = parseInt(text[i + 1]);
-                        i++;
-                    }
-                }
-            }
-            else {
-                tone = -1;
-            }
-        }
-        if(tone === -1 || isNaN(tone)) {
-            if(uppercase) {
-                const value = upMap[char];
-                if(value) {
-                    newText += value;
-                }
-                else {
-                    newText += char;
-                    console.log(`Failed to convert: ${char}`);
-                }
-            }
-            else {
-                const value = map[char];
-                if(value) {
-                    newText += value;
-                }
-                else {
-                    newText += char;
-                    console.log(`Failed to convert: ${char}`);
-                }
-            }
-        }
-        else {
-            newText += getTone(char, tone, sub, uppercase);
-        }
+    for(const word of text.split(" ")) {
+        result += convertWord(word) + " ";
     }
 
-    return newText;
+    console.log(result);
+    return result;
 }
 
-function getTone(char, tone, sub, uppercase) {
-    if(sub) {
-        let value;
-        if(uppercase) {
-            value = upSubscripts[char];
-        }
-        else {
-            value = subscripts[char];
-        }
+function convertWord(word) {
+    let chunks = word.match(/([a-zA-Z][^a-zA-Z]*)/g);
 
-        if(value === undefined) {
+    if(chunks === null) {
+        return word;
+    }
+
+    let result = chunks.map(chunk => convertCharacter(chunk));
+    return result.join("");
+}
+
+function getChar(char, tone, iota, dia, uppercase) {
+
+    let retu = char;
+
+    if(iota) {
+        const toneString = subTones[char];
+
+        if(toneString === undefined) {
             console.log("Failed to get value for: " + char);
             return char;
         }
 
-        return value.charAt(tone);
+        retu = toneString.charAt(tone);
     }
     else {
-        let value;
-        if(uppercase) {
-            value = upTones[char];
-        }
-        else {
-           value = tones[char];
-        }
+        const toneString = tones[char];
 
-        if(value === undefined) {
+        if(toneString === undefined) {
             console.log("Failed to get value for: " + char);
             return char;
         }
 
-        return value.charAt(tone - 1);
+        retu = toneString.charAt(tone - 1);
     }
+
+    if(char === "i" && dia) {
+        retu = diaeresis[char];
+    }
+
+    if(uppercase) {
+        retu = retu.toUpperCase();
+    }
+
+    return retu;
+}
+
+function convertCharacter(text) {
+
+    console.log("converting: " + text);
+
+    let char = text.charAt(0);
+    let agc = 0;
+    let sr = 0;
+    let iota = false;
+    let dia = false;
+
+    let uppercase = char === char.toUpperCase();
+
+    let numbers = text.match(/\d+/g);
+    if (numbers) {
+        agc = parseInt(numbers[0]);
+    }
+
+    if (text.includes("%")) {
+        sr = smoothIndex;
+    } else if (text.includes("&")) {
+        sr = roughIndex;
+    }
+    if (text.includes("_")) {
+        iota = true;
+    }
+    if (text.includes("^")) {
+        dia = true;
+    }
+
+    if ((isNaN(agc) || agc === 0 || agc === undefined || agc === null) && sr === 0 && !iota && !dia) {
+
+        // get from map
+
+        if (uppercase) {
+            char = char.toLowerCase();
+        }
+
+        const value = map[char];
+        if (value) {
+
+            if (uppercase) {
+                return value.toUpperCase();
+            }
+
+            return value;
+        } else {
+            console.log(`Failed to convert: ${char}`);
+            return text;
+        }
+    }
+
+    let index = agc + sr;
+    return getChar(char.toLowerCase(), index, iota, dia, uppercase);
 }

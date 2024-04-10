@@ -8,9 +8,9 @@
 5. Copy the lib folder into your games decompiled lib folder
 6. Copy the folder com.android.support from your decompiled Mod Menu into the smali folder of your game
 7. On first time use, find the Main Activity of your game (should be shown in APK Easy Tool)
-9. Edit the smali and go in the ``onCreate`` method. Paste this at the start (after any labels):
+8. Edit the smali and go in the ``onCreate`` method. Paste this at the start (after any labels):
    
- ```java
+ ```smali
  invoke-static {p0}, Lcom/android/support/Main;->Start(Landroid/content/Context;)V
  ```
 10. Compile the game folder using APK Easy Tool
