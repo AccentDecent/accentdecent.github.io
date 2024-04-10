@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Latin Translator</title>
+
+    <style>
+        #buttonContainer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #buttonContainer button {
+            margin: 0 10px;
+        }
+        #displayBox {
+            border: 3px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Latin Translator (prototype)</h1>
+    <h2>by CorruptionHades</h2>
+
+    <div id="buttonContainer">
+        <button onclick="window.location.href='../index.html'">Zip File Viewer</button>
+        <button onclick="window.location.href='../GreekQuizletGen/index.html'">Greek Converter</button>
+        <button onclick="window.location.href='../b/index.html'">Chinese Quizlet Set Generator</button>
+    </div>
+
+    <br>
+
+    <input type="text" id="linkInput" placeholder="Enter latin word">
+    <button id="test">Test Button</button>
+
+    <br>
+    <br>
+    <p1>Frag Caesar:</p1>
+    <br>
+    <br>
+
+    <div id="displayBox"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
