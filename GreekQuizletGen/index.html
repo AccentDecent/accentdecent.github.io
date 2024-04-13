@@ -7,6 +7,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            font-size: 30px;
             margin: 0;
             padding: 0;
         }
@@ -18,11 +19,60 @@
             margin-left: auto;
             margin-right: auto;
         }
+        #inputText {
+            font-family: Arial, sans-serif;
+            font-size: 30px;
+        }
+
+        h1, h2, h3 {
+            font-family: Arial, sans-serif;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
         #helpArea, #newColumn {
             margin-top: 20px;
             padding: 10px;
             border: 1px solid #ccc;
-            width: 47%; /* Adjust this value as needed */
+            width: 47%;
+        }
+
+        button {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+
+        textarea {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: none; /* Disable textarea resizing */
+        }
+
+        input[type="checkbox"] {
+            margin-top: 10px;
+        }
+
+        label {
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+
+        #generateButton, #copyButton, #template {
+            font-size: 20px;
+            padding: 10px;
+            margin-top: 10px;
         }
 
         #buttonContainer {
@@ -46,25 +96,17 @@
     </div>
 
     <div style="display: flex; justify-content: space-between;">
-        <div id="helpArea">Tones: <br>
-            Acute: a1 = ά <br>
-            Grave: a2 = ὰ <br>
-            Circumflex: a3 = ᾶ <br><br>
-            Smooth: a4 = ἀ<br>
-            Acute: a5 = ἄ<br>
-            Grave: a6 = ἂ<br>
-            Circumflex: a7 = ἆ<br><br>
-            Rough: a8 = ἁ<br>
-            Acute: a9 = ἅ<br>
-            Grave: a10 = ἃ<br>
-            Circumflex: a11 = ἇ<br><br>
-            Diaeresis: i12 = ϊ<br>
-            Acute: i13 = ΐ<br>
-            Grave: i14 = ῒ<br>
-            Circumflex: i15 = ῗ<br><br>
-            ι-Subscriptum: a_ = ᾳ<br>
-            Acute: a_1 = ᾴ<br>
-            ...<br>
+        <div id="helpArea">
+            <h3>Tones: </h3><br>
+            Acute: 1 <br>
+            Grave: 2 <br>
+            Circumflex: 3 <br><br>
+            Smooth: %<br>
+            Rough: &<br>
+            Iota-Sub: _<br>
+            Diaerisis: ^<br>
+            <br>
+            eg: a1_ = ᾴ<br>
         </div>
         <div id="newColumn">
             <h3>How to use</h3>
@@ -74,9 +116,9 @@
             <p>vocab:translation</p>
             <p>- use a # at the start to ignore the line</p><br>
             <p>Letters:</p>
-            <p>a=α, b=β, g=γ, d=δ, e=ε, z/f=ζ, h/ä/hä/he=η, th=θ, i=ι, k=κ, l=λ, m=μ, n=ν, ß=ξ, o=ο, p=π, r=ρ, s=σ/ς, t=τ, u/y/ü=υ, ph=φ, x=χ, ps=ψ, w=ω</p><br>
+            <p>a=α, b=β, g=γ, d=δ, e=ε, z/f=ζ, h/ä=η, th=θ, i=ι, k=κ, l=λ, m=μ, n=ν, ß=ξ, o=ο, p=π, r=ρ, s=σ/ς, t=τ, u/y/ü=υ, f=φ, x=χ, j=ψ, w=ω</p><br>
             <p>Capital Letters:</p>
-            <p>Α=Α, B=Β, G=Γ, D=Δ, E=Ε, Z/F=Ζ, H/Ä/Hä/He=Η, Th=Θ, I=Ι, K=Κ, L=Λ, M=Μ, N=Ν, ß=Ξ, O=Ο, P=Π, R=Ρ, S=Σ/ς, T=Τ, U/Y/Ü=Υ, Ph=Φ, X=Χ, Ps=Ψ, W=Ω<br><br>
+            <p>Α=Α, B=Β, G=Γ, D=Δ, E=Ε, Z/F=Ζ, H/Ä=Η, Th=Θ, I=Ι, K=Κ, L=Λ, M=Μ, N=Ν, ß=Ξ, O=Ο, P=Π, R=Ρ, S=Σ/ς, T=Τ, U/Y/Ü=Υ, F=Φ, X=Χ, J=Ψ, W=Ω<br><br>
 
             <button id="template">Use Template</button>
         </div>
@@ -84,7 +126,9 @@
 
     <br>
 
-    <textarea id="inputText" rows="4" cols="50" placeholder="# Sentence:&#10;Dio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. &#10;&#10;# Quizlet:&#10;lyw:lösen" style="width: 400px; height: 180px;"></textarea><br><br>
+    Input:<br>
+
+    <textarea id="inputText" rows="4" cols="50" placeholder="# Sentence:&#10;Dio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. &#10;&#10;# Quizlet:&#10;lyw:lösen" style="width: 1000px; height: 310px;"></textarea><br><br>
 
     <button id="generateButton">Generate</button><br><br>
     <input type="checkbox" id="myCheckbox"> Generate Quizlet
@@ -94,6 +138,9 @@
     <div id="outputText"></div><br>
     <h3 id="info">Idle</h3>
     <button id="copyButton">Copy to Clipboard</button>
+
+    <br>
+    <br>
 
     <script src="script.js"></script>
 </body>
