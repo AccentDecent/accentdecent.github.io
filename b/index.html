@@ -55,7 +55,8 @@
       padding: 10px 20px;
       background-color: #4CAF50;
       color: white;
-      border: none;
+      border-radius: 0.4em;
+      border-color: #45a049;
       cursor: pointer;
       margin: 10px 10px;
     }
@@ -64,14 +65,38 @@
       background-color: #45a049;
     }
 
-    #buttonContainer {
+    .buttonContainer {
       display: flex;
       justify-content: space-between;
     }
 
-    #buttonContainer button {
+    .buttonContainer button {
       margin: 0 10px;
     }
+
+    .text_area {
+      width: 400px;
+      height: 180px;
+    }
+
+    @media (max-width: 800px) {
+      .text_area {
+        width: 80%;
+      }
+
+      .buttonContainer {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+      }
+
+      .buttonContainer button {
+        margin: 3px;
+        width: 90%;
+        align-self: center;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -79,7 +104,7 @@
 <h1>Quizlet Gen</h1>
 <h2>by CorruptionHades</h2>
 
-<div id="buttonContainer">
+<div id="buttonContainer" class="buttonContainer">
   <button onclick="window.location.href='../index.html'">Zip File Viewer</button>
   <button onclick="window.location.href='../GreekQuizletGen/index.html'">Greek Converter</button>
   <button onclick="window.location.href='../latin_translator/index.html'">Latin Translator</button>
@@ -88,7 +113,7 @@
 
 <br>
 
-<textarea id="inputText" rows="4" cols="50" placeholder="Enter vocab" style="width: 400px; height: 180px;"></textarea><br><br>
+<textarea id="inputText" rows="4" cols="50" placeholder="Enter vocab" class="text_area"></textarea><br><br>
 
 <button id="generateButton">Generate</button><br><br>
 

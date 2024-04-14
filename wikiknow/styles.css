@@ -1,8 +1,15 @@
-.mobile-display{display:none}
-.desktop-display{display:block}
-@media (max-width:800px){
-    . desktop-display {display:none}
-    . mobile-display {display:block}
+@media (max-width: 800px) {
+    .buttonContainer {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+    }
+
+    .buttonContainer button {
+        margin: 3px;
+        width: 90%;
+        align-self: center;
+    }
 }
 
 body {
@@ -75,7 +82,11 @@ button:hover {
     background-color: #45a049;
 }
 
-#buttonContainer {
+.buttonContainer {
     display: flex;
     justify-content: space-between;
+}
+
+.buttonContainer button {
+    margin: 0 10px;
 }

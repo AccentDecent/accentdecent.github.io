@@ -2,10 +2,57 @@
 body, html {
     background-color: #0d0d0d;
 }
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.section {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media (max-width: 800px) {
+    .title {
+        font-size: 20%;
+    }
+
+    .pick_file_label {
+        font-size: 10vw;
+    }
+
+    li {
+        font-size: 100%;
+    }
+
+    button {
+        max-width: 25%;
+    }
+
+    .buttonContainer {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+    }
+
+    .buttonContainer button {
+        margin: 3px;
+        width: 90%;
+        align-self: center;
+    }
+}
 
 .title {
     font-family: "Quicksand", sans-serif;
-    font-size: 1000%;
+    font-size: 170%;
     text-align: center;
     font-weight: 450;
    /* color: #cccccc; */
@@ -64,7 +111,6 @@ li:hover {
 
 button {
     font-family: "Quicksand", sans-serif;
-    font-size: 130%;
     padding: 10px 20px;
     background-color: #4CAF50;
     color: white;
@@ -72,8 +118,6 @@ button {
     cursor: pointer;
     margin: 10px 10px;
     border-radius: 0.4em; /* rounded corners */
-    width: 10%;
-    height: 7%;
 }
 button:hover {
     background-color: #45a049;
