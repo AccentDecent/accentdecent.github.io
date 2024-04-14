@@ -2,74 +2,35 @@
 <html>
 <head>
     <title>File Explorer</title>
-    <style>
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li {
-            cursor: pointer;
-            margin: 5px 0;
-        }
-
-        li:hover {
-            background-color: #f0f0f0;
-        }
-
-        #contentDisplay {
-            display: none;
-            margin-top: 20px;
-            white-space: pre-wrap;
-        }
-
-        #backButton {
-            display: none;
-        }
-
-        button {
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin: 10px 10px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-
-        #buttonContainer {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        #buttonContainer button {
-            margin: 0 10px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <h1>Zip File Viewer</h1>
-    <h2>by AccentDecent</h2>
+    <div class="section">
+        <h1 class="title">Zip File Viewer</h1>
+        <h2 class="title" style="font-size: 5vw">by AccentDecent</h2>
 
-    <div id="buttonContainer">
-        <button onclick="window.location.href='b/index.html'">Chinese Quizlet Set Generator</button>
-        <button onclick="window.location.href='GreekQuizletGen/index.html'">Greek Converter</button>
-        <button onclick="window.location.href='latin_translator/index.html'">Latin Translator</button>
-        <button onclick="window.location.href='wikiknow/index.html'">WikiKnow Game</button>
+        <div id="buttonContainer">
+            <button onclick="window.location.href='b/index.html'">Chinese Quizlet Set Generator</button>
+            <button onclick="window.location.href='GreekQuizletGen/index.html'">Greek Converter</button>
+            <button onclick="window.location.href='latin_translator/index.html'">Latin Translator</button>
+            <button onclick="window.location.href='wikiknow/index.html'">WikiKnow Game</button>
+        </div>
+
+        <div style="text-align: center">
+            <h1 id="fileName" style="font-size: 4vw; text-align: center;"></h1>
+            <label for="fileInput" class="pick_file_label">Choose File</label>
+            <input type="file" id="fileInput" class="pick_file">
+        </div>
+
+
+        <div id="fileList"></div>
+
+        <div id="contentDisplay"></div>
+
+        <button id="backButton">Back</button>
     </div>
-
-    <h1 id="fileName"></h1>
-    <input type="file" id="fileInput">
-    <div id="fileList"></div>
-
-    <div id="contentDisplay"></div>
-
-    <button id="backButton">Back</button>
 
     <script>
         document.getElementById('fileInput').addEventListener('change', function(event) {

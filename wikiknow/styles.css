@@ -1,3 +1,10 @@
+.mobile-display{display:none}
+.desktop-display{display:block}
+@media (max-width:800px){
+    . desktop-display {display:none}
+    . mobile-display {display:block}
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
