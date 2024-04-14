@@ -10,11 +10,23 @@
 
 
     <div class="container">
-        <h4 id="word">Word</h4>
-        <a href="#" id="link">Link</a>
+
+        <div id="buttonContainer">
+            <button onclick="window.location.href='../index.html'">Zip File Viewer</button>
+            <button onclick="window.location.href='../GreekQuizletGen/index.html'">Greek Converter</button>
+            <button onclick="window.location.href='../b/index.html'">Chinese Quizlet Set Generator</button>
+            <button onclick="window.location.href='../latin_translator/index.html'">Latin Translator</button>
+        </div>
+
+        <h1>WikiKnow Game</h1>
+
+
+
+        <h4 id="word"></h4>
+        <a href="#" id="link"></a>
         <br>
-        <input type="search" id="definition_input" placeholder="Enter your definition">
-        <br>
+        <input type="search" id="definition_input" placeholder="Enter your definition" disabled>
+        <br> <h3 id="info_text"></h3>
         <br>
         <button id="play_button">Play</button>
     </div>
