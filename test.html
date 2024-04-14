@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Size</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #screenSize {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="screenSize"></div>
+
+<script>
+    // Function to display screen width and height
+    function displayScreenSize() {
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        document.getElementById("screenSize").innerHTML = "Screen Width: " + width + "px, Screen Height: " + height + "px";
+    }
+
+    // Display screen size when page loads
+    window.onload = displayScreenSize;
+
+    // Update screen size when window is resized
+    window.onresize = displayScreenSize;
+</script>
+
+</body>
+</html>
