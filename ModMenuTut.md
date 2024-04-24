@@ -20,7 +20,7 @@ add the permission
 at the end of the application close tag add
 
 ```xml
-<service android:name="com.android.support.Launcher" android:enabled="true"android:exported="false" android:stopWithTask="true"/>
+<service android:name="com.android.support.Launcher" android:enabled="true" android:exported="false" android:stopWithTask="true"/>
 ```
 ![grafik](https://github.com/AccentDecent/accentdecent.github.io/assets/96599430/8051e540-2eb5-4a40-a7c4-0debe538f403)
 
