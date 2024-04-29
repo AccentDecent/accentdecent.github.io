@@ -122,6 +122,26 @@
       opacity: 1;
     }
 
+    @media (pointer: coarse), (hover: none) {
+      [title] {
+        position: relative;
+        display: flex;
+        justify-content: center;
+      }
+      [title]:focus::after {
+        content: attr(title);
+        position: absolute;
+        top: 90%;
+        background-color: #555;
+        color: #fff;
+        border: 1px solid;
+        width: fit-content;
+        padding: 3px;
+        z-index: 1;
+      }
+
+    }
+
     @media (max-width: 800px) {
       .text_area {
         width: 80%;
@@ -161,7 +181,7 @@
 <button id="generateButton">Generate</button><br><br>
 
 <input type="checkbox" id="override">
-<div class="tooltip">Override Generation
+<div class="tooltip" title="This is used for existing quizlet sets. Export them with a 'Custom Between term and definition' &. When you click generate it will generate the pinyin for the chinese characters (format: chinese&translation)" tabindex="0">Override Generation
   <span class="tooltip_text">This is used for existing quizlet sets. Export them with a 'Custom Between term and definition' &. When you click generate it will generate the pinyin for the chinese characters (format: chinese&translation)</span>
 </div>
 <br>
@@ -169,7 +189,7 @@
 <textarea id="overrideId" hidden=""></textarea> <br>
 
 <input type="checkbox" id="onlyPinyin">
-<div class="tooltip">Only generate Pinyin
+<div class="tooltip" title="Enter some chinese text, and when you click generate it will generate the according pinyin for it." tabindex="0">Only generate Pinyin
   <span class="tooltip_text">Enter some chinese text, and when you click generate it will generate the according pinyin for it.</span>
 </div>
 
