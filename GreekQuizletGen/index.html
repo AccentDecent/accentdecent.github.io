@@ -75,13 +75,31 @@
             margin-top: 10px;
         }
 
-        #buttonContainer {
+        .buttonContainer {
             display: flex;
             justify-content: space-between;
         }
 
-        #buttonContainer button {
+        .buttonContainer button {
             margin: 0 10px;
+        }
+
+        @media (max-width: 800px) {
+            .inputText {
+                width: 80%;
+            }
+
+            .buttonContainer {
+                display: flex;
+                justify-content: space-between;
+                flex-direction: column;
+            }
+
+            .buttonContainer button {
+                margin: 3px;
+                width: 90%;
+                align-self: center;
+            }
         }
     </style>
 </head>
@@ -89,8 +107,8 @@
     <h1>Greek Quizlet Gen</h1>
     <h2>by CorruptionHades</h2>
 
-    <div id="buttonContainer">
-        <button onclick="window.location.href='../b/index.html'">Chinese Quizlet Set Generator</button>
+    <div id="buttonContainer" class="buttonContainer">
+        <button onclick="window.location.href='../ChineseTools/index.html'">Chinese Quizlet Set Generator</button>
         <button onclick="window.location.href='../index.html'">Zip File Viewer</button>
         <button onclick="window.location.href='../latin_translator/index.html'">Latin Translator</button>
         <button onclick="window.location.href='../wikiknow/index.html'">WikiKnow Game</button>
@@ -129,7 +147,7 @@
 
     Input:<br>
 
-    <textarea id="inputText" rows="4" cols="50" placeholder="# Sentence:&#10;Dio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. &#10;&#10;# Quizlet:&#10;lyw:lösen" style="width: 1000px; height: 310px;"></textarea><br><br>
+    <textarea id="inputText" class="inputText" rows="4" cols="50" placeholder="# Sentence:&#10;Dio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. &#10;&#10;# Quizlet:&#10;lyw:lösen" style="width: 1000px; height: 310px;"></textarea><br><br>
 
     <button id="generateButton">Generate</button><br><br>
     <input type="checkbox" id="myCheckbox"> Generate Quizlet

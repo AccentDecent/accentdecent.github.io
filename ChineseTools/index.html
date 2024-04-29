@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quizlet Gen</title>
+  <title>Chinese Quizlet Gen</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -79,6 +79,49 @@
       height: 180px;
     }
 
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip_text {
+      visibility: hidden;
+      width: 250px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      padding: 5px 0;
+      border-radius: 6px;
+
+      /* Position the tooltip text */
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+
+      /* Fade in tooltip */
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip .tooltip_text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #555 transparent transparent transparent;
+    }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltip_text {
+      visibility: visible;
+      opacity: 1;
+    }
+
     @media (max-width: 800px) {
       .text_area {
         width: 80%;
@@ -101,7 +144,7 @@
 </head>
 <body>
 
-<h1>Quizlet Gen</h1>
+<h1>Chinese Quizlet Gen</h1>
 <h2>by CorruptionHades</h2>
 
 <div id="buttonContainer" class="buttonContainer">
@@ -117,6 +160,21 @@
 
 <button id="generateButton">Generate</button><br><br>
 
+<input type="checkbox" id="override">
+<div class="tooltip">Override Generation
+  <span class="tooltip_text">This is used for existing quizlet sets. Export them with a 'Custom Between term and definition' &. When you click generate it will generate the pinyin for the chinese characters (format: chinese&translation)</span>
+</div>
+<br>
+
+<textarea id="overrideId" hidden=""></textarea> <br>
+
+<input type="checkbox" id="onlyPinyin">
+<div class="tooltip">Only generate Pinyin
+  <span class="tooltip_text">Enter some chinese text, and when you click generate it will generate the according pinyin for it.</span>
+</div>
+
+<br>
+
 <h2>Output</h2>
 
 <div id="outputText">Import Template</div><br>
@@ -129,7 +187,7 @@
   <p>Cooldown: <span id="sliderValue">100</span>ms</p>
 </div>
 
-<script src="js/app.js"></script>
+<script src="script.js"></script>
 
 <script>
   const xmlData = `<?xml version="1.0" encoding="UTF-8"?>

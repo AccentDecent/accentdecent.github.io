@@ -1,5 +1,12 @@
 const slider = document.getElementById("mySlider");
 const output = document.getElementById("sliderValue");
+const overrideGen = document.getElementById("override");
+const overrideGenID = document.getElementById("overrideId");
+const onlyPinyin = document.getElementById("onlyPinyin");
+
+window.onload = function() {
+  overrideGenID.hidden = !overrideGen.checked;
+}
 
 output.innerHTML = slider.value; // Display the default slider value
 
@@ -7,6 +14,10 @@ output.innerHTML = slider.value; // Display the default slider value
 slider.oninput = function() {
   output.innerHTML = this.value;
 };
+
+overrideGen.addEventListener("change", async function() {
+  overrideGenID.hidden = !overrideGen.checked;
+});
 
 document.getElementById('generateButton').addEventListener('click', async function() {
   const inputTextElement = document.getElementById('inputText');
@@ -28,11 +39,43 @@ document.getElementById('generateButton').addEventListener('click', async functi
       translatedLines.push(line.replaceAll("# ", "").replaceAll("#", ""));
     }
     else {
-      const translatedLine = await translate(line, i);
-      translatedLines.push(translatedLine);
 
-      if(translatedLine.includes("Failed to translate")) {
-        nlines[i - 1] = "# ERR " + await getPinyin(line) + " " + line + ",";
+
+      if(onlyPinyin.checked) {
+
+        let pinyin = "";
+
+        for (let j = 0; j < line.length; j++) {
+          const char = line[j];
+          if(char !== " ") {
+            pinyin += await getPinyin(char) + " ";
+
+          }
+        }
+
+        translatedLines.push(pinyin);
+      }
+      else if(overrideGen.checked) {
+
+        const id = overrideGenID.value;
+
+        const splitted = line.split(id);
+        const chinese = splitted[0];
+        const translation = splitted[1];
+
+        const pinyin = await getPinyin(chinese);
+
+        translatedLines.push(pinyin + " " + chinese + id + translation);
+
+        console.log("Chinese: " + chinese + " Translation: " + translation + " Id: " + id);
+      }
+      else {
+        const translatedLine = await translate(line, i);
+        translatedLines.push(translatedLine);
+
+        if(translatedLine.includes("Failed to translate")) {
+          nlines[i - 1] = "# ERR " + await getPinyin(line) + " " + line + ",";
+        }
       }
     }
 
