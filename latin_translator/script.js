@@ -79,9 +79,7 @@ function findTable(html) {
     let parser = new DOMParser();
     let doc = parser.parseFromString(html, 'text/html');
 
-    let table = doc.querySelector('.table-responsive table');
-
-    return table;
+    return doc.querySelector('.table-responsive table');
 }
 
 function removeUseless(html) {

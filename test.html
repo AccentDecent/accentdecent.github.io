@@ -28,6 +28,24 @@
         document.getElementById("screenSize").innerHTML = "Screen Width: " + width + "px, Screen Height: " + height + "px";
     }
 
+    async function test() {
+        const headers = new Headers();
+        headers.append("Pinyin", encodeURIComponent("我不是"));
+
+        let response = await fetch(`https://latincheats.stormcph-dk.workers.dev/`, {
+            method: "GET",
+            headers: headers
+        });
+
+        let text = await response.text();
+
+        console.log(text.replaceAll(" ", ""));
+
+        text = decodeURIComponent(text.replaceAll(" ", ""));
+
+        console.log(text);
+    }
+
     // Display screen size when page loads
     window.onload = displayScreenSize;
 

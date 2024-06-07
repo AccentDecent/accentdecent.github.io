@@ -1,9 +1,19 @@
 const checkbox = document.getElementById("myCheckbox");
+const quizletDiv = document.getElementById("quizletCheckDiv");
+const quizletID = document.getElementById("quizletID");
+
+window.onload = function() {
+    quizletDiv.hidden = !isCheckboxEnabled();
+}
 
 // Check if the checkbox is enabled
 function isCheckboxEnabled() {
     return checkbox.checked;
 }
+
+checkbox.addEventListener("change", function() {
+    quizletDiv.hidden = !isCheckboxEnabled();
+});
 
 document.getElementById("copyButton").addEventListener("click", function() {
     const outputText = document.getElementById("outputText").innerText;
@@ -42,7 +52,10 @@ document.getElementById("generateButton").addEventListener("click", async functi
         const translation = split[1];
 
         if(isCheckboxEnabled()) {
-            outText.innerText += `${greek}, ${translation}\n`;
+
+            const separator = quizletID.value === "" ? ":" : quizletID.value;
+
+            outText.innerText += `${greek}${separator}${translation}\n`;
         }
         else {
             outText.innerText += `${greek}\n`;
@@ -136,6 +149,11 @@ function convert(text) {
     }
 
     console.log(result);
+
+    if(result.endsWith(" ")) {
+        result = result.substring(0, result.length - 1);
+    }
+
     return result;
 }
 

@@ -112,17 +112,18 @@
         <button onclick="window.location.href='../index.html'">Zip File Viewer</button>
         <button onclick="window.location.href='../latin_translator/index.html'">Latin Translator</button>
         <button onclick="window.location.href='../wikiknow/index.html'">WikiKnow Game</button>
+        <button onclick="window.location.href='../Pendulum/index.html'">Pendulum</button>
     </div>
 
     <div style="display: flex; justify-content: space-between;">
         <div id="helpArea">
             <h3>Tones: </h3><br>
-            Acute: 1 <br>
-            Grave: 2 <br>
-            Circumflex: 3 <br><br>
-            Smooth: %<br>
-            Rough: &<br>
-            Iota-Sub: _<br>
+            Acute: 1 ώ<br>
+            Grave: 2 ὼ<br>
+            Circumflex: 3 ῶ<br><br>
+            Smooth: % ὠ<br>
+            Rough: & ὡ<br>
+            Iota-Sub: _ ῳ<br>
             Diaerisis: ^<br>
             <br>
             eg: a1_ = ᾴ<br>
@@ -150,7 +151,12 @@
     <textarea id="inputText" class="inputText" rows="4" cols="50" placeholder="# Sentence:&#10;Dio2 kai2 seismoi2 kai2 pneuma1twn sustpophai2 kai2 a5stron kinh1seis gi1gnontai. &#10;&#10;# Quizlet:&#10;lyw:lösen" style="width: 1000px; height: 310px;"></textarea><br><br>
 
     <button id="generateButton">Generate</button><br><br>
-    <input type="checkbox" id="myCheckbox"> Generate Quizlet
+    <input type="checkbox" id="myCheckbox"> Generate Quizlet <br>
+
+    <div id="quizletCheckDiv">
+        <p>Separator</p>
+        <textarea id="quizletID"></textarea>
+    </div>
 
     <h2>Output</h2>
 
