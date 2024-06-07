@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Double Pendulum Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Double Pendulum Simulation</h1>
+
+    <div class="settings">
+        <h2>Settings</h2>
+        <label for="numPendulums">Number of Pendulums:</label>
+        <input type="number" id="numPendulums" value="1" min="1" max="10">
+        <br>
+        <label for="drawPendulums">Draw Pendulums:</label>
+        <input type="checkbox" id="drawPendulums" checked>
+        <br>
+        <label for="drawTrails">Draw Trails:</label>
+        <input type="checkbox" id="drawTrails" checked>
+        <br>
+        <label for="pause">Pause</label>
+        <input type="checkbox" id="pause" checked>
+        <br>
+        <label for="diff">Diff:</label>
+        <input type="number" id="diff" value="2" min="1" max="10">
+        <br>
+        <label for="xdap">X Dap:</label>
+        <input type="number" id="xdap" value="0.99" min="0" max="3">
+        <br>
+        <label for="ydap">Y Dap:</label>
+        <input type="number" id="ydap" value="0.99" min="0" max="3">
+        <br>
+        <label for="mass">Mass:</label>
+        <input type="number" id="mass" value="0" min="0" max="2">
+        <br>
+        <p id="info"></p>
+    </div>
+
+    <canvas id="pendulumCanvas" width="800" height="600"></canvas>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

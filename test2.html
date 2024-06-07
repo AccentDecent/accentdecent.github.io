@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Double Pendulum Simulation</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+        #controls {
+            text-align: center;
+            margin: 20px;
+        }
+        #controls input {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1 style="text-align: center;">Double Pendulum Simulation</h1>
+<div id="controls">
+    <label for="numPendulums">Number of Pendulums:</label>
+    <input type="number" id="numPendulums" value="1" min="1" max="10"><br>
+    <label for="drawPendulums">Draw Pendulums:</label>
+    <input type="checkbox" id="drawPendulums" checked><br>
+    <label for="drawTrails">Draw Trails:</label>
+    <input type="checkbox" id="drawTrails" checked><br>
+    <label for="speed">Speed:</label>
+    <input type="range" id="speed" min="0.1" max="2" value="1" step="0.1"><br>
+</div>
+<canvas id="canvas" width="800" height="600"></canvas>
+<script>
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let numPendulums = document.getElementById('numPendulums').value;
+    let drawPendulums = document.getElementById('drawPendulums').checked;
+    let drawTrails = document.getElementById('drawTrails').checked;
+    let speed = document.getElementById('speed').value;
+
+    class Pendulum {
+        constructor(x, y, length1, length2, mass1, mass2, angle1, angle2) {
+            this.origin = { x, y };
+            this.x = x;
+            this.y = y;
+            this.length1 = length1;
+            this.length2 = length2;
+            this.length = [length1, length2];
+            this.mass1 = mass1;
+            this.mass = [mass1, mass2];
+            this.mass2 = mass2;
+            this.angle = angle1;
+
+            this.angle1 = angle1;
+            this.angle2 = angle2;
+            this.aVel1 = 0;
+            this.aVel2 = 0;
+            this.aAcc1 = 0;
+            this.aAcc2 = 0;
+            this.trail = [];
+            this.maxTrailLength = 40; // Adjust the trail length as needed
+        }
+
+        update() {
+
+            const g = 1;
+
+            const num1 = -g * (2 * this.mass1 + this.mass2) * Math.sin(this.angle1);
+            const num2 = -this.mass2 * g * Math.sin(this.angle1 - 2 * this.angle2);
+            const num3 = -2 * Math.sin(this.angle1 - this.angle2) * this.mass2;
+            const num4 = this.aVel2 * this.aVel2 * this.length2 + this.aVel1 * this.aVel1 * this.length1 * Math.cos(this.angle1 - this.angle2);
+            const den = this.length1 * (2 * this.mass1 + this.mass2 - this.mass2 * Math.cos(2 * this.angle1 - 2 * this.angle2));
+
+            this.aAcc1 = (num1 + num2 + num3 * num4) / den;
+
+            const num5 = 2 * Math.sin(this.angle1 - this.angle2);
+            const num6 = (this.aVel1 * this.aVel1 * this.length1 * (this.mass1 + this.mass2) + g * (this.mass1 + this.mass2) * Math.cos(this.angle1) + this.aVel2 * this.aVel2 * this.length2 * this.mass2 * Math.cos(this.angle1 - this.angle2));
+            const den2 = this.length2 * (2 * this.mass1 + this.mass2 - this.mass2 * Math.cos(2 * this.angle1 - 2 * this.angle2));
+
+            this.aAcc2 = (num5 * num6) / den2;
+
+            this.angle1 += this.aVel1;
+            this.angle2 += this.aVel2;
+            this.aVel1 += this.aAcc1;
+            this.aVel2 += this.aAcc2;
+
+         //   this.aVel1 *= 0.99; // Damping to stabilize the motion
+      //      this.aVel2 *= 0.99;
+
+            // Update trail
+            const x1 = this.x + this.length1 * Math.sin(this.angle1);
+            const y1 = this.y + this.length1 * Math.cos(this.angle1);
+            const x2 = x1 + this.length2 * Math.sin(this.angle2);
+            const y2 = y1 + this.length2 * Math.cos(this.angle2);
+            this.trail.push({ x: x2, y: y2 });
+
+            if (this.trail.length > this.maxTrailLength) {
+                this.trail.shift();
+            }
+        }
+
+
+        draw() {
+            const end1 = this.getEnd1();
+            const end2 = this.getEnd2();
+
+            ctx.beginPath();
+            ctx.moveTo(this.origin.x, this.origin.y);
+            ctx.lineTo(end1.x, end1.y);
+            ctx.lineTo(end2.x, end2.y);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(end2.x, end2.y, this.mass[1] / 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'black';
+            ctx.fill();
+        }
+
+        drawTrail() {
+            for (let i = 0; i < this.trail.length - 1; i++) {
+                const opacity = (i + 1) / this.trail.length;
+                ctx.beginPath();
+                ctx.moveTo(this.trail[i].x, this.trail[i].y);
+                ctx.lineTo(this.trail[i + 1].x, this.trail[i + 1].y);
+                ctx.strokeStyle = `rgba(0, 0, 0, ${opacity})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+
+        getEnd1() {
+            return {
+                x: this.origin.x + this.length[0] * Math.sin(this.angle[0]),
+                y: this.origin.y + this.length[0] * Math.cos(this.angle[0])
+            };
+        }
+
+        getEnd2() {
+            const end1 = this.getEnd1();
+            return {
+                x: end1.x + this.length[1] * Math.sin(this.angle[1]),
+                y: end1.y + this.length[1] * Math.cos(this.angle[1])
+            };
+        }
+    }
+
+    const pendulums = [];
+
+    function initializePendulums(numPendulums) {
+        pendulums.length = 0;
+        const initialLength1 = Math.random() * 100 + 50;
+        const initialLength2 = Math.random() * 100 + 50;
+        const initialMass1 = Math.random() * 20 + 10;
+        const initialMass2 = Math.random() * 20 + 10;
+        const initialAngle1 = Math.PI / 2;
+        const initialAngle2 = Math.PI / 2;
+
+        const diff = 10;
+
+        for (let i = 0; i < numPendulums; i++) {
+            const length1 = initialLength1 + Math.floor(Math.random() * diff);
+            const length2 = initialLength2 + Math.floor(Math.random() * diff);
+            const mass1 = // Math.random() * 20 + 10;
+                initialMass1 + Math.floor(Math.random() * diff);
+            const mass2 =// Math.random() * 20 + 10;
+                initialMass2 + Math.floor(Math.random() * diff);
+            const angle1 = initialAngle1;
+            const angle2 = initialAngle2;
+            const pendulum = new Pendulum(canvas.width / 2, canvas.height / 2, length1, length2, mass1, mass2, angle1, angle2);
+            pendulums.push(pendulum);
+        }
+    }
+
+    function updateSimulation() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        pendulums.forEach(pendulum => {
+            pendulum.update();
+            if (drawPendulums) pendulum.draw();
+            if (drawTrails) pendulum.drawTrail();
+        });
+
+        requestAnimationFrame(updateSimulation);
+    }
+
+    document.getElementById('numPendulums').addEventListener('input', (e) => {
+        numPendulums = e.target.value;
+        initializePendulums(numPendulums);
+    });
+
+    document.getElementById('drawPendulums').addEventListener('change', (e) => {
+        drawPendulums = e.target.checked;
+    });
+
+    document.getElementById('drawTrails').addEventListener('change', (e) => {
+        drawTrails = e.target.checked;
+    });
+
+    document.getElementById('speed').addEventListener('input', (e) => {
+        speed = e.target.value;
+        pendulums.forEach(p => {
+            p.aVel = [p.aVel[0] * speed, p.aVel[1] * speed];
+        });
+    });
+
+    initializePendulums(numPendulums);
+    updateSimulation();
+
+
+</script>
+</body>
+
+</html>
