@@ -4,8 +4,9 @@ let drawTrails = true;
 let diff = 2;
 let xDamp = 0.99;
 let yDamp = 0.99;
-let massOff = 0;
+let massOff = 1;
 let paused = false;
+let btrRainbow = false;
 //endregion
 
 window.addEventListener('keydown', (event) => {
@@ -14,6 +15,19 @@ window.addEventListener('keydown', (event) => {
         pauseInput.checked = paused; // Update the checkbox
     }
 });
+
+// on load
+window.onload = function() {
+    document.getElementById('numPendulums').value = 1;
+    document.getElementById('diff').value = diff;
+    document.getElementById('xdap').value = xDamp;
+    document.getElementById('ydap').value = yDamp;
+    document.getElementById('mass').value = massOff;
+    document.getElementById('pause').checked = false;
+    document.getElementById('drawPendulums').checked = drawPendulums;
+    document.getElementById('drawTrails').checked = drawTrails;
+    document.getElementById('rainbow').checked = btrRainbow;
+};
 
 //region UI Elements
 let numPendulums = document.getElementById('numPendulums').value;
@@ -35,6 +49,11 @@ drawTrailsInput.addEventListener('change', () => {
 const pauseInput = document.getElementById('pause');
 pauseInput.addEventListener('change', () => {
     paused = pauseInput.checked;
+});
+
+const rainbow = document.getElementById('rainbow');
+rainbow.addEventListener('change', () => {
+    btrRainbow = rainbow.checked;
 });
 
 const diffInput = document.getElementById('diff');
@@ -154,18 +173,24 @@ class Pendulum {
     }
 
     drawTrail() {
-        const opacity = (pendulums.indexOf(this) + 1) / pendulums.length;
-        const col = getRainbowColor(pendulums.indexOf(this), pendulums.length);
-        ctx.strokeStyle = `rgba(${col[0]}, ${col[1]}, ${col[2]}, ${opacity})`;
 
+        if(!btrRainbow) {
+            const opacity = (pendulums.indexOf(this) + 1) / pendulums.length;
+            const col = getRainbowColor(pendulums.indexOf(this), pendulums.length);
+            ctx.strokeStyle = `rgba(${col[0]}, ${col[1]}, ${col[2]}, ${opacity})`;
+        }
 
         for (let i = 0; i < this.trail.length - 1; i++) {
-            const opacity = (i + 1) / this.trail.length;
+
+            if(btrRainbow) {
+                const opacity = (i + 1) / this.trail.length;
+                const col = getRainbowColor(i, this.trail.length);
+                ctx.strokeStyle = `rgba(${col[0]}, ${col[1]}, ${col[2]}, ${opacity})`;
+            }
+
             ctx.beginPath();
             ctx.moveTo(this.trail[i].x, this.trail[i].y);
             ctx.lineTo(this.trail[i + 1].x, this.trail[i + 1].y);
-
-
             ctx.lineWidth = 1;
             ctx.stroke();
         }
