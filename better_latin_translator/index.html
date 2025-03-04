@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latin Translator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="theme-toggle-container">
+    <button id="themeToggle">🌓</button>
+</div>
+<div class="container">
+    <header>
+        <h1>Latin Translator</h1>
+        <p class="subtitle">Translate Latin text to modern languages</p>
+    </header>
+
+    <section class="settings-section">
+        <div class="api-key-container">
+            <input type="password" id="apiKeyInput" placeholder="Enter your AI API key...">
+            <button id="saveApiKeyButton">Save Key</button>
+        </div>
+        <div class="language-container">
+            <label for="languageSelector">Target Language:</label>
+            <select id="languageSelector">
+                <option value="German">German</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="English">English</option>
+            </select>
+        </div>
+    </section>
+
+    <section class="extra-info-section">
+        <div class="textarea-container">
+            <label for="extraInfoInput">Extra Information:</label>
+            <textarea id="extraInfoInput" placeholder="Enter extra information here..."></textarea>
+        </div>
+    </section>
+
+    <section class="input-section">
+        <div class="textarea-container">
+            <label for="textInput">Latin Text:</label>
+            <textarea id="textInput" placeholder="Enter Latin text here..."></textarea>
+            <div class="button-group">
+                <button id="pasteButton">Paste</button>
+                <button id="clearButton">Clear</button>
+            </div>
+        </div>
+        <div class="button-group">
+            <button id="generateButton" class="primary-button">Translate</button>
+            <button id="retryButton" class="primary-button" style="display: none;">Retry Translation</button>
+        </div>
+    </section>
+
+    <div id="translatingIndicator" class="translating-indicator">
+        <div class="spinner"></div>
+        <span>Translating...</span>
+    </div>
+
+    <section class="output-section">
+        <div class="output-container">
+            <div class="output-header">
+                <h3>Word Analysis</h3>
+            </div>
+            <div id="outputBox" class="output-box"></div>
+        </div>
+
+        <div class="output-container">
+            <div class="output-header">
+                <h3>Translation Results</h3>
+            </div>
+            <div id="translationsBox" class="translations-box"></div>
+        </div>
+    </section>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
