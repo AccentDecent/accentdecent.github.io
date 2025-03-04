@@ -22,9 +22,28 @@
       margin-bottom: 20px;
     }
     #preview {
-      
       padding: 20px;
       margin-top: 20px;
+      border: 1px solid #ccc; /* Added border for better visibility */
+    }
+    table {
+        border-collapse: collapse; /* Makes the table borders clean */
+        width: 100%; /* Makes the table take up the full width */
+        margin-bottom: 1em; /* Adds some space below the table */
+    }
+
+    th, td {
+        border: 1px solid #ddd; /* Adds borders to table cells */
+        padding: 8px; /* Adds some padding inside cells */
+        text-align: left; /* Aligns text to the left */
+    }
+
+    th {
+        background-color: #f2f2f2; /* Gives table headers a light gray background */
+    }
+
+    tr:nth-child(even) {
+       background-color: #f9f9f9; /* Adds a subtle background color to even rows*/
     }
   </style>
 </head>
@@ -45,20 +64,28 @@
       const html = marked.parse(markdown);
       preview.innerHTML = html;
       // Render LaTeX with MathJax
-      MathJax.typesetPromise();
+      MathJax.typesetPromise([preview]).catch((err) => console.log('MathJax typesetting error:', err));; //added promise for error
     }
 
     // Function to convert the rendered HTML to PDF
     function convertToPDF() {
       renderMarkdown(); // Ensure the latest content is rendered
-      const element = document.getElementById('preview');
-      html2pdf()
-        .from(element)
-        .save('output.pdf');
+
+       //Important: Add a small delay to allow MathJax to complete rendering.
+      setTimeout(() => {
+          const element = document.getElementById('preview');
+          html2pdf()
+          .from(element)
+          .save('output.pdf');
+      }, 250); // 250ms delay -  adjust if needed, more for complex math
     }
 
     // Automatically render Markdown as the user types
     document.getElementById('markdown-input').addEventListener('input', renderMarkdown);
+
+    // Initial rendering.
+    renderMarkdown();
+
   </script>
 </body>
 </html>
