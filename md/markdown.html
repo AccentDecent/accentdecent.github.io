@@ -4,46 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown to PDF Converter</title>
-  <!-- Marked.js for Markdown parsing -->
+  <!-- Marked.js, MathJax, html2pdf.js (same as before) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- MathJax for LaTeX support -->
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <!-- html2pdf.js for PDF generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 200px;
-      margin-bottom: 20px;
-    }
-    #preview {
-      padding: 20px;
-      margin-top: 20px;
-      border: 1px solid #ccc; /* Added border for better visibility */
-    }
-    table {
-        border-collapse: collapse; /* Makes the table borders clean */
-        width: 100%; /* Makes the table take up the full width */
-        margin-bottom: 1em; /* Adds some space below the table */
-    }
+    /* (same CSS as before, plus...) */
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    textarea { width: 100%; height: 200px; margin-bottom: 20px; }
+    #preview { padding: 20px; margin-top: 20px; border: 1px solid #ccc; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
 
-    th, td {
-        border: 1px solid #ddd; /* Adds borders to table cells */
-        padding: 8px; /* Adds some padding inside cells */
-        text-align: left; /* Aligns text to the left */
-    }
-
-    th {
-        background-color: #f2f2f2; /* Gives table headers a light gray background */
-    }
-
-    tr:nth-child(even) {
-       background-color: #f9f9f9; /* Adds a subtle background color to even rows*/
+    /* Prevent page breaks inside these elements */
+    .no-page-break {
+        page-break-inside: avoid;
     }
   </style>
 </head>
@@ -56,36 +34,48 @@
   <div id="preview"></div>
 
   <script>
-    // Function to render Markdown with LaTeX support
     function renderMarkdown() {
       const markdown = document.getElementById('markdown-input').value;
       const preview = document.getElementById('preview');
-      // Convert Markdown to HTML
       const html = marked.parse(markdown);
       preview.innerHTML = html;
-      // Render LaTeX with MathJax
-      MathJax.typesetPromise([preview]).catch((err) => console.log('MathJax typesetting error:', err));; //added promise for error
+
+        // Wrap content that shouldn't be split across pages in a div with class "no-page-break"
+        const noBreakDivs = preview.querySelectorAll('h1, h2, h3, h4, h5, h6, p, table, pre, blockquote, ul, ol, dl'); // Add any other block-level elements you want to prevent from breaking.
+        noBreakDivs.forEach(el => {
+          if (!el.classList.contains('no-page-break')) { // Check if it doesn't already have the class. Important for nested elements.
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('no-page-break');
+            el.parentNode.insertBefore(wrapper, el);
+            wrapper.appendChild(el);
+          }
+      });
+
+      MathJax.typesetPromise([preview]).catch((err) => console.log('MathJax typesetting error:', err));
     }
 
-    // Function to convert the rendered HTML to PDF
     function convertToPDF() {
       renderMarkdown(); // Ensure the latest content is rendered
 
-       //Important: Add a small delay to allow MathJax to complete rendering.
       setTimeout(() => {
           const element = document.getElementById('preview');
-          html2pdf()
-          .from(element)
-          .save('output.pdf');
-      }, 250); // 250ms delay -  adjust if needed, more for complex math
+          const opt = {
+              margin:       0.5, // Add some margin
+              filename:     'output.pdf',
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2 },  // Improve image quality
+              jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }, //letter size
+               //Force the pdf into a single page.
+              pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // Use the pagebreak option
+          };
+
+          html2pdf().set(opt).from(element).save();
+
+      }, 250);
     }
 
-    // Automatically render Markdown as the user types
     document.getElementById('markdown-input').addEventListener('input', renderMarkdown);
-
-    // Initial rendering.
-    renderMarkdown();
-
+    renderMarkdown(); // Initial render
   </script>
 </body>
 </html>
