@@ -193,13 +193,72 @@ function displayWords(words) {
     const outputBox = document.getElementById('outputBox');
     outputBox.innerHTML = '';
     words.forEach(word => {
+        const wordContainer = document.createElement('div');
+        wordContainer.className = 'word-container';
+        wordContainer.style.position = 'relative';
+        wordContainer.style.display = 'inline-block';
+        
         const wordElement = document.createElement('span');
         wordElement.className = 'word';
         wordElement.textContent = word;
         wordElement.id = `word-${word}`;
-        outputBox.appendChild(wordElement);
+        
+        // Create translations popup
+        const translationsPopup = document.createElement('div');
+        translationsPopup.className = 'word-translations';
+        translationsPopup.id = `translations-${word}`;
+        
+        wordContainer.appendChild(wordElement);
+        wordContainer.appendChild(translationsPopup);
+        outputBox.appendChild(wordContainer);
+        
+        // Add click event to show translations
+        wordElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showWordTranslations(word);
+        });
     });
 }
+
+function showWordTranslations(word) {
+    const translations = cachedTranslations[word] || [];
+    const translationsPopup = document.getElementById(`translations-${word}`);
+    
+    if (translationsPopup.style.display === 'block') {
+        translationsPopup.style.display = 'none';
+        return;
+    }
+    
+    // Hide all other translation popups
+    document.querySelectorAll('.word-translations').forEach(popup => {
+        popup.style.display = 'none';
+    });
+    
+    if (translations.length > 0) {
+        translationsPopup.innerHTML = '';
+        translations.forEach(translation => {
+            const translationItem = document.createElement('div');
+            translationItem.className = 'word-translation-item';
+            translationItem.textContent = translation;
+            translationsPopup.appendChild(translationItem);
+        });
+        translationsPopup.style.display = 'block';
+    } else {
+        const noTranslation = document.createElement('div');
+        noTranslation.className = 'word-translation-item';
+        noTranslation.textContent = 'No translations found';
+        translationsPopup.innerHTML = '';
+        translationsPopup.appendChild(noTranslation);
+        translationsPopup.style.display = 'block';
+    }
+}
+
+// Add click event to document to close popups when clicking elsewhere
+document.addEventListener('click', () => {
+    document.querySelectorAll('.word-translations').forEach(popup => {
+        popup.style.display = 'none';
+    });
+});
 
 function markWordAsCompleted(word) {
     const wordElement = document.getElementById(`word-${word}`);
