@@ -342,3 +342,44 @@ h3 {
 .word-translation-item:last-child {
     border-bottom: none;
 }
+
+/* Add to styles.css */
+.word-popup {
+    position: absolute;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    max-width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.word-popup h4 {
+    margin-bottom: 8px;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.word-popup ul {
+    list-style-type: none;
+    padding-left: 5px;
+}
+
+.word-popup li {
+    padding: 3px 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.word-popup li:last-child {
+    border-bottom: none;
+}
+
+.word-container {
+    position: relative;
+    display: inline-block;
+}
