@@ -50,6 +50,7 @@ document.getElementById('saveApiKeyButton').addEventListener('click', () => {
 });
 
 let cachedTranslations = {};
+let originalSentences = [];
 document.getElementById('generateButton').addEventListener('click', async () => {
     const apiKey = getCookie('apiKey');
     if (!apiKey) {
@@ -62,27 +63,53 @@ document.getElementById('generateButton').addEventListener('click', async () => 
 
     try {
         const text = document.getElementById('textInput').value;
-        const sentences = text.split(/[.!?]\s*/).filter(Boolean);
-        const tokens = sentences.reduce((acc, sentence, index) => {
-            acc[index + 1] = sentence.split(/(\s+|[,:;.!?])/).filter(Boolean);
+        // Store original sentences with punctuation
+        originalSentences = text.split(/([.!?])\s*/).reduce((acc, curr, i, arr) => {
+            if (i % 2 === 0) {
+                acc.push(curr + (arr[i+1] || ''));
+            }
             return acc;
-        }, {});
+        }, []).filter(Boolean);
 
-        // remove spaces and special characters from tokens
-        Object.keys(tokens).forEach(key => {
-            tokens[key] = tokens[key].filter(token => token.trim() && !/[,:;.!?]/.test(token));
-        });
+        // Split into tokens while preserving punctuation markers
+        const sentences = text.split(/([.!?])\s*/).filter(Boolean);
+        const tokens = {};
+        let sentenceIndex = 1;
+        
+        for (let i = 0; i < sentences.length; i += 2) {
+            const sentence = sentences[i];
+            const punctuation = sentences[i+1] || '';
+            tokens[sentenceIndex] = {
+                words: sentence.split(/(\s+|[,:;])/).filter(token => token.trim()),
+                punctuation: punctuation
+            };
+            sentenceIndex++;
+        }
 
-        const allWords = Object.values(tokens).flat();
+        // Get all words for translation (filter out punctuation and spaces)
+        const allWords = Object.values(tokens).flatMap(s => 
+            s.words.filter(word => word.trim() && !/^[,:;.!?]$/.test(word))
+        );
+        
         displayWords(allWords);
         const translations = await fetchTranslations(allWords);
 
-        const result = { tokens: {} };
+        // Build result object with punctuation markers
+        const result = { 
+            tokens: {},
+            originalSentences: originalSentences
+        };
+        
         Object.keys(tokens).forEach(key => {
-            result.tokens[key] = tokens[key].reduce((acc, word) => {
-                acc[word] = translations[word] || [];
-                return acc;
-            }, {});
+            result.tokens[key] = {
+                words: tokens[key].words.reduce((acc, word) => {
+                    if (word.trim() && !/^[,:;.!?]$/.test(word)) {
+                        acc[word] = translations[word] || [];
+                    }
+                    return acc;
+                }, {}),
+                punctuation: tokens[key].punctuation
+            };
         });
 
         cachedTranslations = translations;
@@ -102,8 +129,8 @@ document.getElementById('generateButton').addEventListener('click', async () => 
 
         console.log(output);
 
-        // remove ```json from beginning and end
-        const outputJson = output.slice(7, -3);
+        // remove ```json from beginning and end if present
+        const outputJson = output.startsWith('```json') ? output.slice(7, -3) : output;
         const parsedOutput = JSON.parse(outputJson);
         const outputs = parsedOutput.output;
 
@@ -133,23 +160,35 @@ document.getElementById('retryButton').addEventListener('click', async () => {
 
     try {
         const text = document.getElementById('textInput').value;
-        const sentences = text.split(/[.!?]\s*/).filter(Boolean);
-        const tokens = sentences.reduce((acc, sentence, index) => {
-            acc[index + 1] = sentence.split(/(\s+|[,:;.!?])/).filter(Boolean);
-            return acc;
-        }, {});
+        const sentences = text.split(/([.!?])\s*/).filter(Boolean);
+        const tokens = {};
+        let sentenceIndex = 1;
+        
+        for (let i = 0; i < sentences.length; i += 2) {
+            const sentence = sentences[i];
+            const punctuation = sentences[i+1] || '';
+            tokens[sentenceIndex] = {
+                words: sentence.split(/(\s+|[,:;])/).filter(token => token.trim()),
+                punctuation: punctuation
+            };
+            sentenceIndex++;
+        }
 
-        // remove spaces and special characters from tokens
+        const result = { 
+            tokens: {},
+            originalSentences: originalSentences
+        };
+        
         Object.keys(tokens).forEach(key => {
-            tokens[key] = tokens[key].filter(token => token.trim() && !/[,:;.!?]/.test(token));
-        });
-
-        const result = { tokens: {} };
-        Object.keys(tokens).forEach(key => {
-            result.tokens[key] = tokens[key].reduce((acc, word) => {
-                acc[word] = cachedTranslations[word] || [];
-                return acc;
-            }, {});
+            result.tokens[key] = {
+                words: tokens[key].words.reduce((acc, word) => {
+                    if (word.trim() && !/^[,:;.!?]$/.test(word)) {
+                        acc[word] = cachedTranslations[word] || [];
+                    }
+                    return acc;
+                }, {}),
+                punctuation: tokens[key].punctuation
+            };
         });
 
         const json = JSON.stringify(result, null, 4);
@@ -167,8 +206,8 @@ document.getElementById('retryButton').addEventListener('click', async () => {
 
         console.log(output);
 
-        // remove ```json from beginning and end
-        const outputJson = output.slice(7, -3);
+        // remove ```json from beginning and end if present
+        const outputJson = output.startsWith('```json') ? output.slice(7, -3) : output;
         const parsedOutput = JSON.parse(outputJson);
         const outputs = parsedOutput.output;
 
@@ -251,13 +290,18 @@ async function fetchTranslations(wordTokens) {
 
     for (const word of wordTokens) {
         console.log("fetching translation for", word);
-        const response = await fetch(`https://latincheats.stormcph-dk.workers.dev/lateinme?q=${word}`);
-        const text = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-        const translationEntries = doc.querySelectorAll('dd.translationEntry a');
-        translations[word] = Array.from(translationEntries).map(entry => entry.textContent);
-        markWordAsCompleted(word);
+        try {
+            const response = await fetch(`https://latincheats.stormcph-dk.workers.dev/lateinme?q=${word}`);
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            const translationEntries = doc.querySelectorAll('dd.translationEntry a');
+            translations[word] = Array.from(translationEntries).map(entry => entry.textContent);
+            markWordAsCompleted(word);
+        } catch (error) {
+            console.error(`Error fetching translation for ${word}:`, error);
+            translations[word] = ['Translation error'];
+        }
     }
 
     // remove empty translations
@@ -292,16 +336,28 @@ async function promptAI(prompt) {
 }
 
 function initialPrompt(lang, json, extras) {
-    return "You're an AI old language Translator. You will be given a json array with each word given multiple translation possibilities. Your job is to choose the most fitting translation and construct a senseful sentence from the words. Try to make grammatically correct sentences. Add words if needed. You should format your response as a json like this:\n" +
-        "{\n" +
-        "\t\"output\": {\n" +
-        "\t\t\"1\": \"translated\",\n" +
-        "\t\t\"2\": ...\n" +
-        "\t}\n" +
-        "}\n" +
-        "You are to provide the translation in this language:\n" + lang +
-        "Here is some extra information to the text by the user (may be nothing): " + extras +
-        "\nHere is your text to be translated:" + json;
+    return `You're an AI Latin translator. You will be given a JSON object containing:
+1. Original Latin sentences with punctuation
+2. Individual words with their possible translations
+
+Your task is to:
+1. Use the most appropriate translations for each word
+2. Reconstruct grammatically correct sentences in ${lang}
+3. Preserve the original punctuation and sentence structure
+4. Add necessary words (like articles) to make the translation natural
+
+Return your response in this JSON format:
+{
+    "output": {
+        "1": "First translated sentence with punctuation.",
+        "2": "Second translated sentence with punctuation."
+    }
+}
+
+Extra context from user: ${extras || 'None'}
+
+Here is the Latin text to translate:
+${json}`;
 }
 
 function displayTranslations(translations) {
@@ -310,7 +366,10 @@ function displayTranslations(translations) {
     Object.keys(translations).forEach(key => {
         const translationElement = document.createElement('div');
         translationElement.className = 'translation';
-        translationElement.textContent = `${key}: ${translations[key]}`;
+        translationElement.innerHTML = `
+            <div class="original">${originalSentences[key-1] || ''}</div>
+            <div class="translated">${translations[key]}</div>
+        `;
         translationsBox.appendChild(translationElement);
     });
 }
