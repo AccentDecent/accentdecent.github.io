@@ -192,73 +192,52 @@ function getCookie(name) {
 function displayWords(words) {
     const outputBox = document.getElementById('outputBox');
     outputBox.innerHTML = '';
+    
+    // Create popup element
+    const popup = document.createElement('div');
+    popup.className = 'word-popup';
+    popup.id = 'wordPopup';
+    document.body.appendChild(popup);
+    
+    // Close popup when clicking anywhere else
+    document.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('word') && e.target.id !== 'wordPopup') {
+            popup.style.display = 'none';
+        }
+    });
+
     words.forEach(word => {
-        const wordContainer = document.createElement('div');
-        wordContainer.className = 'word-container';
-        wordContainer.style.position = 'relative';
-        wordContainer.style.display = 'inline-block';
+        const container = document.createElement('div');
+        container.className = 'word-container';
         
         const wordElement = document.createElement('span');
         wordElement.className = 'word';
         wordElement.textContent = word;
         wordElement.id = `word-${word}`;
         
-        // Create translations popup
-        const translationsPopup = document.createElement('div');
-        translationsPopup.className = 'word-translations';
-        translationsPopup.id = `translations-${word}`;
-        
-        wordContainer.appendChild(wordElement);
-        wordContainer.appendChild(translationsPopup);
-        outputBox.appendChild(wordContainer);
-        
-        // Add click event to show translations
+        // Add click handler
         wordElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            showWordTranslations(word);
+            const translations = cachedTranslations[word] || ['No translations found'];
+            
+            // Position and show popup
+            const rect = wordElement.getBoundingClientRect();
+            popup.innerHTML = `
+                <h4>${word}</h4>
+                <ul>
+                    ${translations.map(t => `<li>${t}</li>`).join('')}
+                </ul>
+            `;
+            
+            popup.style.display = 'block';
+            popup.style.left = `${rect.left + window.scrollX}px`;
+            popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
         });
+        
+        container.appendChild(wordElement);
+        outputBox.appendChild(container);
     });
 }
-
-function showWordTranslations(word) {
-    const translations = cachedTranslations[word] || [];
-    const translationsPopup = document.getElementById(`translations-${word}`);
-    
-    if (translationsPopup.style.display === 'block') {
-        translationsPopup.style.display = 'none';
-        return;
-    }
-    
-    // Hide all other translation popups
-    document.querySelectorAll('.word-translations').forEach(popup => {
-        popup.style.display = 'none';
-    });
-    
-    if (translations.length > 0) {
-        translationsPopup.innerHTML = '';
-        translations.forEach(translation => {
-            const translationItem = document.createElement('div');
-            translationItem.className = 'word-translation-item';
-            translationItem.textContent = translation;
-            translationsPopup.appendChild(translationItem);
-        });
-        translationsPopup.style.display = 'block';
-    } else {
-        const noTranslation = document.createElement('div');
-        noTranslation.className = 'word-translation-item';
-        noTranslation.textContent = 'No translations found';
-        translationsPopup.innerHTML = '';
-        translationsPopup.appendChild(noTranslation);
-        translationsPopup.style.display = 'block';
-    }
-}
-
-// Add click event to document to close popups when clicking elsewhere
-document.addEventListener('click', () => {
-    document.querySelectorAll('.word-translations').forEach(popup => {
-        popup.style.display = 'none';
-    });
-});
 
 function markWordAsCompleted(word) {
     const wordElement = document.getElementById(`word-${word}`);
@@ -313,7 +292,7 @@ async function promptAI(prompt) {
 }
 
 function initialPrompt(lang, json, extras) {
-    return "You're an AI old language Translator. You will be given a json array with each word given multiple translation possibilities. Your job is to choose the most fitting translation and construct a senseful sentence from the words. You should format your response as a json like this:\n" +
+    return "You're an AI old language Translator. You will be given a json array with each word given multiple translation possibilities. Your job is to choose the most fitting translation and construct a senseful sentence from the words. Try to make grammatically correct sentences. Add words if needed. You should format your response as a json like this:\n" +
         "{\n" +
         "\t\"output\": {\n" +
         "\t\t\"1\": \"translated\",\n" +
