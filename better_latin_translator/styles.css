@@ -293,3 +293,52 @@ h3 {
 #retryButton:hover {
     background-color: darken(var(--secondary-color), 10%);
 }
+
+/* Add these styles to your existing CSS */
+.word {
+    position: relative;
+    cursor: pointer;
+}
+
+.word-translations {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    min-width: 150px;
+    max-width: 250px;
+    display: none;
+    margin-bottom: 5px;
+}
+
+.word-translations::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--card-bg) transparent transparent transparent;
+}
+
+.word:hover .word-translations {
+    display: block;
+}
+
+.word-translation-item {
+    padding: 5px;
+    margin: 3px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.word-translation-item:last-child {
+    border-bottom: none;
+}
