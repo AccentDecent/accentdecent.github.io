@@ -32,6 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('textInput').value = '';
     });
 
+    // Paste button functionality
+    document.getElementById('pasteButton').addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById('textInput').value = text;
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+            alert('Failed to paste from clipboard.');
+        }
+    });
+
     // Rest of your existing code...
     const apiKey = getCookie('apiKey');
     if(apiKey) {
@@ -51,7 +62,8 @@ document.getElementById('saveApiKeyButton').addEventListener('click', () => {
 
 let cachedTranslations = {};
 let originalSentences = [];
-document.getElementById('generateButton').addEventListener('click', async () => {
+
+async function handleTranslation() {
     const apiKey = getCookie('apiKey');
     if (!apiKey) {
         alert('Please enter and save your AI API key first.');
@@ -65,19 +77,20 @@ document.getElementById('generateButton').addEventListener('click', async () => 
         const text = document.getElementById('textInput').value;
         // Store original sentences with punctuation
         originalSentences = text.split(/([.!?])\s*/).reduce((acc, curr, i, arr) => {
-            if (i % 2 === 0) {
-                acc.push(curr + (arr[i+1] || ''));
+            if (i % 2 === 0 && curr.trim()) {
+                acc.push(curr.trim() + (arr[i+1] || ''));
             }
             return acc;
-        }, []).filter(Boolean);
+        }, []).filter(s => s.trim());
 
         // Split into tokens while preserving punctuation markers
         const sentences = text.split(/([.!?])\s*/).filter(Boolean);
         const tokens = {};
         let sentenceIndex = 1;
-        
+
         for (let i = 0; i < sentences.length; i += 2) {
             const sentence = sentences[i];
+            if (!sentence.trim()) continue;
             const punctuation = sentences[i+1] || '';
             tokens[sentenceIndex] = {
                 words: sentence.split(/(\s+|[,:;])/).filter(token => token.trim()),
@@ -87,24 +100,27 @@ document.getElementById('generateButton').addEventListener('click', async () => 
         }
 
         // Get all words for translation (filter out punctuation and spaces)
-        const allWords = Object.values(tokens).flatMap(s => 
+        const allWords = Object.values(tokens).flatMap(s =>
             s.words.filter(word => word.trim() && !/^[,:;.!?]$/.test(word))
         );
-        
+
         displayWords(allWords);
-        const translations = await fetchTranslations(allWords);
+        // Only fetch new translations if cache is empty (first run)
+        if (Object.keys(cachedTranslations).length === 0) {
+            cachedTranslations = await fetchTranslations(allWords);
+        }
 
         // Build result object with punctuation markers
-        const result = { 
+        const result = {
             tokens: {},
             originalSentences: originalSentences
         };
-        
+
         Object.keys(tokens).forEach(key => {
             result.tokens[key] = {
                 words: tokens[key].words.reduce((acc, word) => {
                     if (word.trim() && !/^[,:;.!?]$/.test(word)) {
-                        acc[word] = translations[word] || [];
+                        acc[word] = cachedTranslations[word] || { entries: [] };
                     }
                     return acc;
                 }, {}),
@@ -112,29 +128,20 @@ document.getElementById('generateButton').addEventListener('click', async () => 
             };
         });
 
-        cachedTranslations = translations;
-
         const json = JSON.stringify(result, null, 4);
 
         const language = document.getElementById('languageSelector').value;
         const extras = document.getElementById('extraInfoInput').value;
         const prompt = initialPrompt(language, json, extras);
-        document.getElementById('translatingIndicator').style.display = 'block';
-        const response = await promptAI(prompt);
-        document.getElementById('translatingIndicator').style.display = 'none';
 
-        console.log(response);
+        const response = await promptAI(prompt);
 
         const output = response.candidates[0].content.parts[0].text;
 
-        console.log(output);
-
         // remove ```json from beginning and end if present
-        const outputJson = output.startsWith('```json') ? output.slice(7, -3) : output;
+        const outputJson = output.trim().replace(/^```json\s*|```$/g, '');
         const parsedOutput = JSON.parse(outputJson);
         const outputs = parsedOutput.output;
-
-        console.log(outputs);
 
         displayTranslations(outputs);
 
@@ -142,85 +149,21 @@ document.getElementById('generateButton').addEventListener('click', async () => 
         document.getElementById('retryButton').style.display = 'block';
     } catch (error) {
         console.error('Translation error:', error);
-        alert('An error occurred during translation. Please try again.');
+        alert('An error occurred during translation: ' + error.message);
     } finally {
         indicator.classList.remove('active');
     }
+}
+
+
+document.getElementById('generateButton').addEventListener('click', () => {
+    // Clear cache for a new translation
+    cachedTranslations = {};
+    handleTranslation();
 });
 
-document.getElementById('retryButton').addEventListener('click', async () => {
-    const apiKey = getCookie('apiKey');
-    if (!apiKey) {
-        alert('Please enter and save your AI API key first.');
-        return;
-    }
+document.getElementById('retryButton').addEventListener('click', handleTranslation);
 
-    const indicator = document.getElementById('translatingIndicator');
-    indicator.classList.add('active');
-
-    try {
-        const text = document.getElementById('textInput').value;
-        const sentences = text.split(/([.!?])\s*/).filter(Boolean);
-        const tokens = {};
-        let sentenceIndex = 1;
-        
-        for (let i = 0; i < sentences.length; i += 2) {
-            const sentence = sentences[i];
-            const punctuation = sentences[i+1] || '';
-            tokens[sentenceIndex] = {
-                words: sentence.split(/(\s+|[,:;])/).filter(token => token.trim()),
-                punctuation: punctuation
-            };
-            sentenceIndex++;
-        }
-
-        const result = { 
-            tokens: {},
-            originalSentences: originalSentences
-        };
-        
-        Object.keys(tokens).forEach(key => {
-            result.tokens[key] = {
-                words: tokens[key].words.reduce((acc, word) => {
-                    if (word.trim() && !/^[,:;.!?]$/.test(word)) {
-                        acc[word] = cachedTranslations[word] || [];
-                    }
-                    return acc;
-                }, {}),
-                punctuation: tokens[key].punctuation
-            };
-        });
-
-        const json = JSON.stringify(result, null, 4);
-
-        const language = document.getElementById('languageSelector').value;
-        const extras = document.getElementById('extraInfoInput').value;
-        const prompt = initialPrompt(language, json, extras);
-        document.getElementById('translatingIndicator').style.display = 'block';
-        const response = await promptAI(prompt);
-        document.getElementById('translatingIndicator').style.display = 'none';
-
-        console.log(response);
-
-        const output = response.candidates[0].content.parts[0].text;
-
-        console.log(output);
-
-        // remove ```json from beginning and end if present
-        const outputJson = output.startsWith('```json') ? output.slice(7, -3) : output;
-        const parsedOutput = JSON.parse(outputJson);
-        const outputs = parsedOutput.output;
-
-        console.log(outputs);
-
-        displayTranslations(outputs);
-    } catch (error) {
-        console.error('Translation error:', error);
-        alert('An error occurred during translation. Please try again.');
-    } finally {
-        indicator.classList.remove('active');
-    }
-});
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -231,48 +174,70 @@ function getCookie(name) {
 function displayWords(words) {
     const outputBox = document.getElementById('outputBox');
     outputBox.innerHTML = '';
-    
-    // Create popup element
-    const popup = document.createElement('div');
-    popup.className = 'word-popup';
-    popup.id = 'wordPopup';
-    document.body.appendChild(popup);
-    
-    // Close popup when clicking anywhere else
-    document.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('word') && e.target.id !== 'wordPopup') {
-            popup.style.display = 'none';
-        }
-    });
 
-    words.forEach(word => {
+    let popup = document.getElementById('wordPopup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.className = 'word-popup';
+        popup.id = 'wordPopup';
+        document.body.appendChild(popup);
+        document.addEventListener('click', (e) => {
+            if (popup && !popup.contains(e.target) && !e.target.classList.contains('word')) {
+                popup.style.display = 'none';
+            }
+        });
+    }
+
+    const uniqueWords = [...new Set(words)];
+    uniqueWords.forEach(word => {
         const container = document.createElement('div');
         container.className = 'word-container';
-        
+
         const wordElement = document.createElement('span');
         wordElement.className = 'word';
         wordElement.textContent = word;
         wordElement.id = `word-${word}`;
-        
-        // Add click handler
+
         wordElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            const translations = cachedTranslations[word] || ['No translations found'];
-            
-            // Position and show popup
+            const wordData = cachedTranslations[word];
+            let content = `<h4>${word}</h4>`;
+
+            if (!wordData || !wordData.entries || wordData.entries.length === 0) {
+                content += '<p>No data found.</p>';
+            } else {
+                wordData.entries.forEach(entry => {
+                    content += `<div class="popup-entry"><h5>${entry.word}</h5>`;
+                    if (entry.translations && entry.translations.length > 0) {
+                        content += `<ul>${entry.translations.map(t => `<li>${t}</li>`).join('')}</ul>`;
+                    }
+                    if (entry.formAnalysis && entry.formAnalysis.length > 0) {
+                        content += `<p class="form-analysis"><strong>Analysis:</strong> ${entry.formAnalysis.join(', ')}</p>`;
+                    }
+                    content += `</div>`;
+                });
+            }
+
             const rect = wordElement.getBoundingClientRect();
-            popup.innerHTML = `
-                <h4>${word}</h4>
-                <ul>
-                    ${translations.map(t => `<li>${t}</li>`).join('')}
-                </ul>
-            `;
-            
+            popup.innerHTML = content;
             popup.style.display = 'block';
-            popup.style.left = `${rect.left + window.scrollX}px`;
-            popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
+
+            const popupHeight = popup.offsetHeight;
+            const popupWidth = popup.offsetWidth;
+            let top = rect.bottom + window.scrollY + 5;
+            let left = rect.left + window.scrollX;
+
+            if (top + popupHeight > window.innerHeight + window.scrollY) {
+                top = rect.top + window.scrollY - popupHeight - 5;
+            }
+            if (left + popupWidth > window.innerWidth + window.scrollX) {
+                left = window.innerWidth + window.scrollX - popupWidth - 10;
+            }
+
+            popup.style.top = `${top}px`;
+            popup.style.left = `${left}px`;
         });
-        
+
         container.appendChild(wordElement);
         outputBox.appendChild(container);
     });
@@ -286,40 +251,57 @@ function markWordAsCompleted(word) {
 }
 
 async function fetchTranslations(wordTokens) {
-    const translations = {};
+    const translationsCache = {};
+    const uniqueWords = [...new Set(wordTokens)];
 
-    for (const word of wordTokens) {
-        console.log("fetching translation for", word);
+    for (const originalWord of uniqueWords) {
+        // NOTE: We now query with the original word ('servaque'). The `-que` logic is handled by the API.
+        const wordToFetch = originalWord;
+
+        console.log(`Fetching translation for "${wordToFetch}"`);
         try {
-            const response = await fetch(`https://latincheats.stormcph-dk.workers.dev/lateinme?q=${word}`);
-            const text = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(text, 'text/html');
-            const translationEntries = doc.querySelectorAll('dd.translationEntry a');
-            translations[word] = Array.from(translationEntries).map(entry => entry.textContent);
-            markWordAsCompleted(word);
+            const response = await fetch(`https://latincheats.stormcph-dk.workers.dev/lateinme/json?q=${encodeURIComponent(wordToFetch)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            // The API returns an array of possible word objects. We store them all.
+            if (data && data.length > 0) {
+                translationsCache[originalWord] = {
+                    entries: data.map(entry => ({
+                        word: entry.word || 'Unknown',
+                        translations: entry.translations || [],
+                        formAnalysis: entry.formAnalysis || null
+                    }))
+                };
+            } else {
+                // If no data, still create a valid structure to avoid errors
+                translationsCache[originalWord] = { entries: [] };
+            }
+            markWordAsCompleted(originalWord);
         } catch (error) {
-            console.error(`Error fetching translation for ${word}:`, error);
-            translations[word] = ['Translation error'];
+            console.error(`Error fetching translation for ${originalWord}:`, error);
+            translationsCache[originalWord] = {
+                entries: [{
+                    word: 'Error',
+                    translations: ['Translation error'],
+                    formAnalysis: null
+                }]
+            };
         }
     }
-
-    // remove empty translations
-    Object.keys(translations).forEach(key => {
-        translations[key] = translations[key].filter(Boolean);
-    });
-
-    return translations;
+    return translationsCache;
 }
+
 
 async function promptAI(prompt) {
     const apiKey = getCookie('apiKey');
     if (!apiKey) {
-        alert('Please enter and save your AI API key first.');
-        return;
+        throw new Error('AI API key is missing.');
     }
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey, {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + apiKey, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -327,40 +309,58 @@ async function promptAI(prompt) {
         body: JSON.stringify({
             contents: [{
                 parts: [{ text: prompt }]
-            }]
+            }],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+            }
         })
     });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error("AI API Error:", errorData);
+        throw new Error(`AI API request failed with status ${response.status}: ${errorData.error.message}`);
+    }
 
     return await response.json();
 }
 
 function initialPrompt(lang, json, extras) {
-    return `You're an AI Latin translator. You will be given a JSON object containing:
-1. Original Latin sentences with punctuation
-2. Individual words with their possible translations
+    return `You are a highly skilled AI specializing in Latin translation. You will be provided with a JSON object containing structured data about a Latin text.
 
-Your task is to:
-1. Use the most appropriate translations for each word
-2. Reconstruct grammatically correct sentences in ${lang}
-3. Preserve the original punctuation and sentence structure
-4. Add necessary words (like articles) to make the translation natural
-5. If there is extra context provided, incorporate that into the translation
-6. If the extra content contains word meanings, prioritize those meanings in your translation.
-7. Make sure the translated sentences are fluent and coherent.
+The JSON object includes:
+1. "originalSentences": The complete Latin sentences as they were input.
+2. "tokens": An object where each key is a sentence number. Each sentence contains:
+   - "words": An object where each key is a Latin word from the sentence. The value is an object containing an "entries" array.
+   - "entries": This array holds one or more objects, representing the different possible interpretations of the Latin word. For example, "servaque" could be an entry for "serva" (slave girl) and an entry for "que" (and). Each entry object contains:
+     - "word": A string indicating the base word and its type (e.g., "serva (Substantiv)").
+     - "translations": An array of possible translations.
+     - "formAnalysis": An array describing the word's grammatical form (e.g., case, number, gender). This is crucial for context.
+   - "punctuation": The concluding punctuation for that sentence.
 
-Return your response in this JSON format:
+Your task is to perform a high-quality translation into ${lang} by following these steps:
+1.  Deconstruct compound words. For a word with multiple "entries", like "servaque", you must understand it's composed of "serva" and "que".
+2.  Analyze the "formAnalysis" for each entry to understand its grammatical role. This is the most important clue.
+3.  Select the most contextually appropriate meaning from the "translations" array for each component.
+4. If the extra context contains specific instructions, consider them while translating.
+5. If the extra context includes word translations, prioritize those meanings.
+6.  Construct a fluent, grammatically correct sentence in ${lang}, adding necessary words (articles, helper verbs) that are implied in Latin.
+7.  Maintain the original sentence structure and apply the original punctuation.
+
+User has provided this extra context: ${extras || 'None'}
+
+Here is the Latin data:
+${json}
+
+Your final output MUST be a valid JSON object in the following format, with no other text or explanations before or after it:
 {
     "output": {
         "1": "First translated sentence with punctuation.",
         "2": "Second translated sentence with punctuation."
     }
+}`;
 }
 
-Extra context from user: ${extras || 'None'}
-
-Here is the Latin text to translate:
-${json}`;
-}
 
 function displayTranslations(translations) {
     const translationsBox = document.getElementById('translationsBox');
