@@ -35,8 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Paste button functionality
     document.getElementById('pasteButton').addEventListener('click', async () => {
         try {
-            const text = await navigator.clipboard.readText();
-            document.getElementById('textInput').value = text;
+            document.getElementById('textInput').value = await navigator.clipboard.readText();
         } catch (err) {
             console.error('Failed to read clipboard contents: ', err);
             alert('Failed to paste from clipboard.');
@@ -155,7 +154,6 @@ async function handleTranslation() {
     }
 }
 
-
 document.getElementById('generateButton').addEventListener('click', () => {
     // Clear cache for a new translation
     cachedTranslations = {};
@@ -163,7 +161,6 @@ document.getElementById('generateButton').addEventListener('click', () => {
 });
 
 document.getElementById('retryButton').addEventListener('click', handleTranslation);
-
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -262,7 +259,9 @@ async function fetchTranslations(wordTokens) {
         try {
             const response = await fetch(`https://latincheats.stormcph-dk.workers.dev/lateinme/json?q=${encodeURIComponent(wordToFetch)}`);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                console.log("HTTP error", response.status);
+                alert("An error occurred while fetching translations. Please try again later. Error code: " + response.status);
+                return;
             }
             const data = await response.json();
 
@@ -293,7 +292,6 @@ async function fetchTranslations(wordTokens) {
     }
     return translationsCache;
 }
-
 
 async function promptAI(prompt) {
     const apiKey = getCookie('apiKey');
@@ -339,13 +337,13 @@ The JSON object includes:
    - "punctuation": The concluding punctuation for that sentence.
 
 Your task is to perform a high-quality translation into ${lang} by following these steps:
-1.  Deconstruct compound words. For a word with multiple "entries", like "servaque", you must understand it's composed of "serva" and "que".
-2.  Analyze the "formAnalysis" for each entry to understand its grammatical role. This is the most important clue.
-3.  Select the most contextually appropriate meaning from the "translations" array for each component.
-4. If the extra context contains specific instructions, consider them while translating.
-5. If the extra context includes word translations, prioritize those meanings.
-6.  Construct a fluent, grammatically correct sentence in ${lang}, adding necessary words (articles, helper verbs) that are implied in Latin.
-7.  Maintain the original sentence structure and apply the original punctuation.
+1. Deconstruct compound words. For a word with multiple "entries", like "servaque", you must understand it's composed of "serva" and "que".
+2. Analyze the "formAnalysis" for each entry to understand its grammatical role. This is the most important clue.
+3. Select the most contextually appropriate meaning from the "translations" array for each component.
+4. If the extra context contains specific instructions or notes, consider them while translating.
+5. If the extra context includes word translations, ALWAYS prioritize those meanings.
+6. Construct a fluent, grammatically correct sentence in ${lang}, adding necessary words (articles, helper verbs) that are implied in Latin.
+7. Maintain the original sentence structure and apply the original punctuation.
 
 User has provided this extra context: ${extras || 'None'}
 
@@ -360,7 +358,6 @@ Your final output MUST be a valid JSON object in the following format, with no o
     }
 }`;
 }
-
 
 function displayTranslations(translations) {
     const translationsBox = document.getElementById('translationsBox');
