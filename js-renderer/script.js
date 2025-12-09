@@ -286,6 +286,30 @@ const toColor = (num) => {
     return '#' + Math.floor(num).toString(16).padStart(6, '0');
 };
 
+// javascript
+// Add this helper and API method into `js-renderer/script.js` near the other drawing helpers.
+
+// Helper: convert numeric color (0xRRGGBB or 0xAARRGGBB) to RGBA components
+function colorNumToRGBA(num) {
+    if (typeof num === 'undefined' || num === null) num = 0;
+    const n = Math.floor(num) >>> 0;
+    // If color includes alpha in high byte (0xAARRGGBB) detect by value > 0xFFFFFF
+    let a = 255;
+    let r, g, b;
+    if (n > 0xFFFFFF) {
+        a = (n >>> 24) & 0xFF;
+        r = (n >>> 16) & 0xFF;
+        g = (n >>> 8)  & 0xFF;
+        b = n & 0xFF;
+    } else {
+        r = (n >>> 16) & 0xFF;
+        g = (n >>> 8)  & 0xFF;
+        b = n & 0xFF;
+    }
+    return { r, g, b, a };
+}
+
+
 const api = {
     // Input API
     isKeyPressed: (key) => keysPressed.has(key),
@@ -304,6 +328,72 @@ const api = {
     drawLine: (x1, y1, x2, y2, th, c) => {
         ctx.strokeStyle = toColor(c); ctx.lineWidth = th; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    },
+    drawGradient: (x, y, w, h, colTL, colTR, colBR, colBL) => {
+        // clamp integer pixel sizes for the offscreen canvas
+        const iw = Math.max(1, Math.floor(Math.abs(w)));
+        const ih = Math.max(1, Math.floor(Math.abs(h)));
+
+        // Create offscreen canvas
+        const off = document.createElement('canvas');
+        off.width = iw;
+        off.height = ih;
+        const offCtx = off.getContext('2d');
+        const img = offCtx.createImageData(iw, ih);
+        const data = img.data;
+
+        const cTL = colorNumToRGBA(colTL);
+        const cTR = colorNumToRGBA(colTR);
+        const cBR = colorNumToRGBA(colBR);
+        const cBL = colorNumToRGBA(colBL);
+
+        // Bilinear interpolate per pixel
+        for (let j = 0; j < ih; j++) {
+            const v = (ih === 1) ? 0 : j / (ih - 1);
+            const invV = 1 - v;
+            for (let i = 0; i < iw; i++) {
+                const u = (iw === 1) ? 0 : i / (iw - 1);
+                const invU = 1 - u;
+
+                // weights for corners: TL*(1-u)*(1-v), TR*u*(1-v), BR*u*v, BL*(1-u)*v
+                const r = Math.round(
+                    cTL.r * invU * invV +
+                    cTR.r * u * invV +
+                    cBR.r * u * v +
+                    cBL.r * invU * v
+                );
+                const g = Math.round(
+                    cTL.g * invU * invV +
+                    cTR.g * u * invV +
+                    cBR.g * u * v +
+                    cBL.g * invU * v
+                );
+                const b = Math.round(
+                    cTL.b * invU * invV +
+                    cTR.b * u * invV +
+                    cBR.b * u * v +
+                    cBL.b * invU * v
+                );
+                const a = Math.round(
+                    cTL.a * invU * invV +
+                    cTR.a * u * invV +
+                    cBR.a * u * v +
+                    cBL.a * invU * v
+                );
+
+                const idx = (j * iw + i) * 4;
+                data[idx] = r;
+                data[idx + 1] = g;
+                data[idx + 2] = b;
+                data[idx + 3] = a;
+            }
+        }
+
+        offCtx.putImageData(img, 0, 0);
+
+        // Draw offscreen onto main canvas at requested position and size
+        // ctx is the main canvas 2D context already in scope
+        ctx.drawImage(off, x, y, w, h);
     },
     width: () => {
         const dpr = window.devicePixelRatio || 1;
@@ -360,7 +450,7 @@ function reloadEngine() {
             "use strict";
             const {
                 drawString, drawRect, drawRoundedRect, drawCircle, drawLine,
-                clear, isKeyPressed, sin, cos, PI, Animation, Easing, width, height
+                clear, isKeyPressed, sin, cos, PI, Animation, Easing, width, height, drawGradient
             } = api;
 
             ${rawCode}

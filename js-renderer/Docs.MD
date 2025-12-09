@@ -45,6 +45,7 @@ All coordinates are in pixels. **Colors** are defined as Hex Integers (e.g., `0x
 | **`drawRoundedRect(x, y, w, h, r, color)`**  | Draws a rectangle with rounded corners (radius `r`).     |
 | **`drawCircle(x, y, radius, color)`**        | Draws a solid circle.                                    |
 | **`drawLine(x1, y1, x2, y2, thick, color)`** | Draws a line between two points with specific thickness. |
+| **`drawGradient(x, y, w, h, colTL, colTR, colBR, colBL)`** | Draws a gradient with colors in each corner.             |
 | **`width()`**                                | Gets the width of the canvas.                            |
 | **`height()`**                               | Gets the height of the canvas.                           |
 
