@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Render Engine + Input</title>
+
+    <!-- Load Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-twilight.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="container">
+    <div id="editor-pane">
+        <div id="editor">// Initializing...</div>
+        <div id="controls">
+            <button onclick="reloadEngine()">RERUN code >></button>
+        </div>
+    </div>
+
+    <div id="divider" role="separator" aria-orientation="vertical" tabindex="0"></div>
+
+    <div id="canvas-pane">
+        <div id="input-hint">Click canvas to focus for keyboard input</div>
+        <canvas id="screen" tabindex="1"></canvas>
+        <div id="error-log"></div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
