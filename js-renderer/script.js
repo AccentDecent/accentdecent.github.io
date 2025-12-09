@@ -309,6 +309,66 @@ function colorNumToRGBA(num) {
     return { r, g, b, a };
 }
 
+// --- NEW: Image Caching System ---
+const imageCache = new Map();
+
+function getImageFromCache(url) {
+    if (!imageCache.has(url)) {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; // Attempt to handle CORS
+        img.src = url;
+
+        const entry = { img: img, loaded: false };
+        imageCache.set(url, entry);
+
+        img.onload = () => { entry.loaded = true; };
+        img.onerror = () => { console.error("Failed to load image:", url); };
+
+        return entry;
+    }
+    return imageCache.get(url);
+}
+
+function generateGradientTexture(w, h, colTL, colTR, colBR, colBL) {
+    // clamp integer pixel sizes
+    const iw = Math.max(1, Math.floor(Math.abs(w)));
+    const ih = Math.max(1, Math.floor(Math.abs(h)));
+
+    const off = document.createElement('canvas');
+    off.width = iw;
+    off.height = ih;
+    const offCtx = off.getContext('2d');
+    const img = offCtx.createImageData(iw, ih);
+    const data = img.data;
+
+    const cTL = colorNumToRGBA(colTL);
+    const cTR = colorNumToRGBA(colTR);
+    const cBR = colorNumToRGBA(colBR);
+    const cBL = colorNumToRGBA(colBL);
+
+    // Bilinear interpolate per pixel
+    for (let j = 0; j < ih; j++) {
+        const v = (ih === 1) ? 0 : j / (ih - 1);
+        const invV = 1 - v;
+        for (let i = 0; i < iw; i++) {
+            const u = (iw === 1) ? 0 : i / (iw - 1);
+            const invU = 1 - u;
+
+            const r = (cTL.r * invU * invV + cTR.r * u * invV + cBR.r * u * v + cBL.r * invU * v);
+            const g = (cTL.g * invU * invV + cTR.g * u * invV + cBR.g * u * v + cBL.g * invU * v);
+            const b = (cTL.b * invU * invV + cTR.b * u * invV + cBR.b * u * v + cBL.b * invU * v);
+            const a = (cTL.a * invU * invV + cTR.a * u * invV + cBR.a * u * v + cBL.a * invU * v);
+
+            const idx = (j * iw + i) * 4;
+            data[idx] = r;
+            data[idx + 1] = g;
+            data[idx + 2] = b;
+            data[idx + 3] = a;
+        }
+    }
+    offCtx.putImageData(img, 0, 0);
+    return off;
+}
 
 const api = {
     // Input API
@@ -330,71 +390,51 @@ const api = {
         ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
     },
     drawGradient: (x, y, w, h, colTL, colTR, colBR, colBL) => {
-        // clamp integer pixel sizes for the offscreen canvas
-        const iw = Math.max(1, Math.floor(Math.abs(w)));
-        const ih = Math.max(1, Math.floor(Math.abs(h)));
-
-        // Create offscreen canvas
-        const off = document.createElement('canvas');
-        off.width = iw;
-        off.height = ih;
-        const offCtx = off.getContext('2d');
-        const img = offCtx.createImageData(iw, ih);
-        const data = img.data;
-
-        const cTL = colorNumToRGBA(colTL);
-        const cTR = colorNumToRGBA(colTR);
-        const cBR = colorNumToRGBA(colBR);
-        const cBL = colorNumToRGBA(colBL);
-
-        // Bilinear interpolate per pixel
-        for (let j = 0; j < ih; j++) {
-            const v = (ih === 1) ? 0 : j / (ih - 1);
-            const invV = 1 - v;
-            for (let i = 0; i < iw; i++) {
-                const u = (iw === 1) ? 0 : i / (iw - 1);
-                const invU = 1 - u;
-
-                // weights for corners: TL*(1-u)*(1-v), TR*u*(1-v), BR*u*v, BL*(1-u)*v
-                const r = Math.round(
-                    cTL.r * invU * invV +
-                    cTR.r * u * invV +
-                    cBR.r * u * v +
-                    cBL.r * invU * v
-                );
-                const g = Math.round(
-                    cTL.g * invU * invV +
-                    cTR.g * u * invV +
-                    cBR.g * u * v +
-                    cBL.g * invU * v
-                );
-                const b = Math.round(
-                    cTL.b * invU * invV +
-                    cTR.b * u * invV +
-                    cBR.b * u * v +
-                    cBL.b * invU * v
-                );
-                const a = Math.round(
-                    cTL.a * invU * invV +
-                    cTR.a * u * invV +
-                    cBR.a * u * v +
-                    cBL.a * invU * v
-                );
-
-                const idx = (j * iw + i) * 4;
-                data[idx] = r;
-                data[idx + 1] = g;
-                data[idx + 2] = b;
-                data[idx + 3] = a;
-            }
-        }
-
-        offCtx.putImageData(img, 0, 0);
-
-        // Draw offscreen onto main canvas at requested position and size
-        // ctx is the main canvas 2D context already in scope
-        ctx.drawImage(off, x, y, w, h);
+        const texture = generateGradientTexture(w, h, colTL, colTR, colBR, colBL);
+        ctx.drawImage(texture, x, y, w, h);
     },
+    drawRoundedGradient: (x, y, w, h, colTL, colTR, colBR, colBL, radii) => {
+        const texture = generateGradientTexture(w, h, colTL, colTR, colBR, colBL);
+
+        ctx.save();
+        ctx.beginPath();
+        if(typeof ctx.roundRect === 'function') {
+            ctx.roundRect(x, y, w, h, radii);
+        } else {
+            // Fallback for browsers without roundRect support (just draws square)
+            ctx.rect(x, y, w, h);
+        }
+        ctx.clip(); // Clip drawing to the rounded shape
+        ctx.drawImage(texture, x, y, w, h);
+        ctx.restore();
+    },
+    setBackgroundImage: (url) => {
+        const entry = getImageFromCache(url);
+        if (entry.loaded) {
+            ctx.drawImage(entry.img, 0, 0, canvas.width, canvas.height);
+        }
+    },
+    drawImage: (url, x, y, w, h) => {
+        const entry = getImageFromCache(url);
+        if (entry.loaded) {
+            ctx.drawImage(entry.img, x, y, w, h);
+        }
+    },
+
+    setShadow: (radius, color, offX = 0, offY = 0) => {
+        ctx.shadowBlur = radius;
+        ctx.shadowColor = (radius > 0) ? toColor(color) : 'transparent';
+        ctx.shadowOffsetX = offX;
+        ctx.shadowOffsetY = offY;
+    },
+    setBlur: (radius) => {
+        if (radius > 0) {
+            ctx.filter = `blur(${radius}px)`;
+        } else {
+            ctx.filter = 'none';
+        }
+    },
+
     width: () => {
         const dpr = window.devicePixelRatio || 1;
         return canvas.width / dpr;
@@ -450,7 +490,7 @@ function reloadEngine() {
             "use strict";
             const {
                 drawString, drawRect, drawRoundedRect, drawCircle, drawLine,
-                clear, isKeyPressed, sin, cos, PI, Animation, Easing, width, height, drawGradient
+                clear, isKeyPressed, sin, cos, PI, Animation, Easing, width, height, drawGradient, drawRoundedGradient, setBackgroundImage, drawImage, setShadow, setBlur
             } = api;
 
             ${rawCode}

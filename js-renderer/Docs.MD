@@ -32,22 +32,29 @@ The main game loop.
 An event listener that triggers once per keystroke.
 *   **`key`**: A string representing the key (e.g., `" "`, `"ArrowUp"`, `"a"`, `"Enter"`).
 
+Here is the updated documentation section including the new gradient and image functions.
+
 ---
 
 ## 2. Graphics API
 All coordinates are in pixels. **Colors** are defined as Hex Integers (e.g., `0xFF0000` is Red), not strings.
 
-| Function                                     | Description                                              |
-|:---------------------------------------------|:---------------------------------------------------------|
-| **`clear(color)`**                           | Fills the entire canvas with the specified color.        |
-| **`drawString(x, y, text, color)`**          | Draws text at coordinates (x, y).                        |
-| **`drawRect(x, y, w, h, color)`**            | Draws a solid rectangle.                                 |
-| **`drawRoundedRect(x, y, w, h, r, color)`**  | Draws a rectangle with rounded corners (radius `r`).     |
-| **`drawCircle(x, y, radius, color)`**        | Draws a solid circle.                                    |
+| Function | Description |
+|:---|:---|
+| **`clear(color)`** | Fills the entire canvas with the specified color. |
+| **`setShadow(radius, color, offX, offY)`** | Sets a blurred glow/shadow behind subsequent shapes. Set radius to 0 to disable. |
+| **`setBlur(radius)`** | Applies a blur filter to the shape itself. Useful for out-of-focus effects. Set 0 to disable. |
+| **`drawString(x, y, text, color)`** | Draws text at coordinates (x, y). |
+| **`drawRect(x, y, w, h, color)`** | Draws a solid rectangle. |
+| **`drawRoundedRect(x, y, w, h, r, color)`** | Draws a rectangle with rounded corners (radius `r`). |
+| **`drawCircle(x, y, radius, color)`** | Draws a solid circle. |
 | **`drawLine(x1, y1, x2, y2, thick, color)`** | Draws a line between two points with specific thickness. |
-| **`drawGradient(x, y, w, h, colTL, colTR, colBR, colBL)`** | Draws a gradient with colors in each corner.             |
-| **`width()`**                                | Gets the width of the canvas.                            |
-| **`height()`**                               | Gets the height of the canvas.                           |
+| **`drawGradient(x, y, w, h, colTL, colTR, colBR, colBL)`** | Draws a gradient with specific colors in each corner (Top-Left, Top-Right, Bottom-Right, Bottom-Left). |
+| **`drawRoundedGradient(x, y, w, h, colTL, colTR, colBR, colBL, radii)`** | Draws a gradient clipped to a rounded rectangle. `radii` can be a single number or an array `[tl, tr, br, bl]`. |
+| **`setBackgroundImage(url)`** | Fills the entire canvas with an image from the specified URL. |
+| **`drawImage(url, x, y, w, h)`** | Draws an image from a URL at the specified position and size. |
+| **`width()`** | Gets the current width of the canvas. |
+| **`height()`** | Gets the current height of the canvas. |
 
 ---
 
