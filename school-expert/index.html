@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Expert - AI Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- PDF.js for client-side PDF text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+</head>
+<body>
+<div id="drop-zone" class="drop-overlay hidden">
+    <div class="drop-message"><i class="fas fa-file-upload"></i> Drop files to upload</div>
+</div>
+<div class="app-container">
+    <!-- Collapsible Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <button class="new-chat-btn" id="new-chat-btn">
+            <i class="fas fa-plus"></i> New Chat
+        </button>
+        <div class="chat-history">
+            <p class="history-title">Recent</p>
+            <div class="history-item"><i class="far fa-message"></i> Cellular Respiration</div>
+            <div class="history-item"><i class="far fa-message"></i> WW2 Summary</div>
+        </div>
+        <div class="sidebar-footer">
+            <button class="settings-btn" id="open-settings-btn">
+                <i class="fas fa-cog"></i> Settings
+            </button>
+            <div class="user-profile">
+                <div class="avatar"><i class="fas fa-user"></i></div>
+                <span>Student</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="main-content">
+        <header>
+            <button class="toggle-btn" id="toggle-btn" title="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2>School Expert</h2>
+        </header>
+
+        <div class="chat-window" id="chat-window">
+            <div class="message ai">
+                <div class="avatar"><i class="fas fa-robot"></i></div>
+                <div class="content">
+                    Hello! I'm your School Expert AI. Upload your study materials and click the magic wand to create a custom study guide (Lernzettel), or just ask me questions!
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <!-- Uploaded Files Display -->
+            <div id="file-badges-container" class="file-badges"></div>
+
+            <div class="input-wrapper">
+                <button id="attach-btn" title="Attach Document" class="action-btn">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="file" id="file-input" accept=".txt,.md,.pdf" multiple hidden>
+
+                <textarea id="chat-input" placeholder="Ask a question..." rows="1"></textarea>
+
+                <!-- Magic Button is now ALWAYS enabled to trigger the modal -->
+                <button id="generate-notes-btn" title="Generate Lernzettel (Notes)" class="action-btn magic-btn">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                </button>
+                <button id="send-btn" disabled><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <p class="disclaimer">AI can make mistakes. Verify important facts with your textbooks.</p>
+        </div>
+    </main>
+
+    <!-- Lernzettel Generation Workflow Modal -->
+    <div id="lz-modal" class="modal hidden">
+        <div class="modal-content lz-view">
+            <div class="modal-header">
+                <h3><i class="fas fa-wand-magic-sparkles"></i> Generate Lernzettel</h3>
+                <button id="close-lz-btn" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Step 1: Upload Documents -->
+                <div id="lz-step-1" class="lz-step">
+                    <h4>1. Upload Study Materials</h4>
+                    <p class="text-muted">Please attach all PDFs or text files you want to include in this study guide.</p>
+                    <div id="lz-file-badges" class="file-badges lz-files-area"></div>
+                    <button id="lz-attach-btn" class="secondary-btn"><i class="fas fa-plus"></i> Add Files</button>
+                    <hr>
+                    <button id="lz-start-outline-btn" class="primary-btn" disabled>Next: Create Syllabus Outline <i class="fas fa-arrow-right"></i></button>
+                </div>
+
+                <!-- Step 2: Loading Outline -->
+                <div id="lz-step-2" class="lz-step hidden center-step">
+                    <span class="loader large-loader"></span>
+                    <p>Analyzing documents and building a comprehensive syllabus...</p>
+                </div>
+
+                <!-- Step 3: Reorder & Feedback -->
+                <div id="lz-step-3" class="lz-step hidden">
+                    <h4>2. Customize Outline</h4>
+                    <p class="text-muted">Select the topics to include. Use the arrows to reorder their priority.</p>
+                    <div id="lz-outline-container" class="outline-container">
+                        <!-- Outline list injected here -->
+                    </div>
+                    <hr>
+                    <button id="lz-generate-doc-btn" class="primary-btn magic-bg">Generate Final Document <i class="fas fa-wand-magic-sparkles"></i></button>
+                </div>
+
+                <!-- Step 4: Generating Chunks -->
+                <div id="lz-step-4" class="lz-step hidden center-step">
+                    <span class="loader large-loader"></span>
+                    <p id="lz-progress-text">Writing deep notes for section...</p>
+                    <div class="progress-bar-container">
+                        <div id="lz-progress-bar" class="progress-bar"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sliders-h"></i> AI Settings</h3>
+                <button id="close-settings-btn" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>AI Provider</label>
+                    <select id="setting-provider">
+                        <option value="gemini">Google Gemini</option>
+                        <option value="openai">OpenAI</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="password" id="setting-api-key" placeholder="Enter API Key">
+                    <small>Stored locally in your browser.</small>
+                </div>
+                <div class="form-group">
+                    <label>Summarize Model (Flash/Lite - Stage 1)</label>
+                    <input type="text" id="setting-flash-model" value="gemini-2.5-flash">
+                    <small>Used for quick outlining and QA.</small>
+                </div>
+                <div class="form-group">
+                    <label>Thinking Model (Pro - Stage 2)</label>
+                    <input type="text" id="setting-pro-model" value="gemini-2.5-pro">
+                    <small>Used for deep generation and chunking.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-settings-btn" class="primary-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Viewer Modal -->
+    <div id="document-modal" class="modal hidden">
+        <div class="modal-content document-view">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-alt"></i> Full Study Guide</h3>
+                <div class="doc-actions">
+                    <button id="download-doc-btn"><i class="fas fa-download"></i> Download .MD</button>
+                    <button id="close-doc-btn" class="close-btn"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="modal-body markdown-body" id="document-render-area"></div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

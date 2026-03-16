@@ -6,155 +6,264 @@ editor.setShowPrintMargin(false);
 editor.session.setUseWorker(false);
 
 const defaultCode = `
-// Simple Snake game
+// ==========================================
+// JS RENDER ENGINE: ULTIMATE SHOWCASE
+// ==========================================
+// Controls:
+// [N] Next Screen
+// [P] Previous Screen
+// [Arrows/Space] Interact in specific screens
+// ==========================================
 
-// Config / state
-const CELL = 20;
-let cols = Math.max(10, Math.floor(width() / CELL));
-let rows = Math.max(10, Math.floor(height() / CELL));
-let snake = [];
-let dir = {x: 1, y: 0};         // current direction
-let nextDir = null;            // queued direction (applied on next tick)
-let food = null;
-let tickInterval = 0.12;       // seconds per move
-let tickTimer = 0;
-let score = 0;
-let gameOver = false;
+// --- ASSETS ---
+const BG_URL = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"; 
+const ICON_URL = "https://cdn-icons-png.flaticon.com/512/4712/4712035.png";
 
-function placeFood() {
-    // place food in a random empty cell
-    let attempts = 0;
-    while (attempts < 1000) {
-        attempts++;
-        const fx = Math.floor(Math.random() * cols);
-        const fy = Math.floor(Math.random() * rows);
-        let clash = snake.some(s => s.x === fx && s.y === fy);
-        if (!clash) {
-            food = {x: fx, y: fy};
-            return;
-        }
-    }
-    // fallback: if board full, set food null
-    food = null;
-}
+// --- STATE ---
+let currentScreen = 0;
+const MAX_SCREENS = 4;
 
-function init() {
-    cols = Math.max(10, Math.floor(width() / CELL));
-    rows = Math.max(10, Math.floor(height() / CELL));
-    const startX = Math.floor(cols / 2);
-    const startY = Math.floor(rows / 2);
-    snake = [
-        {x: startX - 1, y: startY},
-        {x: startX,     y: startY},
-    ];
-    dir = {x: 1, y: 0};
-    nextDir = null;
-    tickTimer = 0;
-    score = 0;
-    gameOver = false;
-    placeFood();
-}
+// Transition Animation (Slide offset)
+// FIX: Changed from 'const' to 'let' so we can modify it later
+let transitionAnim = Animation.seconds(0.8, 0, 0, Easing.ELASTIC_OUT);
 
-// helper to test collision with snake body
-function collidesWithSnake(x, y) {
-    return snake.some(s => s.x === x && s.y === y);
-}
+// --- SCREEN 1 STATE: Primitives & Math ---
+let shapes = [];
+for(let i=0; i<10; i++) shapes.push({ off: i * 0.5, speed: 1 + i * 0.2 });
 
-init();
+// --- SCREEN 2 STATE: Input & Physics ---
+let player = { x: 300, y: 300, vy: 0, isGrounded: false };
+const GRAVITY = 1200;
+const JUMP_FORCE = -500;
+const SPEED = 250;
 
+// --- SCREEN 3 STATE: Gradients & Glow ---
+let glowAnim = Animation.seconds(1.0, 10, 40, Easing.SINE_IN_OUT);
+
+// ==========================================
+// MAIN LOOP
+// ==========================================
 void onRender(dt, time) {
-    // Keep grid in sync if canvas size changed (engine will reload on resize normally,
-    // but ensure cols/rows are reasonable)
-    cols = Math.max(10, Math.floor(width() / CELL));
-    rows = Math.max(10, Math.floor(height() / CELL));
+    clear(0x050505);
 
-    // Background
-    clear(0x0b0b0b);
+    // 1. Calculate Transition Slide
+    let slideOffset = transitionAnim.getValue();
+    
+    // 2. Render the current screen based on index
+    // We apply the slideOffset to 'x' coordinates to create the slide effect
+    
+    if (currentScreen === 0) renderPrimitives(dt, time, slideOffset);
+    if (currentScreen === 1) renderInputPhysics(dt, time, slideOffset);
+    if (currentScreen === 2) renderVisuals(dt, time, slideOffset);
+    if (currentScreen === 3) renderImagesFilters(dt, time, slideOffset);
 
-    // If game over, show message and return
-    if (gameOver) {
-        drawString(20, 40, "Game Over - Press R to Restart", 0xFFFFFF);
-        drawString(20, 70, "Score: " + score, 0xFFFFFF);
-        return;
+    // 3. Draw Global HUD
+    drawUI(time);
+}
+
+// ==========================================
+// SCREEN 1: PRIMITIVES & MATH
+// ==========================================
+function renderPrimitives(dt, time, offX) {
+    let cx = (width() / 2) + offX;
+    let cy = height() / 2;
+
+    // A. Rotating Pattern (Line & Circle)
+    for (let i = 0; i < shapes.length; i++) {
+        let s = shapes[i];
+        let angle = time * s.speed + s.off;
+        let r = 50 + (i * 15);
+        
+        let x = cx + Math.cos(angle) * r;
+        let y = cy + Math.sin(angle) * r;
+        
+        // Dynamic Color based on angle
+        let col = hsvToHex((angle % (Math.PI*2)) / (Math.PI*2), 1, 1);
+        
+        drawLine(cx, cy, x, y, 2, 0x222222);
+        drawCircle(x, y, 5, col);
     }
 
-    // Tick logic
-    tickTimer += dt;
-    while (tickTimer >= tickInterval) {
-        tickTimer -= tickInterval;
+    // B. Floating Text
+    let hover = Math.sin(time * 3) * 10;
+    drawRoundedRect(cx - 150, 50 + hover, 300, 60, 10, 0x222222);
+    drawString(cx - 130, 85 + hover, "1. Primitives & Math", 0xFFFFFF);
+    drawString(cx - 100, 350, "Sin/Cos/Circle/Line", 0x666666);
+}
 
-        // Apply queued direction if present and not reversing
-        if (nextDir) {
-            if (!(nextDir.x === -dir.x && nextDir.y === -dir.y)) {
-                dir = nextDir;
-            }
-            nextDir = null;
-        }
+// ==========================================
+// SCREEN 2: INPUT & PHYSICS
+// ==========================================
+function renderInputPhysics(dt, time, offX) {
+    let baseX = offX; // Offset for screen transition
 
-        const head = snake[snake.length - 1];
-        const nx = head.x + dir.x;
-        const ny = head.y + dir.y;
+    // A. Input Handling
+    if (isKeyPressed("ArrowLeft")) player.x -= SPEED * dt;
+    if (isKeyPressed("ArrowRight")) player.x += SPEED * dt;
 
-        // wall collision
-        if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) {
-            gameOver = true;
-            break;
-        }
-        // self collision
-        if (collidesWithSnake(nx, ny)) {
-            gameOver = true;
-            break;
-        }
+    // B. Physics (Gravity)
+    player.vy += GRAVITY * dt;
+    player.y += player.vy * dt;
 
-        // move: add new head
-        snake.push({x: nx, y: ny});
-
-        // eat food?
-        if (food && nx === food.x && ny === food.y) {
-            score += 1;
-            placeFood();
-        } else {
-            // remove tail
-            snake.shift();
-        }
+    // Floor Collision
+    let floorY = 350;
+    if (player.y > floorY) {
+        player.y = floorY;
+        player.vy = 0;
+        player.isGrounded = true;
     }
 
-    // Draw food
-    if (food) {
-        drawRect(food.x * CELL, food.y * CELL, CELL, CELL, 0xFF3333);
-    }
+    // C. Draw Player
+    // Squash and stretch effect based on velocity
+    let stretch = 1 + (Math.abs(player.vy) / 2000);
+    let w = 40 / stretch;
+    let h = 40 * stretch;
+    
+    // Shadow Blur for player
+    setShadow(20, 0x00AAFF);
+    drawRoundedRect(baseX + player.x - (w/2), player.y - h, w, h, 8, 0x00AAFF);
+    setShadow(0, 0); // Reset
 
-    // Draw snake
-    for (let i = 0; i < snake.length; i++) {
-        const s = snake[i];
-        const color = (i === snake.length - 1) ? 0x88FF88 : 0x33CC33;
-        drawRect(s.x * CELL, s.y * CELL, CELL - 1, CELL - 1, color);
-    }
+    // Draw Floor
+    drawRect(baseX, floorY, width(), height() - floorY, 0x333333);
 
-    // HUD
-    drawString(10, 20, "Score: " + score, 0xFFFFFF);
-    drawString(10, 40, "Controls: Arrows / WASD. R to restart.", 0xCCCCCC);
+    // Text
+    drawString(baseX + 20, 50, "2. Input & Physics", 0xFFFFFF);
+    drawString(baseX + 20, 80, "Arrows to Move, SPACE to Jump", 0xAAAAAA);
+}
+
+// ==========================================
+// SCREEN 3: ADVANCED VISUALS
+// ==========================================
+function renderVisuals(dt, time, offX) {
+    let cx = (width() / 2) + offX;
+    
+    // A. Animated Glow
+    if (glowAnim.isDone()) {
+        // Ping pong animation
+        glowAnim.setEnd(glowAnim.getValue() > 20 ? 10 : 40);
+    }
+    let blurVal = glowAnim.getValue();
+
+    // B. Gradient Card (The "RGB Box")
+    let cardW = 300;
+    let cardH = 180;
+    let cardX = cx - (cardW / 2);
+    let cardY = 110;
+
+    // Animated colors
+    let t = time * 0.5;
+    let c1 = hsvToHex(t, 1, 1);
+    let c2 = hsvToHex(t + 0.3, 1, 1);
+    let c3 = hsvToHex(t + 0.6, 1, 1);
+    let c4 = hsvToHex(t + 0.9, 1, 1);
+
+    // GLOW BEHIND
+    setShadow(blurVal, c1);
+    drawRoundedGradient(cardX, cardY, cardW, cardH, c1, c2, c3, c4, 20);
+    setShadow(0, 0);
+
+    // Inner Content
+    drawRoundedRect(cardX + 5, cardY + 5, cardW - 10, cardH - 10, 15, 0x111111);
+    drawString(cardX + 20, cardY + 40, "Gradient & Shadow", 0xFFFFFF);
+    
+    // C. Gradient Bar
+    let barW = 200;
+    drawGradient(cx - 100, 320, barW, 20, 0xFF0000, 0xFFFF00, 0x00FF00, 0x0000FF);
+    drawString(cx - 60, 360, "Linear Interpolation", 0x888888);
+}
+
+// ==========================================
+// SCREEN 4: IMAGES & FILTERS
+// ==========================================
+function renderImagesFilters(dt, time, offX) {
+    let baseX = offX;
+
+    // A. Background Image
+    // We render it at baseX so it slides with the screen
+    drawImage(BG_URL, baseX, 0, width(), height());
+
+    // B. Glassmorphism Panel (Blur behind content)
+    let boxX = baseX + 100;
+    let boxY = 100;
+    
+    // Semi-transparent dark box
+    drawRoundedRect(boxX, boxY, 400, 200, 20, 0x000000); 
+    
+    // C. Icon with Blur Filter
+    // 1. Sharp Icon
+    drawImage(ICON_URL, boxX + 50, boxY + 50, 100, 100);
+    drawString(boxX + 65, boxY + 170, "Sharp", 0xFFFFFF);
+
+    // 2. Blurred Icon (using setBlur)
+    let blurAmount = 10 + Math.sin(time * 4) * 5; // Pulse blur
+    setBlur(Math.abs(blurAmount));
+    drawImage(ICON_URL, boxX + 250, boxY + 50, 100, 100);
+    setBlur(0); // TURN OFF BLUR
+    drawString(boxX + 265, boxY + 170, "Blurred", 0xFFFFFF);
+
+    drawString(baseX + 20, 50, "4. Images & Filters", 0xFFFFFF);
+}
+
+// ==========================================
+// UTILS & INPUT
+// ==========================================
+
+function drawUI(time) {
+    // Bottom Nav Bar
+    drawRect(0, height() - 40, width(), 40, 0x000000);
+    
+    // Dots
+    let cx = width() / 2;
+    for(let i=0; i<MAX_SCREENS; i++) {
+        let col = (i === currentScreen) ? 0x00FF00 : 0x555555;
+        drawCircle(cx - 30 + (i * 20), height() - 20, 6, col);
+    }
+    
+    // Helper Text
+    let blink = Math.floor(time * 2) % 2 === 0;
+    if(blink) drawString(width() - 150, height() - 15, "Press 'N' ->", 0x555555);
 }
 
 void onKey(key) {
-    // Direction keys
-    if (key === "ArrowUp" || key === "w" || key === "W") {
-        nextDir = {x: 0, y: -1};
+    // Screen Navigation
+    if (key === "n" || key === "N") {
+        if (currentScreen < MAX_SCREENS - 1) {
+            currentScreen++;
+            // Create a NEW animation for the transition
+            transitionAnim = Animation.seconds(0.8, width(), 0, Easing.ELASTIC_OUT);
+            
+            // Reset Player for Screen 2
+            if(currentScreen === 1) { player.y = 0; player.vy = 0; }
+        }
     }
-    if (key === "ArrowDown" || key === "s" || key === "S") {
-        nextDir = {x: 0, y: 1};
-    }
-    if (key === "ArrowLeft" || key === "a" || key === "A") {
-        nextDir = {x: -1, y: 0};
-    }
-    if (key === "ArrowRight" || key === "d" || key === "D") {
-        nextDir = {x: 1, y: 0};
+    
+    if (key === "p" || key === "P") {
+        if (currentScreen > 0) {
+            currentScreen--;
+            transitionAnim = Animation.seconds(0.8, -width(), 0, Easing.ELASTIC_OUT);
+        }
     }
 
-    // Restart
-    if (key === "r" || key === "R") {
-        init();
+    // Player Jump (Screen 2)
+    if (currentScreen === 1 && key === " " && player.isGrounded) {
+        player.vy = JUMP_FORCE;
+        player.isGrounded = false;
+        // Animation flare
+        setShadow(30, 0xFFFFFF); // Flash effect handled in render
     }
+}
+
+// HSV Helper
+function hsvToHex(h, s, v) {
+    let r, g, b, i, f, p, q, t;
+    i = Math.floor(h * 6); f = h * 6 - i; p = v * (1 - s); q = v * (1 - f * s); t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break; case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break; case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break; case 5: r = v; g = p; b = q; break;
+    }
+    return (Math.floor(r*255)<<16) | (Math.floor(g*255)<<8) | Math.floor(b*255);
 }
 `;
 
