@@ -8,32 +8,73 @@
 <body>
 
     <div class="section">
-        <h1 class="title">Zip File Viewer</h1>
-        <h2 class="subtitle">by AccentDecent</h2>
+        <h1 class="title">AccentDecent</h1>
+        <p class="subtitle">A collection of useful tools, simulations, and experiments.</p>
 
-        <div id="buttonContainer">
-            <button onclick="window.location.href='ChineseTools/index.html'">Chinese Quizlet Set Generator</button>
-            <button onclick="window.location.href='GreekQuizletGen/index.html'">Greek Converter</button>
-            <button onclick="window.location.href='better_latin_translator/index.html'">Latin Translator</button>
-            <button onclick="window.location.href='wikiknow/index.html'">WikiKnow Game</button>
-            <button onclick="window.location.href='Pendulum/index.html'">Pendulum</button>
-            <button onclick="window.location.href='js-renderer/index.html'">Js Renderer</button>
+        <div class="tool-grid">
+            <a href="school-expert/index.html" class="tool-card">
+                <span class="tool-tag">AI Tools - W.I.P.</span>
+                <h3>School Expert</h3>
+                <p>AI-powered study assistant for PDFs and notes. Organize your learning efficiently.</p>
+            </a>
+
+            <a href="better_latin_translator/index.html" class="tool-card">
+                <span class="tool-tag">Language</span>
+                <h3>Better Latin Translator</h3>
+                <p>AI-driven Latin to modern language translator with contextual understanding.</p>
+            </a>
+
+            <a href="GreekQuizletGen/index.html" class="tool-card">
+                <span class="tool-tag">Education</span>
+                <h3>Greek Quizlet Gen</h3>
+                <p>Converts custom notation into Polytonic Greek for Quizlet study sets.</p>
+            </a>
+
+            <a href="ChineseTools/index.html" class="tool-card">
+                <span class="tool-tag">Education</span>
+                <h3>Chinese Tools</h3>
+                <p>Pinyin generator and Quizlet set creator for Chinese language learners.</p>
+            </a>
+
+            <a href="wikiknow/index.html" class="tool-card">
+                <span class="tool-tag">Game</span>
+                <h3>WikiKnow Game</h3>
+                <p>Test your knowledge with an educational game based on Wikipedia definitions.</p>
+            </a>
+
+            <a href="Pendulum/index.html" class="tool-card">
+                <span class="tool-tag">Simulation</span>
+                <h3>Double Pendulum</h3>
+                <p>Interactive physics simulation exploring the chaotic motion of a double pendulum.</p>
+            </a>
+
+            <a href="js-renderer/index.html" class="tool-card">
+                <span class="tool-tag">Developer</span>
+                <h3>JS Renderer</h3>
+                <p>A graphic coding environment with live canvas output for creative coding.</p>
+            </a>
+
+            <a href="latinlearn/dist/index.html" class="tool-card">
+                <span class="tool-tag">Education</span>
+                <h3>Latein Learn</h3>
+                <p>Step by step Latin translation to master the art.</p>
+            </a>
         </div>
 
-        <br>
+        <div class="utils-section">
+            <h2 class="utils-title">File Utilities</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Need to inspect a ZIP file quickly? Use our built-in viewer below.</p>
 
-        <div style="text-align: center">
-            <h1 id="fileName" style="font-size: 4vw; text-align: center;"></h1>
-            <label for="fileInput" class="pick_file_label">Choose File</label>
-            <input type="file" id="fileInput" class="pick_file">
+            <div style="text-align: center">
+                <h1 id="fileName" style="font-size: 2vw; text-align: center; margin-bottom: 20px;"></h1>
+                <label for="fileInput" class="pick_file_label" style="font-size: 1rem;">Choose Zip File</label>
+                <input type="file" id="fileInput" class="pick_file">
+            </div>
+
+            <div id="fileList"></div>
+            <div id="contentDisplay"></div>
+            <button id="backButton">Back</button>
         </div>
-
-
-        <div id="fileList"></div>
-
-        <div id="contentDisplay"></div>
-
-        <button id="backButton">Back</button>
     </div>
 
     <script>

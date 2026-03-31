@@ -1,7 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
 
+:root {
+    --bg-color: #0d0d0d;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-hover-bg: rgba(255, 255, 255, 0.1);
+    --text-primary: rgba(230, 230, 230, 0.95);
+    --text-secondary: rgba(230, 230, 230, 0.7);
+    --accent-color: #2d9ed3;
+    --accent-hover: #45b3e6;
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
 body, html {
     background-color: #0d0d0d;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: "Quicksand", sans-serif;
+    color: var(--text-primary);
 }
 
 body {
@@ -12,66 +28,96 @@ body {
 }
 
 .section {
-    width: 100%;
-    max-width: 800px;
+    width: 90%;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 40px 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-@media (max-width: 800px) {
-    .title {
-        font-size: 20%;
-    }
-
-    .pick_file_label {
-        font-size: 5vw;
-    }
-
-    li {
-        font-size: 100%;
-    }
-
-    button {
-        max-width: 25%;
-    }
-
-    .buttonContainer {
-        display: flex;
-        justify-content: space-between;
-        flex-direction: column;
-    }
-
-    .buttonContainer button {
-        margin: 3px;
-        width: 90%;
-        align-self: center;
-    }
+    height: auto;
+    min-height: 100vh;
 }
 
 .title {
-    font-family: "Quicksand", sans-serif;
-    font-size: 170%;
-    text-align: center;
-    font-weight: 450;
-    /* color: #cccccc; */
-    color: rgba(230, 230, 230, 0.91);
-    line-height: 1;
-    opacity: 0.9;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
 }
 
 .subtitle {
-    font-family: "Quicksand", sans-serif;
-    font-size: 150%;
+    font-size: 1.5rem;
+    margin-bottom: 3rem;
+    color: var(--text-secondary);
+}
+
+/* Tool Grid Styles */
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    width: 100%;
+    margin-bottom: 60px;
+}
+
+.tool-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    background: var(--card-hover-bg);
+    border-color: var(--accent-color);
+}
+
+.tool-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    color: var(--accent-color);
+}
+
+.tool-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.tool-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    background: rgba(45, 158, 211, 0.2);
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    width: fit-content;
+}
+
+/* Utils Section (Zip Viewer) */
+.utils-section {
+    width: 100%;
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
-    font-weight: 450;
-    /* color: #cccccc; */
-    color: rgba(230, 230, 230, 0.91);
-    line-height: 1;
-    opacity: 0.9;
+}
+
+.utils-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
 }
 
 .pick_file {
@@ -117,11 +163,6 @@ li:hover {
     display: none;
 }
 
-.section {
-    width: 70%;
-    height: 100vh;
-}
-
 button {
     font-family: "Quicksand", sans-serif;
     padding: 10px 20px;
@@ -143,4 +184,16 @@ button:hover {
 
 #buttonContainer button {
     margin: 0 10px;
+}
+
+@media (max-width: 800px) {
+    .title {
+        font-size: 2.5rem;
+    }
+    .tool-grid {
+        grid-template-columns: 1fr;
+    }
+    .section {
+        width: 100%;
+    }
 }
