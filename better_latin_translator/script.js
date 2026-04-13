@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(apiKey) {
         document.getElementById('apiKeyInput').value = apiKey;
     }
+
+    const serverApiKey = getCookie('serverApiKey');
+    if(serverApiKey) {
+        document.getElementById('serverApiKeyInput').value = serverApiKey;
+    }
 });
 
 document.getElementById('saveApiKeyButton').addEventListener('click', () => {
@@ -56,6 +61,16 @@ document.getElementById('saveApiKeyButton').addEventListener('click', () => {
         alert('API key saved successfully!');
     } else {
         alert('Please enter a valid API key.');
+    }
+});
+
+document.getElementById('saveServerApiKeyButton').addEventListener('click', () => {
+    const serverApiKey = document.getElementById('serverApiKeyInput').value;
+    if (serverApiKey) {
+        document.cookie = `serverApiKey=${serverApiKey}; path=/; max-age=31536000`; // Save for 1 year
+        alert('Server API key saved successfully!');
+    } else {
+        alert('Please enter a valid Server API key.');
     }
 });
 
@@ -103,10 +118,11 @@ async function handleTranslation() {
             s.words.filter(word => word.trim() && !/^[,:;.!?]$/.test(word))
         );
 
-        displayWords(allWords);
+        const uniqueWords = [...new Set(allWords)];
+        displayWords(uniqueWords);
         // Only fetch new translations if cache is empty (first run)
         if (Object.keys(cachedTranslations).length === 0) {
-            cachedTranslations = await fetchTranslations(allWords);
+            cachedTranslations = await fetchTranslations(uniqueWords);
         }
 
         // Build result object with punctuation markers
@@ -247,48 +263,59 @@ function markWordAsCompleted(word) {
     }
 }
 
-async function fetchTranslations(wordTokens) {
+async function fetchTranslations(uniqueWords) {
     const translationsCache = {};
-    const uniqueWords = [...new Set(wordTokens)];
+    const serverApiKey = getCookie('serverApiKey');
 
-    for (const originalWord of uniqueWords) {
-        // NOTE: We now query with the original word ('servaque'). The `-que` logic is handled by the API.
-        const wordToFetch = originalWord;
+    if (!serverApiKey) {
+        alert('Please enter and save your Server API key first.');
+        return;
+    }
 
-        console.log(`Fetching translation for "${wordToFetch}"`);
-        try {
-            const response = await fetch(`https://latincheats.stormcph-dk.workers.dev/lateinme/json?q=${encodeURIComponent(wordToFetch)}`);
-            if (!response.ok) {
-                console.log("HTTP error", response.status);
-                alert("An error occurred while fetching translations. Please try again later. Error code: " + response.status);
-                return;
+    if (uniqueWords.length === 0) return {};
+
+    console.log(`Fetching translations for ${uniqueWords.length} words`);
+    try {
+        const queryParam = uniqueWords.join(',');
+        // https://accentdecent-utils.corruptionhades.workers.dev
+        const response = await fetch(`https://accentdecent-utils.corruptionhades.workers.dev/latin?type=lateinme&query=${encodeURIComponent(queryParam)}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${serverApiKey}`
             }
-            const data = await response.json();
+        });
 
-            // The API returns an array of possible word objects. We store them all.
-            if (data && data.length > 0) {
+        if (!response.ok) {
+            console.log("HTTP error", response.status);
+            alert("An error occurred while fetching translations. Please try again later. Error code: " + response.status);
+            return {};
+        }
+
+        const data = await response.json();
+
+        // Handle both bulk (object with word keys) and single word (direct array) responses
+        const results = (Array.isArray(data) && uniqueWords.length === 1)
+            ? { [uniqueWords[0]]: data }
+            : (data || {});
+
+        for (const originalWord of uniqueWords) {
+            const wordData = results[originalWord];
+            if (wordData && wordData.length > 0) {
                 translationsCache[originalWord] = {
-                    entries: data.map(entry => ({
-                        word: entry.word || 'Unknown',
-                        translations: entry.translations || [],
-                        formAnalysis: entry.formAnalysis || null
+                    entries: wordData.map(entry => ({
+                        word: entry.form || entry.word || 'Unknown',
+                        translations: entry.translation ? [entry.translation] : (entry.translations || []),
+                        formAnalysis: entry.grammar ? [entry.grammar] : (entry.formAnalysis || null)
                     }))
                 };
             } else {
-                // If no data, still create a valid structure to avoid errors
                 translationsCache[originalWord] = { entries: [] };
             }
             markWordAsCompleted(originalWord);
-        } catch (error) {
-            console.error(`Error fetching translation for ${originalWord}:`, error);
-            translationsCache[originalWord] = {
-                entries: [{
-                    word: 'Error',
-                    translations: ['Translation error'],
-                    formAnalysis: null
-                }]
-            };
         }
+    } catch (error) {
+        console.error(`Error fetching translations:`, error);
+        alert('Failed to connect to the translation server.');
     }
     return translationsCache;
 }

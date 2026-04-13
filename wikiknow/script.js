@@ -22,6 +22,32 @@ let playing = false;
 input.disabled = true;
 input.value = "";
 
+linkText.innerText = "";
+infoText.innerText = "";
+
+document.addEventListener('DOMContentLoaded', () => {
+    const serverApiKey = getCookie('serverApiKey');
+    if(serverApiKey) {
+        document.getElementById('serverApiKeyInput').value = serverApiKey;
+    }
+});
+
+document.getElementById('saveServerApiKeyButton').addEventListener('click', () => {
+    const serverApiKey = document.getElementById('serverApiKeyInput').value;
+    if (serverApiKey) {
+        document.cookie = `serverApiKey=${serverApiKey}; path=/; max-age=31536000`; // Save for 1 year
+        alert('Server API key saved successfully!');
+    } else {
+        alert('Please enter a valid Server API key.');
+    }
+});
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
 playButton.addEventListener("click", async function() {
     await play();
 });
@@ -59,13 +85,24 @@ async function play() {
 }
 
 async function getRandomArticle(){
-    const headers = new Headers();
-    headers.append("Wiki-Header", "random");
+    const serverApiKey = getCookie('serverApiKey');
+    if (!serverApiKey) {
+        alert('Please enter and save your Server API key first.');
+        return;
+    }
 
-    let response = await fetch(`https://latincheats.stormcph-dk.workers.dev/`, {
+    const headers = new Headers();
+    headers.append('Authorization', `Bearer ${serverApiKey}`);
+
+    let response = await fetch(`https://accentdecent-utils.corruptionhades.workers.dev/wiki?query=random`, {
         method: "GET",
         headers: headers
     });
+
+    if (!response.ok) {
+        infoText.innerText = "Error: " + response.status;
+        return;
+    }
 
     let text = await response.text();
 
@@ -88,25 +125,32 @@ async function checkAnswer(answer) {
         return false;
     }
 
+    const serverApiKey = getCookie('serverApiKey');
+    if (!serverApiKey) {
+        alert('Please enter and save your Server API key first.');
+        return false;
+    }
+
     const headers = new Headers();
+    headers.append('Authorization', `Bearer ${serverApiKey}`);
 
-    const json = JSON.stringify(
-        {
-            "answer": answer,
-            "id": linkID
-        }
-    );
+    const queryJson = JSON.stringify({
+        "answer": answer,
+        "id": parseInt(linkID)
+    });
 
-    headers.append("Wiki-Header", json);
-
-    let response = await fetch(`https://latincheats.stormcph-dk.workers.dev/`, {
+    let response = await fetch(`https://accentdecent-utils.corruptionhades.workers.dev/wiki?query=${encodeURIComponent(queryJson)}`, {
         method: "GET",
         headers: headers
     });
 
-    let text = await response.text();
+    if (!response.ok) {
+        infoText.innerText = "Error: " + response.status;
+        return false;
+    }
 
-    let responseJson = JSON.parse(text);
+    let responseText = await response.text();
+    let responseJson = JSON.parse(responseText);
 
     console.log(responseJson);
 

@@ -19,6 +19,29 @@ overrideGen.addEventListener("change", async function() {
   overrideGenID.hidden = !overrideGen.checked;
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const serverApiKey = getCookie('serverApiKey');
+  if(serverApiKey) {
+    document.getElementById('serverApiKeyInput').value = serverApiKey;
+  }
+});
+
+document.getElementById('saveServerApiKeyButton').addEventListener('click', () => {
+  const serverApiKey = document.getElementById('serverApiKeyInput').value;
+  if (serverApiKey) {
+    document.cookie = `serverApiKey=${serverApiKey}; path=/; max-age=31536000`; // Save for 1 year
+    alert('Server API key saved successfully!');
+  } else {
+    alert('Please enter a valid Server API key.');
+  }
+});
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
 document.getElementById('generateButton').addEventListener('click', async function() {
   const inputTextElement = document.getElementById('inputText');
   const outText = document.getElementById('outputText');
@@ -171,101 +194,28 @@ async function test(chinese) {
 }
 
 async function getPinyin(chineseChar) {
-  /*const link = `https://www.purpleculture.net/dictionary-details/?word=${chineseChar}`;
-  const subtitleResponse = await fetch(link);
-  const subtitleBody = await subtitleResponse.text();
+  const serverApiKey = getCookie('serverApiKey');
+  if (!serverApiKey) {
+    alert('Please enter and save your Server API key first.');
+    throw new Error("Missing API Key");
+  }
 
-  if (subtitleResponse.status === 200) {
-    const lines = subtitleBody.split("\n");
-
-    let found = false, found2 = false;
-    var pinyin = "";
-    for (const line of lines) {
-      if (found) {
-        if (line.includes("<dd class=\"dd-inner\">") && !found2) {
-          found2 = true;
-        } else if (found2) {
-          if (line.includes("<a href=")) {
-            var translation = line.substring(line.indexOf(">") + 1, line.lastIndexOf("<")).replace("</a>", "");
-            return pinyin + " " + chineseChar + "\t" + translation;
-          }
-        }
-      } else {
-        if (line.includes("1.")) {
-          found = true;
-        }
+  try {
+    const response = await fetch(`https://accentdecent-utils.corruptionhades.workers.dev/chinese?text=${encodeURIComponent(chineseChar)}`, {
+      headers: {
+        'Authorization': `Bearer ${serverApiKey}`
       }
+    });
 
-      if(line.includes("headword pinyin")) {
-        pinyin = line
-          .substring(
-            line.indexOf("headword pinyin") + 15 + 2, line.lastIndexOf("<"))
-          .replaceAll("</span>", "").replace(" ", "");
-      }
+    if (!response.ok) {
+      console.error("HTTP error", response.status);
+      return chineseChar;
     }
+
+    const pinyin = await response.text();
+    return pinyin.trim();
+  } catch (error) {
+    console.error("Error fetching pinyin:", error);
+    return chineseChar;
   }
-  return "Failed to translate: " + chineseChar; */
-
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlData, "text/xml");
-
-  const items = xmlDoc.getElementsByTagName('item');
-  const pinyinMap = new Map();
-
-  for (const item of items) {
-    const unicode = item.getAttribute('unicode');
-    const hanyu = item.getAttribute('hanyu');
-    pinyinMap.set(unicode, hanyu);
-  }
-  const characters = chineseChar.trim();
-  let pinyin = "";
-  for (let i = 0; i < characters.length; i += 1) {
-    // get unicode of character
-    const unicode = characters.charCodeAt(i).toString(16).toUpperCase();
-    let hanyu = pinyinMap.get(unicode);
-
-    if (hanyu) {
-
-      if(hanyu.includes(",")) {
-        hanyu = hanyu.split(",")[0];
-      }
-
-      const toneNumber = getToneNumber(hanyu);
-      const syllableWithoutTone = hanyu.substring(0, hanyu.length - 1);
-      const to = applyTone(syllableWithoutTone, toneNumber);
-      console.log(to);
-      pinyin += to;
-
-    } else {
-      pinyin += characters[i];
-    }
-  }
-
-  return pinyin;
-}
-
-function getToneNumber(hanyu) {
-  const toneChar = hanyu[hanyu.length - 1];
-  return parseInt(toneChar);
-}
-
-function applyTone(syllable, toneNumber) {
-  const toneMap = {
-    "a": "āáǎàa",
-    "e": "ēéěèe",
-    "i": "īíǐìi",
-    "o": "ōóǒòo",
-    "u": "ūúǔùu",
-  };
-
-  // logic for pinyin: alphabetically the tones are assigned, so for example for bai with tone 1 it would be bāi (applied to the a instead of the i)
-  for (const [vowel, tones] of Object.entries(toneMap)) {
-    if (syllable.includes(vowel)) {
-      const tone = tones[toneNumber - 1];
-      syllable = syllable.replace(vowel, tone);
-      break;
-    }
-  }
-
-  return syllable;
 }
