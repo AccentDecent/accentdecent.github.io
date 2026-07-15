@@ -1,0 +1,38 @@
+/* ===== Angry Birds Framework — shared theme + campaign overlays ===== */
+:root{
+  --bg:#12131f; --bg2:#191b2b; --bg3:#20233a; --panel:#181a2a; --border:#2b2e4a;
+  --text:#e6e8f2; --muted:#8b8fb0; --accent:#e94560; --accent2:#00e6a8; --gold:#ffcf40;
+  --btn:#262943; --btn-h:#333764; --input:#0f1120; --radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+button{font-family:inherit}
+.muted{color:var(--muted);font-size:12px;font-style:italic}
+.hidden{display:none !important}
+
+/* ---- campaign / story overlays (player) ---- */
+.ab-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(6,7,15,.72);backdrop-filter:blur(5px);z-index:60;padding:20px}
+.ab-overlay.hidden{display:none}
+.ab-card{background:linear-gradient(180deg,#1d2039,#171930);color:var(--text);border:1px solid var(--border);
+  border-radius:18px;padding:30px 36px;max-width:540px;width:100%;text-align:center;box-shadow:0 24px 70px #000a;animation:pop .25s ease}
+.ab-card.wide{max-width:820px}
+.ab-card h1{font-size:26px;margin-bottom:14px;color:var(--gold)}
+.ab-story{white-space:pre-wrap;line-height:1.65;color:#ccd0e6;margin-bottom:14px;text-align:left}
+.ab-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.ab-btn{background:var(--btn);color:#fff;border:1px solid var(--border);border-radius:10px;
+  padding:11px 22px;font-size:15px;cursor:pointer;transition:.15s}
+.ab-btn:hover{background:var(--btn-h)}
+.ab-btn.primary{background:var(--accent);border-color:var(--accent)}
+.ab-stars{font-size:44px;letter-spacing:8px;margin:8px 0}
+.ab-star{color:#4a4d6a}.ab-star.on{color:var(--gold);text-shadow:0 0 14px rgba(255,207,64,.5)}
+.ab-star.sm{font-size:14px;letter-spacing:1px}
+.ab-score{font-size:18px;margin-top:6px}
+.ab-level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-top:16px;max-height:56vh;overflow:auto}
+.ab-level-cell{background:#232640;border:1px solid var(--border);border-radius:12px;padding:16px 12px;cursor:pointer;
+  color:#fff;display:flex;flex-direction:column;gap:6px;align-items:center;transition:.15s}
+.ab-level-cell:hover:not(.locked){border-color:var(--accent2);transform:translateY(-2px)}
+.ab-level-cell.locked{opacity:.45;cursor:not-allowed}
+.ab-level-cell .num{font-size:24px;font-weight:800;color:var(--gold)}
+.ab-level-cell .nm{font-size:12px;color:#cfd3e6}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}

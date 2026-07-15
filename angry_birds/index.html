@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AB Framework — Make your own Angry Birds</title>
+<link rel="stylesheet" href="css/common.css">
+<style>
+  html,body{height:auto;min-height:100%;overflow:auto}
+  body{background:radial-gradient(1200px 600px at 50% -10%, #1c2140, #0d0e18)}
+  .wrap{max-width:1000px;margin:0 auto;padding:48px 20px 60px}
+  header{text-align:center;margin-bottom:36px}
+  header h1{font-size:44px;letter-spacing:-1px}
+  header h1 .g{color:var(--gold)}
+  header p{color:var(--muted);font-size:18px;margin-top:10px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-bottom:40px}
+  .card{background:linear-gradient(180deg,#1d2039,#171930);border:1px solid var(--border);border-radius:16px;
+    padding:26px;text-decoration:none;color:var(--text);transition:.18s;display:block}
+  .card:hover{border-color:var(--accent2);transform:translateY(-3px);box-shadow:0 16px 40px #0007}
+  .card .ic{font-size:38px}
+  .card h2{font-size:20px;margin:10px 0 6px}
+  .card p{color:var(--muted);font-size:14px;line-height:1.5}
+  .card.primary{border-color:var(--accent)}
+  .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:28px 0}
+  .feat div{background:#161829;border:1px solid var(--border);border-radius:12px;padding:16px}
+  .feat h3{font-size:14px;color:var(--accent2);margin-bottom:6px}
+  .feat p{font-size:13px;color:var(--muted);line-height:1.5}
+  .links{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+  .links a{color:var(--muted);font-size:14px;text-decoration:none;border-bottom:1px dashed var(--border)}
+  .links a:hover{color:var(--text)}
+  .note{text-align:center;color:var(--muted);font-size:13px;margin-top:30px;line-height:1.6}
+  code{background:#0f1120;padding:2px 6px;border-radius:5px;color:var(--accent2);font-size:12px}
+  h2.sec{color:var(--gold);text-align:center;margin:34px 0 4px;font-size:16px;text-transform:uppercase;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🐦 <span class="g">Angry Birds</span> Framework</h1>
+    <p>A free, JSON-driven maker for building your own Angry-Birds-style games — in the browser, no build step.</p>
+  </header>
+
+  <div class="cards">
+    <a class="card primary" href="editor.html">
+      <div class="ic">✎</div><h2>Open the Editor</h2>
+      <p>Build whole games: multiple levels, custom birds & blocks, textures, scripts, bosses. Then export.</p>
+    </a>
+    <a class="card" href="play.html">
+      <div class="ic">🎮</div><h2>Play the Demo</h2>
+      <p>“The Great Egg Heist” — 5 levels, a custom Storm Bird, and a three-phase King Pig boss fight.</p>
+    </a>
+    <a class="card" href="docs.html">
+      <div class="ic">📖</div><h2>Read the Docs</h2>
+      <p>Getting started, the full JSON format, and the complete scripting API reference.</p>
+    </a>
+  </div>
+
+  <h2 class="sec">What you can build</h2>
+  <div class="feat">
+    <div><h3>Accurate physics</h3><p>Matter.js rigid bodies. Damage scales with impact impulse (speed × weight), so heavy/fast hits do more — like the original.</p></div>
+    <div><h3>Every block type</h3><p>Wood, stone, ice, glass, sand, steel, gold, TNT, rubber, balloons — each with hardness, weight, friction, bounce. Invent your own.</p></div>
+    <div><h3>Custom birds</h3><p>Built-in powers (split, bomb, boomerang, freeze…) or write a brand-new ability in a few lines of script.</p></div>
+    <div><h3>Scripted bosses</h3><p>Multi-phase bosses with HP thresholds, built-in AI behaviors, custom logic, and automatic camera moves.</p></div>
+    <div><h3>Camera & cutscenes</h3><p>Follow, focus, zoom, shake, and full keyframed cutscene sequences — all controllable from scripts.</p></div>
+    <div><h3>Texture overrides</h3><p>Drop in your own art per block, bird, or pig — stored inline so your game stays a portable static file.</p></div>
+    <div><h3>Multi-level stories</h3><p>Chain levels into a campaign with story cards, star ratings, level select, and saved progress.</p></div>
+    <div><h3>Ship anywhere</h3><p>Export a <code>game.json</code> or a single self-contained HTML. Host on any static site — the player needs no editor.</p></div>
+  </div>
+
+  <h2 class="sec">Standalone example levels</h2>
+  <p style="text-align:center">
+    <a class="ab-btn" style="display:inline-block;text-decoration:none;margin:4px" href="play.html?src=data/levels/demo.json">▶ Demo Level</a>
+    <a class="ab-btn" style="display:inline-block;text-decoration:none;margin:4px" href="play.html?src=data/levels/boss-arena.json">▶ Boss Arena</a>
+  </p>
+
+  <div class="links">
+    <a href="docs.html?doc=getting-started">Getting Started</a>
+    <a href="docs.html?doc=json-format">JSON Format</a>
+    <a href="docs.html?doc=scripting">Scripting Guide</a>
+    <a href="docs.html?doc=api-reference">API Reference</a>
+  </div>
+
+  <p class="note">
+    For full functionality (loading <code>.json</code> levels), run a tiny static server in this folder:<br>
+    <code>python -m http.server</code> &nbsp;then open&nbsp; <code>http://localhost:8000/</code><br>
+    Opening the files directly still works via the embedded demo game.
+  </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,741 @@
+{
+  "format": "ab-game",
+  "version": "2.0.0",
+  "title": "The Great Egg Heist",
+  "author": "AB Framework",
+  "description": "5 levels · custom birds & blocks · a scripted boss. A demo of everything the framework can do.",
+  "settings": {
+    "tuning": {},
+    "startLevel": 0,
+    "allowLevelSelect": true
+  },
+  "story": {
+    "intro": "The green pigs have stolen the eggs and fortified their island.\nLaunch your flock, smash their defenses, and take back what is yours!",
+    "outro": "You beat the King Pig and rescued every egg. A hero's work is never done..."
+  },
+  "textures": {},
+  "customMaterials": {
+    "crystal": {
+      "name": "Crystal",
+      "icon": "🔮",
+      "shape": "rect",
+      "hardness": 130,
+      "density": 0.006,
+      "friction": 0.6,
+      "restitution": 0.25,
+      "breakable": true,
+      "color": "#8e6fe0",
+      "stroke": "#5b3fb0",
+      "particle": "#c3aef0",
+      "score": 1800,
+      "size": {
+        "w": 44,
+        "h": 44
+      }
+    }
+  },
+  "customBirds": {
+    "storm": {
+      "name": "Storm Bird",
+      "icon": "⚡",
+      "description": "Tap in flight to call a lightning barrage.",
+      "radius": 18,
+      "density": 0.0072,
+      "restitution": 0.3,
+      "color": "#5c6bc0",
+      "stroke": "#303f9f",
+      "ability": "custom",
+      "abilityScript": "const p = ctx.bird.body.position;\nctx.shake(7, 350);\nfor (let i = 0; i < 5; i++) {\n  const proj = ctx.spawnProjectile(p.x + (i - 2) * 26, p.y - 8, (i - 2) * 2.2, 7, { color: '#b3e5fc', radius: 7 });\n  proj.ref.ttl = 650 + i * 45;\n  proj.ref.onExpire = (t) => ctx.explode(t.body.position.x, t.body.position.y, 78, 0.17);\n}\nctx.setVelocity(ctx.bird, ctx.bird.body.velocity.x * 0.5, -5);"
+    }
+  },
+  "customPigs": {},
+  "customBosses": {
+    "big_boss": {
+      "name": "King Pig",
+      "icon": "👹",
+      "radius": 52,
+      "density": 0.014,
+      "hp": 1800,
+      "color": "#d4a017",
+      "stroke": "#8b6914",
+      "score": 60000,
+      "phases": [
+        {
+          "name": "Smug",
+          "hpThreshold": 1,
+          "behavior": "charge",
+          "color": "#d4a017"
+        },
+        {
+          "name": "Furious",
+          "hpThreshold": 0.55,
+          "behavior": "shoot",
+          "color": "#e08a17",
+          "camera": {
+            "zoom": 0.7,
+            "ms": 700
+          }
+        },
+        {
+          "name": "Enraged",
+          "hpThreshold": 0.22,
+          "behavior": "rage",
+          "color": "#e53935",
+          "camera": {
+            "zoom": 0.62,
+            "ms": 700
+          }
+        }
+      ],
+      "onSpawn": "ctx.boss.ref.vars.taunted = false;",
+      "onUpdate": "if (!ctx.boss.ref.vars.taunted && ctx.time > 4000) { ctx.boss.ref.vars.taunted = true; ctx.message('Ho ho! You cannot stop the King!', 2200); }"
+    }
+  },
+  "customBackgrounds": {},
+  "globalScripts": [],
+  "levels": [
+    {
+      "id": "l1",
+      "name": "First Nest",
+      "background": "sky",
+      "gravity": {
+        "x": 0,
+        "y": 1
+      },
+      "world": {
+        "left": -400,
+        "right": 1600,
+        "groundY": 550
+      },
+      "camera": {
+        "start": {
+          "x": 560,
+          "y": 360
+        },
+        "zoom": 0.72
+      },
+      "slingshot": {
+        "x": 180,
+        "y": 430
+      },
+      "birds": [
+        {
+          "type": "red"
+        },
+        {
+          "type": "red"
+        },
+        {
+          "type": "chuck"
+        }
+      ],
+      "pigs": [
+        {
+          "type": "normal",
+          "x": 760,
+          "y": 530
+        },
+        {
+          "type": "normal",
+          "x": 980,
+          "y": 530
+        }
+      ],
+      "blocks": [
+        {
+          "type": "wood",
+          "x": 726,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "wood",
+          "x": 794,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "wood",
+          "x": 760,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "wood_block",
+          "x": 940,
+          "y": 528
+        },
+        {
+          "type": "wood_block",
+          "x": 1020,
+          "y": 528
+        }
+      ],
+      "bosses": [],
+      "props": [],
+      "starThresholds": [
+        8000,
+        15000,
+        25000
+      ],
+      "scripts": [],
+      "intro": "The pigs have stolen the eggs again. Start small — knock down their flimsy wooden huts!",
+      "outro": null,
+      "nextLevel": null
+    },
+    {
+      "id": "l2",
+      "name": "Stone Cold",
+      "background": "desert",
+      "gravity": {
+        "x": 0,
+        "y": 1
+      },
+      "world": {
+        "left": -400,
+        "right": 1800,
+        "groundY": 550
+      },
+      "camera": {
+        "start": {
+          "x": 620,
+          "y": 350
+        },
+        "zoom": 0.66
+      },
+      "slingshot": {
+        "x": 180,
+        "y": 430
+      },
+      "birds": [
+        {
+          "type": "bomb"
+        },
+        {
+          "type": "chuck"
+        },
+        {
+          "type": "red"
+        },
+        {
+          "type": "bomb"
+        }
+      ],
+      "pigs": [
+        {
+          "type": "helmet",
+          "x": 820,
+          "y": 530
+        },
+        {
+          "type": "normal",
+          "x": 1080,
+          "y": 530
+        },
+        {
+          "type": "big",
+          "x": 1180,
+          "y": 520
+        }
+      ],
+      "blocks": [
+        {
+          "type": "stone",
+          "x": 786,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 854,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 820,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "stone",
+          "x": 1096,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 1164,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "crystal",
+          "x": 1130,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "crystal",
+          "x": 1000,
+          "y": 528
+        },
+        {
+          "type": "crystal",
+          "x": 1000,
+          "y": 484
+        }
+      ],
+      "bosses": [],
+      "props": [],
+      "starThresholds": [
+        15000,
+        30000,
+        50000
+      ],
+      "scripts": [
+        {
+          "hook": "onLevelStart",
+          "code": "ctx.message('Tap a flying Bomb bird to detonate it early!', 3000);"
+        }
+      ],
+      "intro": "Now they hide behind stone. Wood birds bounce off — bring the Bomb.",
+      "outro": null,
+      "nextLevel": null
+    },
+    {
+      "id": "l3",
+      "name": "Ice Palace",
+      "background": "night",
+      "gravity": {
+        "x": 0,
+        "y": 1
+      },
+      "world": {
+        "left": -400,
+        "right": 1800,
+        "groundY": 550
+      },
+      "camera": {
+        "start": {
+          "x": 640,
+          "y": 340
+        },
+        "zoom": 0.64
+      },
+      "slingshot": {
+        "x": 180,
+        "y": 430
+      },
+      "birds": [
+        {
+          "type": "blues"
+        },
+        {
+          "type": "ice_bird"
+        },
+        {
+          "type": "blues"
+        },
+        {
+          "type": "red"
+        }
+      ],
+      "pigs": [
+        {
+          "type": "normal",
+          "x": 760,
+          "y": 530
+        },
+        {
+          "type": "normal",
+          "x": 980,
+          "y": 530
+        },
+        {
+          "type": "helmet",
+          "x": 1180,
+          "y": 530
+        }
+      ],
+      "blocks": [
+        {
+          "type": "ice",
+          "x": 726,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "ice",
+          "x": 794,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "ice",
+          "x": 760,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "ice",
+          "x": 946,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "ice",
+          "x": 1014,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "glass",
+          "x": 980,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "ice",
+          "x": 1146,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "ice",
+          "x": 1214,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "ice",
+          "x": 1180,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "glass",
+          "x": 870,
+          "y": 528
+        },
+        {
+          "type": "glass",
+          "x": 1080,
+          "y": 528
+        }
+      ],
+      "bosses": [],
+      "props": [],
+      "starThresholds": [
+        16000,
+        34000,
+        56000
+      ],
+      "scripts": [],
+      "intro": "A frozen fortress under the stars. Ice shatters easily — split birds and the Ice Bird excel here.",
+      "outro": null,
+      "nextLevel": null
+    },
+    {
+      "id": "l4",
+      "name": "Storm Rising",
+      "background": "sunset",
+      "gravity": {
+        "x": 0,
+        "y": 1
+      },
+      "world": {
+        "left": -400,
+        "right": 1900,
+        "groundY": 550
+      },
+      "camera": {
+        "start": {
+          "x": 660,
+          "y": 340
+        },
+        "zoom": 0.62
+      },
+      "slingshot": {
+        "x": 180,
+        "y": 430
+      },
+      "birds": [
+        {
+          "type": "storm"
+        },
+        {
+          "type": "chuck"
+        },
+        {
+          "type": "bomb"
+        },
+        {
+          "type": "red"
+        }
+      ],
+      "pigs": [
+        {
+          "type": "normal",
+          "x": 780,
+          "y": 530
+        },
+        {
+          "type": "normal",
+          "x": 900,
+          "y": 530
+        },
+        {
+          "type": "big",
+          "x": 1120,
+          "y": 520
+        },
+        {
+          "type": "normal",
+          "x": 1260,
+          "y": 530
+        }
+      ],
+      "blocks": [
+        {
+          "type": "wood",
+          "x": 746,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "wood",
+          "x": 814,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "wood",
+          "x": 780,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "tnt",
+          "x": 900,
+          "y": 530
+        },
+        {
+          "type": "tnt",
+          "x": 940,
+          "y": 530
+        },
+        {
+          "type": "stone",
+          "x": 1086,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 1154,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 1120,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "wood_plank",
+          "x": 1000,
+          "y": 420,
+          "width": 260,
+          "height": 16,
+          "angle": 0
+        },
+        {
+          "type": "wood",
+          "x": 1000,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "balloon",
+          "x": 1000,
+          "y": 350
+        }
+      ],
+      "bosses": [],
+      "props": [],
+      "starThresholds": [
+        22000,
+        42000,
+        70000
+      ],
+      "scripts": [
+        {
+          "hook": "onBirdLaunch",
+          "code": "if (ctx.event.track.ref.type==='storm') ctx.message('Tap to unleash the storm!', 2000);"
+        }
+      ],
+      "intro": "Meet the STORM BIRD — tap it in flight to call a lightning barrage. Aim near the TNT!",
+      "outro": null,
+      "nextLevel": null
+    },
+    {
+      "id": "l5",
+      "name": "King Pig's Keep",
+      "background": "cave",
+      "gravity": {
+        "x": 0,
+        "y": 1
+      },
+      "world": {
+        "left": -400,
+        "right": 2000,
+        "groundY": 550
+      },
+      "camera": {
+        "start": {
+          "x": 700,
+          "y": 330
+        },
+        "zoom": 0.58
+      },
+      "slingshot": {
+        "x": 180,
+        "y": 430
+      },
+      "birds": [
+        {
+          "type": "bomb"
+        },
+        {
+          "type": "storm"
+        },
+        {
+          "type": "terence"
+        },
+        {
+          "type": "bomb"
+        },
+        {
+          "type": "chuck"
+        },
+        {
+          "type": "red"
+        }
+      ],
+      "pigs": [
+        {
+          "type": "normal",
+          "x": 820,
+          "y": 530
+        },
+        {
+          "type": "normal",
+          "x": 980,
+          "y": 530
+        }
+      ],
+      "blocks": [
+        {
+          "type": "stone",
+          "x": 786,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 854,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 820,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "stone",
+          "x": 946,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 1014,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "steel",
+          "x": 980,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "steel",
+          "x": 1120,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "crystal",
+          "x": 1120,
+          "y": 430,
+          "width": 60,
+          "height": 60
+        }
+      ],
+      "bosses": [
+        {
+          "type": "big_boss",
+          "x": 1250,
+          "y": 498
+        }
+      ],
+      "props": [],
+      "starThresholds": [
+        50000,
+        90000,
+        140000
+      ],
+      "scripts": [
+        {
+          "hook": "onLevelStart",
+          "name": "intro cutscene",
+          "code": "ctx.cutscene([\n  { x: 1250, y: 400, zoom: 0.7, ms: 1600, hold: 500 },\n  { x: ctx.game.slingshot.x + 220, y: 380, zoom: 0.72, ms: 1200 }\n], () => {});\nctx.after(3600, () => ctx.message('Defeat the King Pig!', 2500));"
+        },
+        {
+          "hook": "onBossPhaseChange",
+          "name": "phase fx",
+          "code": "ctx.shake(12, 500);\nctx.explode(ctx.event.track.body.position.x, ctx.event.track.body.position.y, 120, 0.12);\nctx.message('The King Pig grows ' + ctx.event.phase.name + '!', 2200);"
+        }
+      ],
+      "intro": "The King Pig himself guards the eggs. Break his defenses, then bring him down through all THREE phases!",
+      "outro": "The eggs are safe... for now. The pigs will surely return. 🥚",
+      "nextLevel": null
+    }
+  ],
+  "id": "egg_heist"
+}

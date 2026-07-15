@@ -1,0 +1,233 @@
+{
+  "format": "ab-game",
+  "version": "2.0.0",
+  "id": "boss_arena",
+  "title": "Boss Arena",
+  "description": "Standalone example level.",
+  "settings": {
+    "allowLevelSelect": false
+  },
+  "story": {},
+  "textures": {},
+  "customMaterials": {
+    "crystal": {
+      "name": "Crystal",
+      "icon": "🔮",
+      "shape": "rect",
+      "hardness": 130,
+      "density": 0.006,
+      "friction": 0.6,
+      "restitution": 0.25,
+      "breakable": true,
+      "color": "#8e6fe0",
+      "stroke": "#5b3fb0",
+      "particle": "#c3aef0",
+      "score": 1800,
+      "size": {
+        "w": 44,
+        "h": 44
+      }
+    }
+  },
+  "customBirds": {
+    "storm": {
+      "name": "Storm Bird",
+      "icon": "⚡",
+      "description": "Tap in flight to call a lightning barrage.",
+      "radius": 18,
+      "density": 0.0072,
+      "restitution": 0.3,
+      "color": "#5c6bc0",
+      "stroke": "#303f9f",
+      "ability": "custom",
+      "abilityScript": "const p = ctx.bird.body.position;\nctx.shake(7, 350);\nfor (let i = 0; i < 5; i++) {\n  const proj = ctx.spawnProjectile(p.x + (i - 2) * 26, p.y - 8, (i - 2) * 2.2, 7, { color: '#b3e5fc', radius: 7 });\n  proj.ref.ttl = 650 + i * 45;\n  proj.ref.onExpire = (t) => ctx.explode(t.body.position.x, t.body.position.y, 78, 0.17);\n}\nctx.setVelocity(ctx.bird, ctx.bird.body.velocity.x * 0.5, -5);"
+    }
+  },
+  "customPigs": {},
+  "customBosses": {
+    "big_boss": {
+      "name": "King Pig",
+      "icon": "👹",
+      "radius": 52,
+      "density": 0.014,
+      "hp": 1800,
+      "color": "#d4a017",
+      "stroke": "#8b6914",
+      "score": 60000,
+      "phases": [
+        {
+          "name": "Smug",
+          "hpThreshold": 1,
+          "behavior": "charge",
+          "color": "#d4a017"
+        },
+        {
+          "name": "Furious",
+          "hpThreshold": 0.55,
+          "behavior": "shoot",
+          "color": "#e08a17",
+          "camera": {
+            "zoom": 0.7,
+            "ms": 700
+          }
+        },
+        {
+          "name": "Enraged",
+          "hpThreshold": 0.22,
+          "behavior": "rage",
+          "color": "#e53935",
+          "camera": {
+            "zoom": 0.62,
+            "ms": 700
+          }
+        }
+      ],
+      "onSpawn": "ctx.boss.ref.vars.taunted = false;",
+      "onUpdate": "if (!ctx.boss.ref.vars.taunted && ctx.time > 4000) { ctx.boss.ref.vars.taunted = true; ctx.message('Ho ho! You cannot stop the King!', 2200); }"
+    }
+  },
+  "customBackgrounds": {},
+  "globalScripts": [],
+  "levels": [
+    {
+      "id": "l5",
+      "name": "King Pig's Keep",
+      "background": "cave",
+      "gravity": {
+        "x": 0,
+        "y": 1
+      },
+      "world": {
+        "left": -400,
+        "right": 2000,
+        "groundY": 550
+      },
+      "camera": {
+        "start": {
+          "x": 700,
+          "y": 330
+        },
+        "zoom": 0.58
+      },
+      "slingshot": {
+        "x": 180,
+        "y": 430
+      },
+      "birds": [
+        {
+          "type": "bomb"
+        },
+        {
+          "type": "storm"
+        },
+        {
+          "type": "terence"
+        },
+        {
+          "type": "bomb"
+        },
+        {
+          "type": "chuck"
+        },
+        {
+          "type": "red"
+        }
+      ],
+      "pigs": [
+        {
+          "type": "normal",
+          "x": 820,
+          "y": 530
+        },
+        {
+          "type": "normal",
+          "x": 980,
+          "y": 530
+        }
+      ],
+      "blocks": [
+        {
+          "type": "stone",
+          "x": 786,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 854,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 820,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "stone",
+          "x": 946,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "stone",
+          "x": 1014,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "steel",
+          "x": 980,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "steel",
+          "x": 1120,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "crystal",
+          "x": 1120,
+          "y": 430,
+          "width": 60,
+          "height": 60
+        }
+      ],
+      "bosses": [
+        {
+          "type": "big_boss",
+          "x": 1250,
+          "y": 498
+        }
+      ],
+      "props": [],
+      "starThresholds": [
+        50000,
+        90000,
+        140000
+      ],
+      "scripts": [
+        {
+          "hook": "onLevelStart",
+          "name": "intro cutscene",
+          "code": "ctx.cutscene([\n  { x: 1250, y: 400, zoom: 0.7, ms: 1600, hold: 500 },\n  { x: ctx.game.slingshot.x + 220, y: 380, zoom: 0.72, ms: 1200 }\n], () => {});\nctx.after(3600, () => ctx.message('Defeat the King Pig!', 2500));"
+        },
+        {
+          "hook": "onBossPhaseChange",
+          "name": "phase fx",
+          "code": "ctx.shake(12, 500);\nctx.explode(ctx.event.track.body.position.x, ctx.event.track.body.position.y, 120, 0.12);\nctx.message('The King Pig grows ' + ctx.event.phase.name + '!', 2200);"
+        }
+      ],
+      "intro": "The King Pig himself guards the eggs. Break his defenses, then bring him down through all THREE phases!",
+      "outro": "The eggs are safe... for now. The pigs will surely return. 🥚",
+      "nextLevel": null
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AB Framework — Docs</title>
+<link rel="stylesheet" href="css/common.css">
+<style>
+  html,body{height:100%;overflow:hidden}
+  #shell{display:flex;height:100vh}
+  #nav{width:230px;background:var(--panel);border-right:1px solid var(--border);padding:16px 10px;overflow-y:auto;flex-shrink:0}
+  #nav .brand{font-weight:800;color:var(--gold);padding:0 8px 12px;display:block}
+  #nav a{display:block;padding:8px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:2px}
+  #nav a:hover{background:var(--bg3);color:var(--text)}
+  #nav a.active{background:var(--bg3);color:#fff;border-left:3px solid var(--accent2)}
+  #nav .home{color:var(--muted);font-size:13px;margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
+  #doc{flex:1;overflow-y:auto;padding:40px 8vw}
+  #doc-inner{max-width:860px;margin:0 auto}
+  #doc h1{font-size:32px;color:var(--gold);margin:6px 0 18px;border-bottom:1px solid var(--border);padding-bottom:12px}
+  #doc h2{font-size:23px;color:#fff;margin:30px 0 12px}
+  #doc h3{font-size:18px;color:var(--accent2);margin:22px 0 8px}
+  #doc h4{font-size:15px;color:#fff;margin:16px 0 6px}
+  #doc p{line-height:1.7;margin:10px 0;color:#d4d7e6}
+  #doc ul,#doc ol{margin:10px 0 10px 24px;line-height:1.7;color:#d4d7e6}
+  #doc li{margin:4px 0}
+  #doc a{color:var(--accent2)}
+  #doc code{background:#0f1120;padding:2px 6px;border-radius:5px;font-size:13px;color:#ffd9a0;font-family:'JetBrains Mono',Consolas,monospace}
+  #doc pre{background:#0b0c18;border:1px solid var(--border);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:14px 0}
+  #doc pre code{background:none;padding:0;color:#dfe3f5;font-size:13px;line-height:1.55}
+  #doc table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;display:block;overflow-x:auto}
+  #doc th,#doc td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+  #doc th{background:var(--bg3);color:var(--gold)}
+  #doc blockquote{border-left:3px solid var(--accent);background:#0f1120;padding:8px 16px;margin:12px 0;color:var(--muted);border-radius:0 8px 8px 0}
+  #doc hr{border:0;border-top:1px solid var(--border);margin:24px 0}
+  #err{color:var(--muted);background:#1a1420;border:1px solid #402b3a;border-radius:10px;padding:18px}
+  @media(max-width:720px){#nav{width:170px}#doc{padding:24px 20px}}
+</style>
+</head>
+<body>
+<div id="shell">
+  <nav id="nav">
+    <a class="brand" href="index.html">🐦 AB Framework</a>
+    <a data-doc="README">Overview</a>
+    <a data-doc="getting-started">Getting Started</a>
+    <a data-doc="json-format">JSON Format</a>
+    <a data-doc="scripting">Scripting Guide</a>
+    <a data-doc="api-reference">API Reference</a>
+    <div class="home"><a href="index.html">← Home</a> · <a href="editor.html">Editor</a> · <a href="play.html">Play</a></div>
+  </nav>
+  <main id="doc"><div id="doc-inner"><p class="muted">Loading…</p></div></main>
+</div>
+
+<script>
+/* ---- tiny, dependency-free Markdown → HTML ---- */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function inl(t){
+  t = esc(t);
+  t = t.replace(/`([^`]+)`/g, (m,c)=>'<code>'+c+'</code>');
+  t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+  t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, txt, url) => {
+    const md = url.match(/^(?:\.\/)?(?:docs\/)?([\w.-]+)\.md(?:#.*)?$/);   // route cross-doc links through the viewer
+    if (md) return '<a href="docs.html?doc=' + md[1] + '">' + txt + '</a>';
+    return '<a href="' + url + '" target="_blank" rel="noopener">' + txt + '</a>';
+  });
+  return t;
+}
+function splitRow(l){return l.replace(/^\s*\|/,'').replace(/\|\s*$/,'').split('|').map(s=>s.trim());}
+function mdToHtml(md){
+  const lines = md.replace(/\r\n/g,'\n').split('\n');
+  let html='', i=0;
+  const isBlock = (l)=>/^(#{1,6}\s|```|>\s?|\s*[-*+]\s+|\s*\d+\.\s+)/.test(l)||/^(-{3,})\s*$/.test(l)||/\|/.test(l);
+  while(i<lines.length){
+    let line=lines[i];
+    if(/^```/.test(line)){ i++; let code=''; while(i<lines.length && !/^```/.test(lines[i])){code+=lines[i]+'\n';i++;} i++; html+='<pre><code>'+esc(code.replace(/\n$/,''))+'</code></pre>'; continue; }
+    let h=line.match(/^(#{1,6})\s+(.*)$/); if(h){ html+='<h'+h[1].length+'>'+inl(h[2])+'</h'+h[1].length+'>'; i++; continue; }
+    if(/^(-{3,}|\*{3,}|_{3,})\s*$/.test(line)){ html+='<hr>'; i++; continue; }
+    if(/\|/.test(line) && i+1<lines.length && /-/.test(lines[i+1]) && /^\s*\|?[\s:\-|]+$/.test(lines[i+1])){
+      const head=splitRow(line); i+=2; const rows=[];
+      while(i<lines.length && /\|/.test(lines[i]) && lines[i].trim()){ rows.push(splitRow(lines[i])); i++; }
+      html+='<table><thead><tr>'+head.map(c=>'<th>'+inl(c)+'</th>').join('')+'</tr></thead><tbody>'+
+        rows.map(r=>'<tr>'+r.map(c=>'<td>'+inl(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table>'; continue;
+    }
+    if(/^>\s?/.test(line)){ let q=''; while(i<lines.length && /^>\s?/.test(lines[i])){ q+=inl(lines[i].replace(/^>\s?/,''))+' '; i++; } html+='<blockquote>'+q+'</blockquote>'; continue; }
+    if(/^\s*[-*+]\s+/.test(line)){ let it=''; while(i<lines.length && /^\s*[-*+]\s+/.test(lines[i])){ it+='<li>'+inl(lines[i].replace(/^\s*[-*+]\s+/,''))+'</li>'; i++; } html+='<ul>'+it+'</ul>'; continue; }
+    if(/^\s*\d+\.\s+/.test(line)){ let it=''; while(i<lines.length && /^\s*\d+\.\s+/.test(lines[i])){ it+='<li>'+inl(lines[i].replace(/^\s*\d+\.\s+/,''))+'</li>'; i++; } html+='<ol>'+it+'</ol>'; continue; }
+    if(line.trim()===''){ i++; continue; }
+    let para=line; i++;
+    while(i<lines.length && lines[i].trim() && !isBlock(lines[i])){ para+=' '+lines[i]; i++; }
+    html+='<p>'+inl(para)+'</p>';
+  }
+  return html;
+}
+
+const DOCS = ['README','getting-started','json-format','scripting','api-reference'];
+const inner = document.getElementById('doc-inner');
+function load(name){
+  document.querySelectorAll('#nav a[data-doc]').forEach(a=>a.classList.toggle('active', a.dataset.doc===name));
+  fetch('docs/'+name+'.md').then(r=>{ if(!r.ok) throw new Error(r.status); return r.text(); })
+    .then(md=>{ inner.innerHTML = mdToHtml(md); document.getElementById('doc').scrollTop=0; location.hash = name; })
+    .catch(()=>{ inner.innerHTML = '<div id="err"><b>Could not load docs/'+name+'.md.</b><br>Browsers block reading local files over <code>file://</code>. '+
+      'Run a static server (<code>python -m http.server</code>) and reopen, or read the raw file: '+
+      '<a href="docs/'+name+'.md" target="_blank">docs/'+name+'.md</a>.</div>'; });
+}
+document.querySelectorAll('#nav a[data-doc]').forEach(a=>a.onclick=(e)=>{e.preventDefault();load(a.dataset.doc);});
+const start = (location.hash||'').replace('#','');
+load(DOCS.includes(start)?start : new URLSearchParams(location.search).get('doc') || 'README');
+</script>
+</body>
+</html>

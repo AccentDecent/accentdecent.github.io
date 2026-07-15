@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AB Framework — Editor</title>
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+
+<!-- ===================== TOP BAR ===================== -->
+<div id="topbar">
+  <span class="brand">🐦 AB&nbsp;Maker <small>editor</small></span>
+  <span id="game-title">My Angry Birds Game</span>
+  <span class="sep"></span>
+  <button class="tb" id="btn-new-game">＋ New</button>
+  <button class="tb" id="btn-open">📂 Open</button>
+  <input type="file" id="file-open" accept=".json" hidden>
+  <button class="tb" id="btn-save">💾 Save JSON</button>
+  <span class="menu-wrap">
+    <button class="tb" id="btn-export">⇩ Export ▾</button>
+    <div id="export-menu" class="hidden">
+      <button data-export="json">Download game.json</button>
+      <button data-export="selfhtml">Self-contained playable HTML…</button>
+    </div>
+  </span>
+  <span class="sep"></span>
+  <button class="tb primary" id="btn-test">▶ Test Level</button>
+  <button class="tb go" id="btn-play">🎮 Play Game</button>
+  <span class="spacer"></span>
+  <a class="tb" href="docs.html" target="_blank" title="Documentation">📖 Docs</a>
+  <span id="status">Ready.</span>
+</div>
+
+<!-- ===================== MAIN ===================== -->
+<div id="main">
+
+  <!-- LEFT: levels, tools, palette -->
+  <div id="left" class="panel">
+    <details class="sec" open>
+      <summary>Levels</summary>
+      <div class="sec-body">
+        <div id="level-list"></div>
+        <div class="row">
+          <button class="mini" id="btn-level-add">＋ Add</button>
+          <button class="mini" id="btn-level-dup">⧉ Dup</button>
+          <button class="mini danger" id="btn-level-del">🗑 Del</button>
+          <button class="mini" id="btn-level-up">▲</button>
+          <button class="mini" id="btn-level-down">▼</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="sec">
+      <div class="sec-title">Tools</div>
+      <div class="tool-row">
+        <button class="tool active" id="tool-select" title="Select / move (V)">▹ Select</button>
+        <button class="tool" id="tool-delete" title="Delete (X)">🗑 Delete</button>
+        <button class="tool" id="tool-pan" title="Pan (H)">✋ Pan</button>
+      </div>
+      <div class="sec-body" style="padding-top:0">
+        <label class="chk"><input type="checkbox" id="chk-grid" checked> Show grid</label>
+        <label class="chk"><input type="checkbox" id="chk-snap" checked> Snap to grid</label>
+        <p class="muted">Wheel = zoom · drag = move · Q/E = rotate · Del = delete</p>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Palette</div>
+      <div class="pal-tabs">
+        <button class="pal-tab active" data-kind="block">Blocks</button>
+        <button class="pal-tab" data-kind="bird">Birds</button>
+        <button class="pal-tab" data-kind="pig">Pigs</button>
+        <button class="pal-tab" data-kind="boss">Bosses</button>
+      </div>
+      <div id="palette"></div>
+    </div>
+  </div>
+
+  <!-- CENTER: canvas -->
+  <div id="center">
+    <div id="canvas-wrap">
+      <canvas id="editor-canvas"></canvas>
+      <div id="test-overlay" class="hidden">
+        <button class="tb primary" id="btn-stop-test">◀ Stop Test</button>
+        <span id="test-score">Score: 0</span>
+        <span id="test-birds">🐦 0</span>
+        <span id="test-hint">drag bird → release · Space/tap = ability · Esc = stop</span>
+      </div>
+      <div id="test-msg"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: properties + settings -->
+  <div id="right" class="panel">
+    <details class="sec" open>
+      <summary>Properties</summary>
+      <div class="sec-body"><div id="props"><p class="muted">Select an object to edit its properties.</p></div></div>
+    </details>
+
+    <details class="sec">
+      <summary>Level Settings</summary>
+      <div class="sec-body">
+        <label class="field">Name<input type="text" id="lv-name"></label>
+        <label class="field">Background<select id="lv-bg"></select></label>
+        <div class="two">
+          <label class="field">Gravity Y<input type="number" id="lv-gravity" step="0.1"></label>
+          <label class="field">Ground Y<input type="number" id="lv-groundy" step="1"></label>
+        </div>
+        <div class="two">
+          <label class="field">World Left<input type="number" id="lv-worldleft" step="10"></label>
+          <label class="field">World Right<input type="number" id="lv-worldright" step="10"></label>
+        </div>
+        <div class="two">
+          <label class="field">Slingshot X<input type="number" id="lv-slingx" step="1"></label>
+          <label class="field">Slingshot Y<input type="number" id="lv-slingy" step="1"></label>
+        </div>
+        <div class="two">
+          <label class="field">Cam Start X<input type="number" id="lv-camstartx" step="10"></label>
+          <label class="field">Cam Start Y<input type="number" id="lv-camstarty" step="10"></label>
+        </div>
+        <label class="field">Camera Zoom<input type="number" id="lv-camzoom" step="0.05"></label>
+        <label class="field">Star thresholds (1★, 2★, 3★)<input type="text" id="lv-stars" placeholder="10000, 30000, 60000"></label>
+        <label class="field">Intro story (optional)<textarea id="lv-intro" rows="2"></textarea></label>
+        <label class="field">Outro story (optional)<textarea id="lv-outro" rows="2"></textarea></label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Game &amp; Story</summary>
+      <div class="sec-body">
+        <label class="field">Title<input type="text" id="g-title"></label>
+        <label class="field">Author<input type="text" id="g-author"></label>
+        <label class="field">Description<textarea id="g-desc" rows="2"></textarea></label>
+        <label class="field">Story intro<textarea id="g-story-intro" rows="3"></textarea></label>
+        <label class="field">Story outro<textarea id="g-story-outro" rows="3"></textarea></label>
+        <label class="chk"><input type="checkbox" id="g-levelselect" checked> Show level-select menu</label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Custom Block</summary>
+      <div class="sec-body">
+        <div class="two"><label class="field">ID<input type="text" id="cm-id" placeholder="my_block"></label>
+          <label class="field">Icon<input type="text" id="cm-icon" placeholder="🧱"></label></div>
+        <label class="field">Name<input type="text" id="cm-name" placeholder="My Block"></label>
+        <label class="field">Shape<select id="cm-shape">
+          <option>rect</option><option>circle</option><option>triangle</option><option>triangle_r</option><option>trapezoid</option>
+        </select></label>
+        <div class="two"><label class="field">Hardness<input type="number" id="cm-hardness" value="60"></label>
+          <label class="field">Density<input type="number" id="cm-density" value="0.005" step="0.001"></label></div>
+        <div class="two"><label class="field">Friction<input type="number" id="cm-friction" value="0.7" step="0.05"></label>
+          <label class="field">Restitution<input type="number" id="cm-rest" value="0.05" step="0.05"></label></div>
+        <div class="two"><label class="field">Width<input type="number" id="cm-w" value="60"></label>
+          <label class="field">Height<input type="number" id="cm-h" value="20"></label></div>
+        <div class="two"><label class="field">Color<input type="color" id="cm-color" value="#c4873c"></label>
+          <label class="field">Score<input type="number" id="cm-score" value="500"></label></div>
+        <label class="field">Texture key (optional)<input type="text" id="cm-texture" placeholder="my_tex"></label>
+        <label class="chk"><input type="checkbox" id="cm-breakable" checked> Breakable</label>
+        <label class="chk"><input type="checkbox" id="cm-explosive"> Explosive</label>
+        <button class="mini wide" id="btn-add-material">＋ Add custom block</button>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Custom Bird</summary>
+      <div class="sec-body">
+        <div class="two"><label class="field">ID<input type="text" id="cb-id" placeholder="my_bird"></label>
+          <label class="field">Icon<input type="text" id="cb-icon" placeholder="🐤"></label></div>
+        <label class="field">Name<input type="text" id="cb-name" placeholder="My Bird"></label>
+        <label class="field">Description<input type="text" id="cb-desc"></label>
+        <div class="two"><label class="field">Radius<input type="number" id="cb-radius" value="18"></label>
+          <label class="field">Density<input type="number" id="cb-density" value="0.007" step="0.001"></label></div>
+        <div class="two"><label class="field">Restitution<input type="number" id="cb-rest" value="0.3" step="0.05"></label>
+          <label class="field">Color<input type="color" id="cb-color" value="#e53935"></label></div>
+        <label class="field">Ability<select id="cb-ability">
+          <option>none</option><option>speed_boost</option><option>split</option><option>explode</option>
+          <option>egg_drop</option><option>boomerang</option><option>inflate</option><option>freeze</option><option>custom</option>
+        </select></label>
+        <label class="field">Ability data (JSON)<input type="text" id="cb-adata" value="{}"></label>
+        <div id="cb-script-row" style="display:none">
+          <button class="mini wide" id="cb-edit-script">✎ Edit custom ability script</button>
+        </div>
+        <label class="field">Texture key (optional)<input type="text" id="cb-texture" placeholder="my_tex"></label>
+        <button class="mini wide" id="btn-add-bird">＋ Add custom bird</button>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Custom Pig</summary>
+      <div class="sec-body">
+        <div class="two"><label class="field">ID<input type="text" id="cp-id" placeholder="my_pig"></label>
+          <label class="field">Icon<input type="text" id="cp-icon" placeholder="🐷"></label></div>
+        <label class="field">Name<input type="text" id="cp-name" placeholder="My Pig"></label>
+        <div class="two"><label class="field">Radius<input type="number" id="cp-radius" value="20"></label>
+          <label class="field">Density<input type="number" id="cp-density" value="0.0045" step="0.001"></label></div>
+        <div class="two"><label class="field">HP<input type="number" id="cp-hp" value="100"></label>
+          <label class="field">Armor 0–0.95<input type="number" id="cp-armor" value="0" step="0.05"></label></div>
+        <div class="two"><label class="field">Color<input type="color" id="cp-color" value="#63c74d"></label>
+          <label class="field">Score<input type="number" id="cp-score" value="5000"></label></div>
+        <label class="field">Texture key (optional)<input type="text" id="cp-texture"></label>
+        <button class="mini wide" id="btn-add-pig">＋ Add custom pig</button>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Custom Boss</summary>
+      <div class="sec-body">
+        <div class="two"><label class="field">ID<input type="text" id="cbo-id" placeholder="my_boss"></label>
+          <label class="field">Icon<input type="text" id="cbo-icon" placeholder="👹"></label></div>
+        <label class="field">Name<input type="text" id="cbo-name" placeholder="My Boss"></label>
+        <div class="two"><label class="field">Radius<input type="number" id="cbo-radius" value="52"></label>
+          <label class="field">Density<input type="number" id="cbo-density" value="0.014" step="0.001"></label></div>
+        <div class="two"><label class="field">HP<input type="number" id="cbo-hp" value="2000"></label>
+          <label class="field">Score<input type="number" id="cbo-score" value="60000"></label></div>
+        <label class="field">Color<input type="color" id="cbo-color" value="#d4a017"></label>
+        <label class="field">Phases (JSON) — behavior: charge / shoot / summon / rage / overheat / idle
+          <textarea id="cbo-phases" rows="6" spellcheck="false">[
+  {"name":"Phase 1","hpThreshold":1,"behavior":"charge"},
+  {"name":"Phase 2","hpThreshold":0.5,"behavior":"shoot","camera":{"zoom":0.7,"ms":700}},
+  {"name":"Rage","hpThreshold":0.2,"behavior":"rage"}
+]</textarea></label>
+        <label class="field">Texture key (optional)<input type="text" id="cbo-texture"></label>
+        <div class="row">
+          <button class="mini" id="cbo-edit-update">✎ onUpdate</button>
+          <button class="mini" id="cbo-edit-phase">✎ onPhaseChange</button>
+        </div>
+        <button class="mini wide" id="btn-add-boss">＋ Add custom boss</button>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Custom Background</summary>
+      <div class="sec-body">
+        <div class="two"><label class="field">ID<input type="text" id="cbg-id" placeholder="my_sky"></label>
+          <label class="field">Name<input type="text" id="cbg-name" placeholder="My Sky"></label></div>
+        <div class="two"><label class="field">Sky top<input type="color" id="cbg-top" value="#4fc3f7"></label>
+          <label class="field">Sky bottom<input type="color" id="cbg-bottom" value="#e1f5fe"></label></div>
+        <div class="two"><label class="field">Ground top<input type="color" id="cbg-groundtop" value="#8bc34a"></label>
+          <label class="field">Ground bottom<input type="color" id="cbg-groundbottom" value="#558b2f"></label></div>
+        <label class="field">Cloud color (CSS)<input type="text" id="cbg-cloudcolor" value="rgba(255,255,255,0.85)"></label>
+        <label class="chk"><input type="checkbox" id="cbg-clouds" checked> Clouds</label>
+        <label class="chk"><input type="checkbox" id="cbg-stars"> Stars</label>
+        <button class="mini wide" id="btn-add-bg">＋ Add custom background</button>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Textures</summary>
+      <div class="sec-body">
+        <label class="field">Upload image → key<input type="text" id="tex-key" placeholder="key (blank = filename)"></label>
+        <input type="file" id="tex-upload" accept="image/*">
+        <div id="tex-list"></div>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Scripts</summary>
+      <div class="sec-body">
+        <div class="two">
+          <label class="field">Scope<select id="script-scope">
+            <option value="level">This level</option><option value="global">Whole game</option>
+          </select></label>
+          <label class="field">Hook<select id="script-hook">
+            <option>onLevelStart</option><option>onUpdate</option><option>onBirdLaunch</option><option>onBirdLand</option>
+            <option>onBirdLost</option><option>onBlockDestroyed</option><option>onPigKilled</option><option>onBossSpawn</option>
+            <option>onBossPhaseChange</option><option>onBossKilled</option><option>onExplosion</option><option>onVictory</option><option>onDefeat</option>
+          </select></label>
+        </div>
+        <button class="mini wide" id="btn-add-script">＋ Add script</button>
+        <div id="script-list" style="margin-top:8px"></div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ===================== BOTTOM BAR ===================== -->
+<div id="bottombar">
+  <span>Objects: <b id="obj-count">0</b></span>
+  <span>Mouse: <b id="mouse-pos">0, 0</b></span>
+  <span>Zoom: <b id="zoom">1.00×</b></span>
+  <span>v<b>2.0</b></span>
+</div>
+
+<!-- ===================== SCRIPT MODAL ===================== -->
+<div id="script-modal" class="hidden">
+  <div class="mhead">
+    <h2 id="script-title">Script</h2>
+    <div class="r">
+      <select id="script-tmpl"><option value="">— Insert template —</option></select>
+      <button class="tb primary" id="script-apply">✔ Apply</button>
+      <button class="tb" id="script-cancel">✕ Cancel</button>
+    </div>
+  </div>
+  <textarea id="script-code" spellcheck="false" placeholder="// Write your script here. See docs/scripting.md for the full ctx API."></textarea>
+</div>
+
+<!-- ===================== ENGINE + EDITOR ===================== -->
+<script src="engine/matter.min.js"></script>
+<script src="engine/core.js"></script>
+<script src="engine/assets.js"></script>
+<script src="engine/camera.js"></script>
+<script src="engine/physics.js"></script>
+<script src="engine/abilities.js"></script>
+<script src="engine/entities.js"></script>
+<script src="engine/renderer.js"></script>
+<script src="engine/scripting.js"></script>
+<script src="engine/boss.js"></script>
+<script src="engine/game.js"></script>
+<script src="engine/campaign.js"></script>
+<script src="editor/editor.js"></script>
+</body>
+</html>

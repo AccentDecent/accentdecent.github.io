@@ -1,0 +1,35 @@
+/* ===== Angry Birds Framework — player ===== */
+html,body{height:100%;overflow:hidden;background:#0b0c16}
+#stage{position:fixed;inset:0}
+#game-canvas{display:block;width:100%;height:100%;touch-action:none}
+
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+#level-name{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#fff;font-weight:700;
+  font-size:16px;text-shadow:0 2px 6px #0009}
+#score{position:absolute;top:10px;right:16px;color:var(--gold);font-weight:800;font-size:22px;text-shadow:0 2px 6px #0009}
+#birds{position:absolute;top:40px;right:16px;display:flex;gap:5px;align-items:center;flex-direction:row-reverse}
+.bird-chip{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:16px;background:rgba(20,22,40,.55);border:2px solid rgba(255,255,255,.25);box-shadow:0 2px 6px #0006}
+.bird-chip.cur{border-color:var(--gold);width:38px;height:38px;font-size:20px;box-shadow:0 0 12px rgba(255,207,64,.55)}
+#ability-btn{position:absolute;bottom:22px;right:22px;pointer-events:auto;background:var(--accent);color:#fff;
+  border:0;border-radius:30px;padding:11px 20px;font-size:15px;font-weight:700;box-shadow:0 6px 18px #0007;cursor:pointer;
+  display:flex;align-items:center;gap:8px;transition:transform .1s,filter .2s}
+#ability-btn:active{transform:scale(.96)}
+#ability-btn kbd{background:rgba(0,0,0,.28);border-radius:6px;padding:2px 7px;font-size:11px;font-family:inherit;font-weight:600}
+#ability-btn.dim{filter:grayscale(.7) brightness(.8);opacity:.75}
+#ability-btn.ready{animation:abpulse 1s ease-in-out infinite}
+@keyframes abpulse{0%,100%{box-shadow:0 6px 18px #0007}50%{box-shadow:0 6px 26px rgba(233,69,96,.9)}}
+#toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:#000b;color:#fff;
+  padding:11px 20px;border-radius:12px;font-weight:600;opacity:0;transition:opacity .25s;max-width:80vw;text-align:center}
+#toast.show{opacity:1}
+#topleft{position:absolute;top:10px;left:12px;display:flex;gap:8px;pointer-events:auto}
+.hud-btn{background:rgba(20,22,40,.7);color:#fff;border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px;font-size:13px;cursor:pointer}
+.hud-btn:hover{background:rgba(40,44,80,.9)}
+
+#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  gap:14px;color:var(--muted);background:#0b0c16;z-index:70}
+#loader .sp{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.drop-hint{border:2px dashed var(--border);border-radius:12px;padding:22px 30px;text-align:center;max-width:460px}
+.drop-hint b{color:var(--text)}

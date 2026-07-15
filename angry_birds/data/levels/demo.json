@@ -1,0 +1,111 @@
+{
+  "format": "ab-game",
+  "version": "2.0.0",
+  "id": "demo",
+  "title": "Demo Level",
+  "description": "Standalone example level.",
+  "settings": {
+    "allowLevelSelect": false
+  },
+  "story": {},
+  "textures": {},
+  "customMaterials": {},
+  "customBirds": {},
+  "customPigs": {},
+  "customBosses": {},
+  "customBackgrounds": {},
+  "globalScripts": [],
+  "levels": [
+    {
+      "id": "l1",
+      "name": "First Nest",
+      "background": "sky",
+      "gravity": {
+        "x": 0,
+        "y": 1
+      },
+      "world": {
+        "left": -400,
+        "right": 1600,
+        "groundY": 550
+      },
+      "camera": {
+        "start": {
+          "x": 560,
+          "y": 360
+        },
+        "zoom": 0.72
+      },
+      "slingshot": {
+        "x": 180,
+        "y": 430
+      },
+      "birds": [
+        {
+          "type": "red"
+        },
+        {
+          "type": "red"
+        },
+        {
+          "type": "chuck"
+        }
+      ],
+      "pigs": [
+        {
+          "type": "normal",
+          "x": 760,
+          "y": 530
+        },
+        {
+          "type": "normal",
+          "x": 980,
+          "y": 530
+        }
+      ],
+      "blocks": [
+        {
+          "type": "wood",
+          "x": 726,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "wood",
+          "x": 794,
+          "y": 506,
+          "angle": 90
+        },
+        {
+          "type": "wood",
+          "x": 760,
+          "y": 451,
+          "width": 88,
+          "height": 22,
+          "angle": 0
+        },
+        {
+          "type": "wood_block",
+          "x": 940,
+          "y": 528
+        },
+        {
+          "type": "wood_block",
+          "x": 1020,
+          "y": 528
+        }
+      ],
+      "bosses": [],
+      "props": [],
+      "starThresholds": [
+        8000,
+        15000,
+        25000
+      ],
+      "scripts": [],
+      "intro": "The pigs have stolen the eggs again. Start small — knock down their flimsy wooden huts!",
+      "outro": null,
+      "nextLevel": null
+    }
+  ]
+}

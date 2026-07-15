@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Play — AB Framework</title>
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/play.css">
+</head>
+<body>
+
+<div id="stage"><canvas id="game-canvas"></canvas></div>
+
+<div id="hud">
+  <div id="topleft">
+    <button class="hud-btn" id="btn-menu" title="Level select">☰</button>
+    <a class="hud-btn" href="index.html" title="Home">⌂</a>
+  </div>
+  <div id="level-name"></div>
+  <div id="score">0</div>
+  <div id="birds" title="Your flock — leftmost is loaded next"></div>
+  <button id="ability-btn"><span id="ab-label">✨ Ability</span><kbd>Space</kbd></button>
+  <div id="toast"></div>
+</div>
+
+<div id="loader">
+  <div class="sp"></div>
+  <div id="loader-text">Loading game…</div>
+  <div class="drop-hint hidden" id="drop-hint">
+    <p><b>No game found.</b></p>
+    <p>Drop a <code>game.json</code> here, or open one:</p>
+    <p style="margin-top:10px"><input type="file" id="file-game" accept=".json"></p>
+    <p style="margin-top:10px" class="muted">Tip: run a local server (<code>python -m http.server</code>) and open
+      <code>play.html?src=data/game.json</code>, or build a game in the <a href="editor.html">editor</a>.</p>
+  </div>
+</div>
+
+<!-- ENGINE -->
+<script src="engine/matter.min.js"></script>
+<script src="engine/core.js"></script>
+<script src="engine/assets.js"></script>
+<script src="engine/camera.js"></script>
+<script src="engine/physics.js"></script>
+<script src="engine/abilities.js"></script>
+<script src="engine/entities.js"></script>
+<script src="engine/renderer.js"></script>
+<script src="engine/scripting.js"></script>
+<script src="engine/boss.js"></script>
+<script src="engine/game.js"></script>
+<script src="engine/campaign.js"></script>
+<!-- offline fallback game (window.AB_EXAMPLE_GAME) -->
+<script src="data/example-game.js"></script>
+
+<script>
+(function () {
+  const cv = document.getElementById('game-canvas');
+  AB.Renderer.init(cv);
+  AB.Camera.attach(cv);
+
+  const ABILITY_LABELS = { speed_boost: 'Speed Boost', split: 'Split', explode: 'Detonate', egg_drop: 'Egg Drop', boomerang: 'Boomerang', inflate: 'Inflate', freeze: 'Freeze', custom: 'Special' };
+  function birdChip(type, cur) { const d = AB.birdDef(type) || {}; return '<span class="bird-chip' + (cur ? ' cur' : '') + '" title="' + (d.name || type) + '">' + (d.icon || '🐦') + '</span>'; }
+  const abBtn = document.getElementById('ability-btn'), abLabel = document.getElementById('ab-label');
+
+  const hud = {
+    setScore: (s) => document.getElementById('score').textContent = s.toLocaleString(),
+    setBirds: (b) => {
+      const chips = [];
+      if (b.current) chips.push(birdChip(b.current.ref.type, true));
+      for (const s of b.queue) chips.push(birdChip(s.type, false));
+      document.getElementById('birds').innerHTML = chips.join('');
+      const cur = b.current, has = cur && cur.ref.ability && cur.ref.ability !== 'none';
+      abLabel.textContent = has ? '✨ ' + (ABILITY_LABELS[cur.ref.ability] || 'Ability') : '— no power —';
+      abBtn.classList.toggle('dim', !has);
+    },
+    setState: (st) => abBtn.classList.toggle('ready', st === 'flying'),
+    setLevelName: (n, i, t) => document.getElementById('level-name').textContent = n + '  (' + i + '/' + t + ')',
+    message: (t, ms) => { const el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), ms || 2000); }
+  };
+
+  // ---- input: drag to aim, tap / Space / E / button to trigger ability ----
+  cv.addEventListener('pointerdown', (e) => {
+    if (AB.Game.state === 'flying') { AB.Game.activateAbility(); return; }
+    AB.Game.pointerDown(e.clientX, e.clientY);
+  });
+  cv.addEventListener('pointermove', (e) => AB.Game.pointerMove(e.clientX, e.clientY));
+  window.addEventListener('pointerup', () => AB.Game.pointerUp());
+  abBtn.addEventListener('click', function () { AB.Game.activateAbility(); this.blur(); });
+  window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'KeyE') { e.preventDefault(); AB.Game.activateAbility(); } });
+  document.getElementById('btn-menu').addEventListener('click', () => AB.Campaign.showLevelSelect());
+
+  // ---- resolve the game source ----
+  const params = new URLSearchParams(location.search);
+  const src = params.get('src');
+
+  function startGame(game) {
+    document.getElementById('loader').classList.add('hidden');
+    AB.Campaign.start(game, { hud });
+  }
+  function showDrop(msg) {
+    document.getElementById('loader-text').textContent = msg || 'No game found.';
+    document.getElementById('drop-hint').classList.remove('hidden');
+  }
+
+  function fromLocal() { try { const r = localStorage.getItem('ab_editor_playtest'); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+
+  if (src === 'local') {
+    const g = fromLocal();
+    if (g) startGame(g); else showDrop('Nothing handed off from the editor.');
+  } else if (src) {
+    fetch(src).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(startGame)
+      .catch(() => { if (window.AB_EXAMPLE_GAME) startGame(window.AB_EXAMPLE_GAME); else showDrop('Could not load ' + src + '.'); });
+  } else {
+    // default: try the bundled game.json, else the embedded example
+    fetch('data/game.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(startGame)
+      .catch(() => { if (window.AB_EXAMPLE_GAME) startGame(window.AB_EXAMPLE_GAME); else showDrop(); });
+  }
+
+  // ---- drag & drop / file open fallback ----
+  function loadFile(file) { const r = new FileReader(); r.onload = (e) => { try { startGame(JSON.parse(e.target.result)); } catch (err) { alert('Invalid JSON: ' + err.message); } }; r.readAsText(file); }
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  const fg = document.getElementById('file-game'); if (fg) fg.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+/* ===== Angry Birds Framework — editor layout ===== */
+html,body{height:100%;overflow:hidden}
+body{display:flex;flex-direction:column;user-select:none}
+
+/* top bar */
+#topbar{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg2);
+  border-bottom:1px solid var(--border);min-height:46px;flex-shrink:0;position:relative;z-index:30}
+#topbar .brand{font-weight:800;color:var(--gold);margin-right:6px;white-space:nowrap}
+#topbar .brand small{color:var(--muted);font-weight:400;font-size:11px}
+#game-title{color:#fff;font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#topbar .spacer{flex:1}
+#status{color:var(--muted);font-size:12px;max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb{background:var(--btn);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);
+  padding:6px 11px;font-size:13px;cursor:pointer;white-space:nowrap;transition:.15s}
+.tb:hover{background:var(--btn-h)}
+.tb.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.tb.go{background:var(--accent2);border-color:var(--accent2);color:#04231b;font-weight:700}
+.sep{width:1px;height:22px;background:var(--border);margin:0 4px}
+
+/* export menu */
+.menu-wrap{position:relative}
+#export-menu{position:absolute;top:110%;right:0;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:4px;min-width:210px;box-shadow:0 12px 30px #0008;z-index:40}
+#export-menu button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);
+  padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+#export-menu button:hover{background:var(--btn-h)}
+
+/* main */
+#main{flex:1;display:flex;overflow:hidden}
+.panel{width:250px;background:var(--panel);overflow-y:auto;flex-shrink:0}
+#left{border-right:1px solid var(--border)}
+#right{border-left:1px solid var(--border);width:290px}
+.panel::-webkit-scrollbar{width:8px}.panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.sec{border-bottom:1px solid var(--border)}
+.sec>summary,.sec-title{list-style:none;cursor:pointer;padding:9px 12px;font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.6px;color:var(--gold);display:flex;align-items:center;gap:6px}
+.sec>summary::-webkit-details-marker{display:none}
+.sec>summary::before{content:'▸';color:var(--muted);transition:.15s}
+.sec[open]>summary::before{transform:rotate(90deg)}
+.sec-body{padding:8px 12px 14px}
+
+label.field{display:block;font-size:11px;color:var(--muted);margin-bottom:7px}
+label.field>input,label.field>select,label.field>textarea,.sec-body input,.sec-body select,.sec-body textarea{
+  width:100%;background:var(--input);border:1px solid var(--border);color:var(--text);border-radius:6px;
+  padding:5px 7px;font-size:12px;font-family:inherit;margin-top:2px}
+textarea{resize:vertical;min-height:52px}
+.two{display:flex;gap:6px}.two>label{flex:1}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;margin:4px 0}
+.chk input{width:auto;margin:0}
+
+/* tools + level list */
+.tool-row{display:flex;gap:4px;padding:8px 12px;flex-wrap:wrap}
+.tool{flex:1;min-width:60px;background:var(--btn);border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:6px;font-size:12px;cursor:pointer}
+.tool.active{background:var(--accent2);border-color:var(--accent2);color:#04231b;font-weight:700}
+#level-list{max-height:150px;overflow:auto;margin-bottom:6px}
+.level-item{padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer;color:#cfd3e6;border:1px solid transparent}
+.level-item:hover{background:var(--bg3)}
+.level-item.active{background:var(--bg3);border-color:var(--accent2);color:#fff}
+.mini{background:var(--btn);border:1px solid var(--border);color:var(--text);border-radius:6px;
+  padding:4px 8px;font-size:11px;cursor:pointer}
+.mini:hover{background:var(--btn-h)}
+.mini.danger{background:#3a1a26;border-color:#5a2740;color:#ff9bb2}
+.mini.wide{width:100%;margin-top:6px}
+
+/* palette */
+.pal-tabs{display:flex;gap:2px;padding:6px 12px 0}
+.pal-tab{flex:1;background:var(--btn);border:1px solid var(--border);color:var(--muted);border-radius:6px 6px 0 0;
+  padding:5px;font-size:11px;cursor:pointer;text-transform:capitalize}
+.pal-tab.active{background:var(--bg3);color:#fff;border-bottom-color:var(--bg3)}
+#palette{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px 12px}
+.pal-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 3px;border-radius:7px;
+  background:var(--bg3);border:2px solid transparent;cursor:pointer;transition:.12s}
+.pal-item:hover{border-color:var(--accent)}
+.pal-item.sel{border-color:var(--accent2);box-shadow:0 0 10px rgba(0,230,168,.3)}
+.pal-item .ic{font-size:20px;filter:drop-shadow(0 1px 1px #0006)}
+.pal-item .nm{font-size:9.5px;color:var(--muted);text-align:center;line-height:1.1}
+
+/* canvas */
+#center{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#canvas-wrap{flex:1;position:relative;background:#0b0c16;overflow:hidden}
+#editor-canvas{position:absolute;inset:0;cursor:crosshair}
+body.testing #editor-canvas{cursor:default}
+
+/* properties */
+#props .tag{font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:capitalize}
+#props label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
+#props input,#props select{width:100%;background:var(--input);border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:5px 7px;font-size:12px;margin-top:2px}
+#props .hint{display:inline-block;width:13px;height:13px;line-height:13px;text-align:center;background:var(--border);
+  border-radius:50%;font-size:9px;margin-left:4px;cursor:help}
+#props .row{margin-top:6px}
+
+/* textures */
+#tex-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.tex-item{display:flex;align-items:center;gap:8px;background:var(--bg3);padding:5px;border-radius:6px}
+.tex-item img{width:34px;height:34px;object-fit:cover;border-radius:4px;background:#0007}
+.tex-item code{flex:1;font-size:11px;color:var(--accent2);overflow:hidden;text-overflow:ellipsis}
+
+/* scripts */
+.script-item{display:flex;justify-content:space-between;align-items:center;background:var(--bg3);
+  padding:5px 8px;border-radius:6px;font-size:11px;margin-bottom:5px}
+
+/* bottom bar */
+#bottombar{display:flex;gap:20px;padding:3px 12px;background:var(--bg2);border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted);flex-shrink:0}
+#bottombar b{color:var(--text)}
+
+/* script modal */
+#script-modal{position:fixed;inset:0;background:rgba(4,5,12,.9);z-index:80;display:flex;flex-direction:column;padding:16px}
+#script-modal .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
+#script-modal h2{color:var(--gold);font-size:16px}
+#script-code{flex:1;width:100%;background:#0b0c18;border:1px solid var(--border);border-radius:8px;color:#dfe3f5;
+  font-family:'JetBrains Mono','Consolas',monospace;font-size:13px;line-height:1.5;padding:12px;resize:none;tab-size:2}
+#script-code:focus{outline:none;border-color:var(--accent2)}
+#script-modal select{background:var(--input);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 8px;font-size:12px}
+.mhead .r{display:flex;gap:6px;align-items:center}
+
+/* test overlay (thin top bar so the canvas stays interactive) */
+#test-overlay{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:14px;
+  padding:8px 14px;background:linear-gradient(180deg,rgba(10,11,22,.92),rgba(10,11,22,0));z-index:20;pointer-events:none}
+#test-overlay button{pointer-events:auto}
+#test-score{color:var(--gold);font-weight:800;font-size:16px}
+#test-birds{display:inline-flex;gap:4px;align-items:center}
+#test-birds .bird-chip{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:14px;background:rgba(20,22,40,.6);border:2px solid rgba(255,255,255,.25)}
+#test-birds .bird-chip.cur{border-color:var(--gold);width:32px;height:32px;font-size:17px}
+#test-hint{color:var(--muted);font-size:12px;margin-left:auto}
+#test-msg{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:#000b;color:#fff;
+  padding:10px 18px;border-radius:10px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none}
+#test-msg.show{opacity:1}
+
+@media(max-width:1000px){.panel{width:210px}#right{width:240px}}
