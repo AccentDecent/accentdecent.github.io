@@ -1,659 +1,783 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ImageExplorer — shared library</title>
-<style>
-  :root { --bg:#14161a; --alt:#1b1e24; --panel:#20242b; --border:#2e333c;
-          --text:#e6e9ef; --dim:#98a1b0; --accent:#3b82f6; --green:#22c55e; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--text);
-         font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  header { display:flex; gap:12px; align-items:center; flex-wrap:wrap;
-           padding:10px 14px; background:var(--alt); border-bottom:1px solid var(--border);
-           position:sticky; top:0; z-index:5; }
-  h1 { font-size:15px; margin:0; }
-  .dim { color:var(--dim); }
-  input,select,button { background:var(--panel); color:var(--text);
-        border:1px solid var(--border); border-radius:6px; padding:5px 8px; font:inherit; }
-  button { cursor:pointer; } button:hover { background:#262b34; }
-  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  button.on { background:#1d4ed8; border-color:var(--accent); }
-  main { display:flex; gap:0; align-items:flex-start; }
-  aside { width:300px; min-width:220px; max-width:560px; resize:horizontal; overflow:auto;
-          padding:12px; border-right:1px solid var(--border); height:calc(100vh - 56px);
-          position:sticky; top:56px; }
-  section { flex:1; padding:12px; }
-  .group { border:1px solid var(--border); border-radius:8px; background:var(--panel);
-           margin-bottom:10px; padding:8px; }
-  .group h3 { margin:0 0 6px; font-size:12px; color:var(--dim); text-transform:uppercase;
-              letter-spacing:.04em; }
-  .chips { display:flex; flex-wrap:wrap; gap:4px; }
-  .chip { border:1px solid var(--border); border-radius:999px; padding:2px 8px; cursor:pointer;
-          background:var(--alt); font-size:12px; }
-  .chip.sel { background:#1d4ed8; border-color:var(--accent); color:#fff; }
-  .chip small { color:var(--dim); }
-  .chip.sel small { color:#dbeafe; }
-  .person { display:flex; align-items:center; gap:6px; padding:3px 4px; border-radius:6px;
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ImageExplorer — shared library</title>
+    <style>
+        :root { --bg:#14161a; --alt:#1b1e24; --panel:#20242b; --border:#2e333c;
+            --text:#e6e9ef; --dim:#98a1b0; --accent:#3b82f6; --green:#22c55e; }
+        * { box-sizing:border-box; }
+        body { margin:0; background:var(--bg); color:var(--text);
+            font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+        header { display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+            padding:10px 14px; background:var(--alt); border-bottom:1px solid var(--border);
+            position:sticky; top:0; z-index:5; }
+        h1 { font-size:15px; margin:0; }
+        .dim { color:var(--dim); }
+        input,select,button { background:var(--panel); color:var(--text);
+            border:1px solid var(--border); border-radius:6px; padding:5px 8px; font:inherit; }
+        button { cursor:pointer; } button:hover { background:#262b34; }
+        button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+        button.on { background:#1d4ed8; border-color:var(--accent); }
+        main { display:flex; gap:0; align-items:flex-start; }
+        aside { width:300px; min-width:220px; max-width:560px; resize:horizontal; overflow:auto;
+            padding:12px; border-right:1px solid var(--border); height:calc(100vh - 56px);
+            position:sticky; top:56px; }
+        section { flex:1; padding:12px; }
+        .group { border:1px solid var(--border); border-radius:8px; background:var(--panel);
+            margin-bottom:10px; padding:8px; }
+        .group h3 { margin:0 0 6px; font-size:12px; color:var(--dim); text-transform:uppercase;
+            letter-spacing:.04em; }
+        .chips { display:flex; flex-wrap:wrap; gap:4px; }
+        .chip { border:1px solid var(--border); border-radius:999px; padding:2px 8px; cursor:pointer;
+            background:var(--alt); font-size:12px; }
+        .chip.sel { background:#1d4ed8; border-color:var(--accent); color:#fff; }
+        .chip small { color:var(--dim); }
+        .chip.sel small { color:#dbeafe; }
+        .person { display:flex; align-items:center; gap:6px; padding:3px 4px; border-radius:6px;
             cursor:pointer; }
-  .person:hover { background:#262b34; }
-  .person.sel { background:#1d4ed8; }
-  .person img { width:34px; height:34px; border-radius:50%; object-fit:cover; background:#2a2f38; }
-  .person img.body { border-radius:8px; object-fit:contain; }
-  #grid { display:flex; flex-wrap:wrap; gap:8px; }
-  .card { width:186px; background:var(--alt); border:1px solid var(--border); border-radius:8px;
-          overflow:hidden; cursor:pointer; }
-  .card:hover { border-color:var(--accent); }
-  .card.marked { border-color:#eab308; box-shadow:0 0 0 1px #eab308 inset; }
-  .star { position:absolute; top:6px; right:6px; width:24px; height:24px; border-radius:6px;
-          background:rgba(0,0,0,.55); color:#cbd5e1; display:flex; align-items:center;
-          justify-content:center; font-size:15px; cursor:pointer; user-select:none; }
-  .star:hover { background:rgba(0,0,0,.8); color:#fff; }
-  .card.marked .star { color:#eab308; }
-  .card { position:relative; }
-  #markBar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  #markBar .count { color:#eab308; font-weight:600; }
-  .card .thumb { width:100%; height:150px; object-fit:cover; background:#23272e; display:block; }
-  .card .thumb.noimg { display:flex; align-items:center; justify-content:center;
-                       color:#5b6472; font-size:12px; letter-spacing:.04em;
-                       background:repeating-linear-gradient(45deg,#1f2329,#1f2329 10px,#23272e 10px,#23272e 20px); }
-  .card .meta { padding:5px 7px; font-size:11px; color:var(--dim); }
-  .card .meta b { color:var(--text); font-weight:600; font-size:12px; display:block;
-                  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  dialog { border:1px solid var(--border); border-radius:10px; background:var(--panel);
-           color:var(--text); max-width:1100px; width:92vw; padding:0; }
-  dialog::backdrop { background:rgba(0,0,0,.6); }
-  .dlg { display:flex; gap:14px; padding:14px; }
-  .dlg img.big { max-width:62vw; max-height:76vh; object-fit:contain; background:#111; }
-  .dlg .side { width:340px; overflow:auto; max-height:76vh; }
-  .kv { display:grid; grid-template-columns:96px 1fr; gap:2px 8px; font-size:12px; }
-  .kv div:nth-child(odd) { color:var(--dim); }
-  .banner { background:#1e3a5f; border:1px solid #2b5c95; border-radius:8px; padding:8px 10px;
+        .person:hover { background:#262b34; }
+        .person.sel { background:#1d4ed8; }
+        .person img { width:34px; height:34px; border-radius:50%; object-fit:cover; background:#2a2f38; }
+        .person img.body { border-radius:8px; object-fit:contain; }
+        #grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:8px; }
+        .card { width:auto; background:var(--alt); border:1px solid var(--border); border-radius:8px;
+            overflow:hidden; cursor:pointer; }
+        .card:hover { border-color:var(--accent); }
+        .card.marked { border-color:#eab308; box-shadow:0 0 0 1px #eab308 inset; }
+        .star { position:absolute; top:6px; right:6px; width:24px; height:24px; border-radius:6px;
+            background:rgba(0,0,0,.55); color:#cbd5e1; display:flex; align-items:center;
+            justify-content:center; font-size:15px; cursor:pointer; user-select:none; }
+        .star:hover { background:rgba(0,0,0,.8); color:#fff; }
+        .card.marked .star { color:#eab308; }
+        .card { position:relative; }
+        #markBar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        #markBar .count { color:#eab308; font-weight:600; }
+        .card .thumb { width:100%; aspect-ratio:1/1; height:auto; object-fit:cover;
+            background:#23272e; display:block; }
+        .card .thumb.noimg { aspect-ratio:1/1; height:auto; display:flex; align-items:center;
+            justify-content:center; color:#5b6472; font-size:12px;
+            letter-spacing:.04em;
+            background:repeating-linear-gradient(45deg,#1f2329,#1f2329 10px,#23272e 10px,#23272e 20px); }
+        .card .meta { padding:5px 7px; font-size:11px; color:var(--dim); }
+        .card .meta b { color:var(--text); font-weight:600; font-size:12px; display:block;
+            overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        dialog { border:1px solid var(--border); border-radius:10px; background:var(--panel);
+            color:var(--text); max-width:1100px; width:92vw; padding:0; }
+        dialog::backdrop { background:rgba(0,0,0,.6); }
+        .dlg { display:flex; gap:14px; padding:14px; }
+        .dlg img.big { max-width:62vw; max-height:76vh; object-fit:contain; background:#111; }
+        .dlg .side { width:340px; overflow:auto; max-height:76vh; }
+        .kv { display:grid; grid-template-columns:96px 1fr; gap:2px 8px; font-size:12px; }
+        .kv div:nth-child(odd) { color:var(--dim); }
+        .banner { background:#1e3a5f; border:1px solid #2b5c95; border-radius:8px; padding:8px 10px;
             margin-bottom:10px; font-size:12px; }
-  /* `hidden` must win: a display rule elsewhere (main {display:flex}) otherwise
-     overrides the attribute and the app shell renders above the landing panel,
-     pushing the "Select the exported ZIP" button off screen */
-  [hidden] { display: none !important; }
-  #drop { padding:40px 20px; text-align:center; display:flex; align-items:center;
-          justify-content:center; min-height:70vh; }
-  #drop .dropinner { max-width:620px; }
-  .bigButton { font-size:19px; padding:20px 34px; border-radius:12px; width:100%;
-               background:var(--accent); border:2px solid #60a5fa; color:#fff;
-               font-weight:600; cursor:pointer; box-shadow:0 6px 22px rgba(59,130,246,.28); }
-  .bigButton:hover { background:#4b8ffa; transform:translateY(-1px); }
-  button.linky { background:none; border:none; color:var(--accent); padding:0 3px;
-                 text-decoration:underline; font:inherit; }
-  body.dragging #drop { outline:3px dashed var(--accent); outline-offset:-14px;
-                        background:#1a2433; }
-  /* videos stand out: play badge + duration pill */
-  .thumbwrap { position:relative; display:block; }
-  .playbadge { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-               width:46px; height:46px; border-radius:50%; background:rgba(0,0,0,.55);
-               border:1px solid rgba(255,255,255,.45); color:#fff; display:flex;
-               align-items:center; justify-content:center; font-size:17px; line-height:1;
-               padding-left:3px; box-sizing:border-box; }
-  .durpill { position:absolute; right:5px; bottom:5px; background:rgba(0,0,0,.72);
-             border-radius:4px; padding:1px 5px; font-size:11px; color:#fff;
-             font-variant-numeric:tabular-nums; }
-  #drop { padding:40px; text-align:center; }
-  .hint { color:var(--dim); font-size:12px; margin-top:6px; }
-</style>
+        /* `hidden` must win: a display rule elsewhere (main {display:flex}) otherwise
+           overrides the attribute and the app shell renders above the landing panel,
+           pushing the "Select the exported ZIP" button off screen */
+        [hidden] { display: none !important; }
+        #drop { padding:40px 20px; text-align:center; display:flex; align-items:center;
+            justify-content:center; min-height:70vh; }
+        /* --- mobile / small screens ------------------------------------------- */
+        #sidebarToggle { display:none; }
+        #clearFilters { display:none; }
+        #clearFilters.active { display:inline-flex; }
+        #clearFilters { border-color:#eab308; color:#eab308; }
+        .person.toggle { opacity:.9; }
+        .person.toggle .caret { width:20px; text-align:center; color:var(--dim); font-size:12px;
+            display:flex; align-items:center; justify-content:center; }
+        .person.toggle:hover { background:#262b34; }
+        #scrim { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:20; }
+        #scrim.open { display:block; }
+        @media (max-width: 900px) {
+            header { gap:8px; padding:8px 10px; }
+            #q { flex:1 1 100%; order:3; min-width:0; }
+            #sort { order:4; }
+            #markBar { order:2; gap:6px; }
+            #markBar button { padding:7px 10px; }
+            #sidebarToggle { display:inline-flex; order:1; }
+            #clearFilters.active { order:2; }
+            #sidebar {
+                position:fixed; top:0; left:0; height:100dvh; width:min(86vw, 340px); z-index:30;
+                background:var(--panel); border-right:1px solid var(--border); padding:12px;
+                overflow:auto; transform:translateX(-104%); transition:transform .18s ease;
+            }
+            #sidebar.open { transform:none; }
+            section { padding:10px; }
+            #grid { grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:6px; }
+            .card .meta { font-size:10.5px; padding:4px 6px; }
+            .dlg { flex-direction:column; padding:10px; gap:10px; }
+            .dlg img.big { max-width:100%; max-height:40vh; }
+            .dlg .side { width:auto; max-height:none; }
+            dialog { width:100vw; max-width:100vw; height:100dvh; border-radius:0; margin:0; }
+            .kv { grid-template-columns:88px 1fr; }
+            .hint { display:none; }             /* "drag the zip" is desktop advice */
+            aside { resize:none; }
+        }
+        /* bigger tap targets where there is no mouse */
+        @media (hover: none) {
+            .star { width:34px; height:34px; font-size:18px; }
+            button { min-height:40px; }
+            .chip { padding:5px 10px; }
+            .person img { width:42px; height:42px; }
+        }
+        #drop .dropinner { max-width:620px; }
+        .bigButton { font-size:19px; padding:20px 34px; border-radius:12px; width:100%;
+            background:var(--accent); border:2px solid #60a5fa; color:#fff;
+            font-weight:600; cursor:pointer; box-shadow:0 6px 22px rgba(59,130,246,.28); }
+        .bigButton:hover { background:#4b8ffa; transform:translateY(-1px); }
+        button.linky { background:none; border:none; color:var(--accent); padding:0 3px;
+            text-decoration:underline; font:inherit; }
+        body.dragging #drop { outline:3px dashed var(--accent); outline-offset:-14px;
+            background:#1a2433; }
+        /* videos stand out: play badge + duration pill */
+        .thumbwrap { position:relative; display:block; }
+        .playbadge { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+            width:46px; height:46px; border-radius:50%; background:rgba(0,0,0,.55);
+            border:1px solid rgba(255,255,255,.45); color:#fff; display:flex;
+            align-items:center; justify-content:center; font-size:17px; line-height:1;
+            padding-left:3px; box-sizing:border-box; }
+        .durpill { position:absolute; right:5px; bottom:5px; background:rgba(0,0,0,.72);
+            border-radius:4px; padding:1px 5px; font-size:11px; color:#fff;
+            font-variant-numeric:tabular-nums; }
+        #drop { padding:40px; text-align:center; }
+        .hint { color:var(--dim); font-size:12px; margin-top:6px; }
+    </style>
 </head>
 <body>
 <header id="topbar" hidden>
-  <h1 id="title">ImageExplorer</h1>
-  <span class="dim" id="sub"></span>
-  <span style="flex:1"></span>
-  <input id="q" placeholder="search name, tag, person, place…" style="min-width:240px">
-  <select id="sort">
-    <option value="new">Newest first</option>
-    <option value="old">Oldest first</option>
-    <option value="name">Name A→Z</option>
-    <option value="faces">Most faces</option>
-  </select>
-  <span id="markBar">
+    <button id="sidebarToggle" title="filters">☰ Filters</button>
+    <button id="clearFilters" title="clear every filter and the search box">✕ Clear filters</button>
+    <h1 id="title">ImageExplorer</h1>
+    <span class="dim" id="sub"></span>
+    <span style="flex:1"></span>
+    <input id="q" placeholder="search name, tag, person, place…" style="min-width:240px">
+    <select id="sort">
+        <option value="new">Newest first</option>
+        <option value="old">Oldest first</option>
+        <option value="name">Name A→Z</option>
+        <option value="faces">Most faces</option>
+    </select>
+    <span id="markBar">
     <span class="count" id="markedCount">0 marked</span>
     <button id="btnOnlyMarked" title="show only the pictures you marked">show marked</button>
     <button id="btnExportMarked" title="download the marked list as JSON — send it back to the owner">export marked (JSON)</button>
-    <button id="btnClearMarks" title="unmark everything">clear</button>
   </span>
 </header>
 
 <main id="app" hidden>
-  <aside>
-    <div class="group" id="gMedia">
-      <h3>Show</h3>
-      <div class="chips" id="mediaChips"></div>
-    </div>
-    <div class="group" id="gTags">
-      <h3>Tags <span class="dim" id="tagMode"></span></h3>
-      <div class="chips" id="tagChips"></div>
-    </div>
-    <div class="group" id="gPeople">
-      <h3>People (faces)</h3>
-      <div id="peopleList"></div>
-    </div>
-    <div class="group" id="gBodies">
-      <h3>People (whole body)</h3>
-      <div id="bodyList"></div>
-    </div>
-    <div class="group" id="gMisc">
-      <h3>Camera / place</h3>
-      <div class="chips" id="miscChips"></div>
-    </div>
-    <div class="group" id="gOmitted" hidden>
-      <h3>Left out by the owner</h3>
-      <div class="dim" id="omittedList" style="font-size:12px"></div>
-    </div>
-  </aside>
-  <section>
-    <div class="banner">
-      <b>Previews only.</b> Thumbnails, face crops and person cut-outs are included;
-      the full-resolution originals stay with the owner. Each photo shows its original
-      path so you can ask for a specific file.
-    </div>
-    <div class="dim" id="count" style="margin-bottom:8px"></div>
-    <div id="grid"></div>
-    <div class="hint" id="more"></div>
-  </section>
+    <div id="scrim"></div>
+    <aside id="sidebar">
+        <div class="group" id="gMedia">
+            <h3>Show</h3>
+            <div class="chips" id="mediaChips"></div>
+        </div>
+        <div class="group" id="gTags">
+            <h3>Tags <span class="dim" id="tagMode"></span></h3>
+            <div class="chips" id="tagChips"></div>
+        </div>
+        <div class="group" id="gPeople">
+            <h3>People (faces)</h3>
+            <div id="peopleList"></div>
+        </div>
+        <div class="group" id="gBodies">
+            <h3>People (whole body)</h3>
+            <div id="bodyList"></div>
+        </div>
+        <div class="group" id="gMisc">
+            <h3>Camera / place</h3>
+            <div class="chips" id="miscChips"></div>
+        </div>
+        <div class="group" id="gOmitted" hidden>
+            <h3>Left out by the owner</h3>
+            <div class="dim" id="omittedList" style="font-size:12px"></div>
+        </div>
+    </aside>
+    <section>
+        <div class="banner">
+            <b>Previews only.</b> Thumbnails, face crops and person cut-outs are included;
+            the full-resolution originals stay with the owner. Each photo shows its original
+            path so you can ask for a specific file.
+        </div>
+        <div class="dim" id="count" style="margin-bottom:8px"></div>
+        <div id="grid"></div>
+        <div class="hint" id="more"></div>
+    </section>
 </main>
 
 <div id="drop">
-  <div class="dropinner">
-    <h1>Shared photo library</h1>
-    <p class="dim">Select the <b>.zip</b> that ImageExplorer exported — it loads right here.
-       Nothing is uploaded: the page reads the file on your machine.</p>
-    <input type="file" id="zipPick" accept=".zip,application/zip" hidden>
-    <button id="bigZip" class="bigButton">📦&nbsp;&nbsp;Select the exported ZIP</button>
-    <p class="dim" style="margin-top:16px">
-      <input type="file" id="dirPick" webkitdirectory directory multiple hidden>
-      or <button class="linky" id="folderBtn">choose the unzipped folder</button> instead
-    </p>
-    <p class="hint">You can also drag the .zip — or the unzipped files — onto this window.</p>
-    <div class="hint" id="loadMsg"></div>
-  </div>
+    <div class="dropinner">
+        <h1>Shared photo library</h1>
+        <p class="dim">Select the <b>.zip</b> that ImageExplorer exported — it loads right here.
+            Nothing is uploaded: the page reads the file on your machine.</p>
+        <input type="file" id="zipPick" accept=".zip,application/zip" hidden>
+        <button id="bigZip" class="bigButton">📦&nbsp;&nbsp;Select the exported ZIP</button>
+        <p class="dim" style="margin-top:16px">
+            <input type="file" id="dirPick" webkitdirectory directory multiple hidden>
+            or <button class="linky" id="folderBtn">choose the unzipped folder</button> instead
+        </p>
+        <p class="hint">You can also drag the .zip — or the unzipped files — onto this window.</p>
+        <div class="hint" id="loadMsg"></div>
+    </div>
 </div>
 
 <dialog id="detail"><div class="dlg">
-  <div><img class="big" id="dImg" alt=""></div>
-  <div class="side">
-    <h1 id="dTitle" style="font-size:14px"></h1>
-    <div class="kv" id="dMeta"></div>
-    <p><button onclick="step(-1)">‹ prev</button> <button onclick="step(1)">next ›</button>
-       <button onclick="document.getElementById('detail').close()">close</button></p>
-  </div>
+    <div><img class="big" id="dImg" alt=""></div>
+    <div class="side">
+        <h1 id="dTitle" style="font-size:14px"></h1>
+        <div class="kv" id="dMeta"></div>
+        <p><button onclick="step(-1)">‹ prev</button> <button onclick="step(1)">next ›</button>
+            <button onclick="document.getElementById('detail').close()">close</button></p>
+    </div>
 </div></dialog>
 
 <script>
-/* ------------------------------------------------------------------ state -- */
-const S = { m:null, images:[], people:[], bodies:[], tags:{}, urls:new Map(),
-            source:null, zip:null, filter:{tags:new Set(), person:null, body:null,
-            media:'all', cam:null, place:null, withFaces:false}, q:'', sort:'new',
-            idx:-1, shown:0 };
+    /* ------------------------------------------------------------------ state -- */
+    const S = { m:null, images:[], people:[], bodies:[], tags:{}, urls:new Map(),
+        source:null, zip:null, filter:{tags:new Set(), person:null, body:null,
+            media:'all', cam:null, place:null, withFaces:false},
+        showUnnamed:{face:false, body:false},
+        q:'', sort:'new', idx:-1, shown:0 };
 
-const el = id => document.getElementById(id);
-const esc = s => (s ?? '').toString().replace(/[&<>"]/g, c =>
-  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const el = id => document.getElementById(id);
+    const esc = s => (s ?? '').toString().replace(/[&<>"]/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-/* ------------------------------------------------------- loading sources -- */
-/* 1. next to the page (unzipped folder or a served copy) — zero clicks */
-async function tryAuto() {
-  try {
-    const r = await fetch('manifest.json', {cache:'no-store'});
-    if (!r.ok) return false;
-    const m = await r.json();
-    S.source = {kind:'relative'};
-    boot(m);
-    return true;
-  } catch (e) { return false; }
-}
-
-/* 2. a picked folder (webkitdirectory) */
-async function openFiles(files) {
-  const map = new Map();
-  for (const f of files) {
-    const full = f.webkitRelativePath || f.name;
-    // index by full relative path AND by bare name, so either layout resolves
-    map.set(full.split('/').slice(1).join('/') || f.name, f);
-    map.set(f.name, f);
-  }
-  let mf = [...map.values()].find(f => f.name === 'manifest.json');
-  if (!mf) { el('loadMsg').textContent = 'no manifest.json among those files — pick the zip, or the whole unzipped folder.';
-             return; }
-  el('loadMsg').textContent = 'reading…';
-  S.source = {kind:'map', map};
-  boot(JSON.parse(await mf.text()));
-}
-
-el('dirPick').addEventListener('change', ev => openFiles([...ev.target.files]));
-
-/* 3. a picked .zip — parsed in the browser, deflate via DecompressionStream */
-async function openZip(file) {
-  if (!file) return;
-  el('loadMsg').textContent = 'reading the zip…';
-  try {
-    const zip = await ZipReader.open(file);
-    const mf = await zip.text('manifest.json');
-    S.zip = zip;
-    S.source = {kind:'zip'};
-    boot(JSON.parse(mf));
-  } catch (e) {
-    el('loadMsg').textContent = 'could not read that zip: ' + e.message +
-      '  (tip: unzip it and pick the folder instead)';
-  }
-}
-
-el('zipPick').addEventListener('change', ev => openZip(ev.target.files[0]));
-el('bigZip').onclick = () => el('zipPick').click();
-el('folderBtn').onclick = () => el('dirPick').click();
-
-/* drag and drop: a .zip, or the loose files of an unzipped export */
-document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('dragging'); });
-document.addEventListener('dragleave', e => {
-  if (e.target === document.documentElement || e.target === document.body)
-    document.body.classList.remove('dragging');
-});
-document.addEventListener('drop', async e => {
-  e.preventDefault();
-  document.body.classList.remove('dragging');
-  if (!el('drop').hidden) {
-    const files = [...(e.dataTransfer.files || [])];
-    if (!files.length) return;
-    if (files.length === 1 && /\.zip$/i.test(files[0].name)) openZip(files[0]);
-    else openFiles(files);
-  }
-});
-
-/* minimal zip reader: central directory + stored/deflate-raw entries */
-const ZipReader = {
-  async open(file) {
-    const buf = await file.arrayBuffer();
-    const dv = new DataView(buf), u8 = new Uint8Array(buf);
-    let eocd = -1;
-    for (let i = u8.length - 22; i >= Math.max(0, u8.length - 66000); i--) {
-      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    /* ------------------------------------------------------- loading sources -- */
+    /* 1. next to the page (unzipped folder or a served copy) — zero clicks */
+    async function tryAuto() {
+        try {
+            const r = await fetch('manifest.json', {cache:'no-store'});
+            if (!r.ok) return false;
+            const m = await r.json();
+            S.source = {kind:'relative'};
+            boot(m);
+            return true;
+        } catch (e) { return false; }
     }
-    if (eocd < 0) throw new Error('not a zip');
-    const count = dv.getUint16(eocd + 10, true);
-    let off = dv.getUint32(eocd + 16, true);
-    const entries = new Map();
-    const dec = new TextDecoder();
-    for (let i = 0; i < count; i++) {
-      if (dv.getUint32(off, true) !== 0x02014b50) break;
-      const method = dv.getUint16(off + 10, true);
-      const csize = dv.getUint32(off + 20, true);
-      const usize = dv.getUint32(off + 24, true);
-      const nlen = dv.getUint16(off + 28, true);
-      const elen = dv.getUint16(off + 30, true);
-      const clen = dv.getUint16(off + 32, true);
-      const lho = dv.getUint32(off + 42, true);
-      const name = dec.decode(u8.subarray(off + 46, off + 46 + nlen));
-      entries.set(name, {method, csize, usize, lho});
-      off += 46 + nlen + elen + clen;
+
+    /* 2. a picked folder (webkitdirectory) */
+    async function openFiles(files) {
+        const map = new Map();
+        for (const f of files) {
+            const full = f.webkitRelativePath || f.name;
+            // index by full relative path AND by bare name, so either layout resolves
+            map.set(full.split('/').slice(1).join('/') || f.name, f);
+            map.set(f.name, f);
+        }
+        let mf = [...map.values()].find(f => f.name === 'manifest.json');
+        if (!mf) { el('loadMsg').textContent = 'no manifest.json among those files — pick the zip, or the whole unzipped folder.';
+            return; }
+        el('loadMsg').textContent = 'reading…';
+        S.source = {kind:'map', map};
+        boot(JSON.parse(await mf.text()));
     }
-    return {buf, u8, dv, entries, file,
-            // hand back an object that can actually read entries: open() returns
-            // data, not the reader, so the methods have to travel with it
-            blob: name => ZipReader.blob.call({u8, dv, entries}, name),
-            text: async name => await ZipReader.blob.call({u8, dv, entries}, name).then(b => b.text())};
-  },
-  async blob(name) {
-    const e = this.entries.get(name);
-    if (!e) return null;
-    const nlen = this.dv.getUint16(e.lho + 26, true);
-    const elen = this.dv.getUint16(e.lho + 28, true);
-    const start = e.lho + 30 + nlen + elen;
-    const raw = this.u8.subarray(start, start + (e.csize || e.usize));
-    if (e.method === 0) return new Blob([raw]);
-    if (typeof DecompressionStream === 'undefined')
-      throw new Error('this browser cannot inflate the zip — unzip it and use "Open folder"');
-    const ds = new DecompressionStream('deflate-raw');
-    const stream = new Blob([raw]).stream().pipeThrough(ds);
-    return await new Response(stream).blob();
-  },
-  async text(name) { const b = await this.blob(name); if (!b) throw new Error(name + ' missing'); return await b.text(); },
-};
 
-/* --------------------------------------------------------------- url glue -- */
-async function urlFor(rel) {
-  if (!rel) return '';
-  if (S.urls.has(rel)) return S.urls.get(rel);
-  let url = '';
-  if (S.source.kind === 'relative') url = rel;
-  else if (S.source.kind === 'map') {
-    const f = S.source.map.get(rel) || S.source.map.get(rel.split('/').pop());
-    url = f ? URL.createObjectURL(f) : '';
-  } else {
-    try { const b = await S.zip.blob(rel); url = b ? URL.createObjectURL(b) : ''; }
-    catch (e) { url = ''; }
-  }
-  S.urls.set(rel, url);
-  return url;
-}
+    el('dirPick').addEventListener('change', ev => openFiles([...ev.target.files]));
 
-/* ------------------------------------------------------------------ boot -- */
-function boot(m) {
-  S.m = m; S.images = m.images || []; S.people = m.persons || [];
-  S.bodies = m.body_groups || []; S.tags = m.tags || {};
-  S.opt = m.options || {};
-  el('drop').hidden = true; el('app').hidden = false; el('topbar').hidden = false;
-  const c = m.counts || {};
-  el('title').textContent = m.library.name || 'library';
-  el('sub').textContent = `${c.images || S.images.length} items · ${c.photos||0} photos · ` +
-      `${c.videos||0} videos · ${c.people||S.people.length} people · ` +
-      `${c.body_groups||S.bodies.length} whole-body groups · exported ${m.generated}`;
-  applyOptions();
-  loadMarks();
-  buildMedia(); buildTags(); buildPeople(); buildBodies(); buildMisc();
-  render();
-}
+    /* 3. a picked .zip — parsed in the browser, deflate via DecompressionStream */
+    async function openZip(file) {
+        if (!file) return;
+        el('loadMsg').textContent = 'reading the zip…';
+        try {
+            const zip = await ZipReader.open(file);
+            const mf = await zip.text('manifest.json');
+            S.zip = zip;
+            S.source = {kind:'zip'};
+            boot(JSON.parse(mf));
+        } catch (e) {
+            el('loadMsg').textContent = 'could not read that zip: ' + e.message +
+                '  (tip: unzip it and pick the folder instead)';
+        }
+    }
 
-/* respect what the owner chose to include: hide the parts that are not there */
-function applyOptions() {
-  const o = S.opt, has = k => o[k] !== false;      // absent options = legacy = everything
-  const toggle = (id, on) => { const n = el(id); if (n) n.hidden = !on; };
-  toggle('gTags', has('tags'));
-  toggle('gPeople', has('people'));
-  toggle('gBodies', has('bodies'));
-  toggle('gMisc', has('metadata') || has('location'));
-  const missing = [];
-  if (!has('thumbs')) missing.push('photo previews (this is a metadata catalogue)');
-  if (!has('tags')) missing.push('tags');
-  if (!has('people')) missing.push('people recognised from faces');
-  if (!has('bodies')) missing.push('whole-body people');
-  if (!has('metadata')) missing.push('camera/lens/exposure');
-  if (!has('location')) missing.push('GPS and place names');
-  if (!has('paths')) missing.push('original file paths');
-  if (missing.length) {
-    el('gOmitted').hidden = false;
-    el('omittedList').innerHTML = missing.map(x => '· ' + esc(x)).join('<br>');
-  }
-  if (!has('thumbs')) {
-    const b = document.querySelector('.banner');
-    b.innerHTML = '<b>No photo previews in this export.</b> ' +
-      'It is a metadata catalogue: names, dates, tags and people only. ' +
-      'Ask the owner for the full-resolution files.';
-  }
-}
+    el('zipPick').addEventListener('change', ev => openZip(ev.target.files[0]));
+    el('bigZip').onclick = () => el('zipPick').click();
+    el('folderBtn').onclick = () => el('dirPick').click();
 
-function buildMedia() {
-  const kinds = [['all','everything'], ['photo','photos'], ['video','videos']];
-  el('mediaChips').innerHTML = kinds.map(([k,label]) =>
-    `<span class="chip${S.filter.media===k?' sel':''}" data-media="${k}">${label}</span>`).join('');
-  el('mediaChips').onclick = e => { const k = e.target.dataset.media;
-    if (k) { S.filter.media = k; buildMedia(); render(); } };
-}
+    /* drag and drop: a .zip, or the loose files of an unzipped export */
+    document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('dragging'); });
+    document.addEventListener('dragleave', e => {
+        if (e.target === document.documentElement || e.target === document.body)
+            document.body.classList.remove('dragging');
+    });
+    document.addEventListener('drop', async e => {
+        e.preventDefault();
+        document.body.classList.remove('dragging');
+        if (!el('drop').hidden) {
+            const files = [...(e.dataTransfer.files || [])];
+            if (!files.length) return;
+            if (files.length === 1 && /\.zip$/i.test(files[0].name)) openZip(files[0]);
+            else openFiles(files);
+        }
+    });
 
-function buildTags() {
-  const counts = new Map();
-  for (const im of S.images) for (const [t] of (im.tags||[])) counts.set(t, (counts.get(t)||0)+1);
-  const list = [...counts.entries()].sort((a,b) => b[1]-a[1]).slice(0, 70);
-  el('tagMode').textContent = list.length ? '(any of)' : '';
-  el('tagChips').innerHTML = list.map(([t,n]) =>
-    `<span class="chip${S.filter.tags.has(t)?' sel':''}" data-tag="${esc(t)}">${esc(t)} <small>${n}</small></span>`).join('');
-  el('tagChips').onclick = e => { const t = e.target.closest('[data-tag]');
-    if (!t) return; const name = t.dataset.tag;
-    S.filter.tags.has(name) ? S.filter.tags.delete(name) : S.filter.tags.add(name);
-    buildTags(); render(); };
-}
+    /* minimal zip reader: central directory + stored/deflate-raw entries */
+    const ZipReader = {
+        async open(file) {
+            const buf = await file.arrayBuffer();
+            const dv = new DataView(buf), u8 = new Uint8Array(buf);
+            let eocd = -1;
+            for (let i = u8.length - 22; i >= Math.max(0, u8.length - 66000); i--) {
+                if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+            }
+            if (eocd < 0) throw new Error('not a zip');
+            const count = dv.getUint16(eocd + 10, true);
+            let off = dv.getUint32(eocd + 16, true);
+            const entries = new Map();
+            const dec = new TextDecoder();
+            for (let i = 0; i < count; i++) {
+                if (dv.getUint32(off, true) !== 0x02014b50) break;
+                const method = dv.getUint16(off + 10, true);
+                const csize = dv.getUint32(off + 20, true);
+                const usize = dv.getUint32(off + 24, true);
+                const nlen = dv.getUint16(off + 28, true);
+                const elen = dv.getUint16(off + 30, true);
+                const clen = dv.getUint16(off + 32, true);
+                const lho = dv.getUint32(off + 42, true);
+                const name = dec.decode(u8.subarray(off + 46, off + 46 + nlen));
+                entries.set(name, {method, csize, usize, lho});
+                off += 46 + nlen + elen + clen;
+            }
+            return {buf, u8, dv, entries, file,
+                // hand back an object that can actually read entries: open() returns
+                // data, not the reader, so the methods have to travel with it
+                blob: name => ZipReader.blob.call({u8, dv, entries}, name),
+                text: async name => await ZipReader.blob.call({u8, dv, entries}, name).then(b => b.text())};
+        },
+        async blob(name) {
+            const e = this.entries.get(name);
+            if (!e) return null;
+            const nlen = this.dv.getUint16(e.lho + 26, true);
+            const elen = this.dv.getUint16(e.lho + 28, true);
+            const start = e.lho + 30 + nlen + elen;
+            const raw = this.u8.subarray(start, start + (e.csize || e.usize));
+            if (e.method === 0) return new Blob([raw]);
+            if (typeof DecompressionStream === 'undefined')
+                throw new Error('this browser cannot inflate the zip — unzip it and use "Open folder"');
+            const ds = new DecompressionStream('deflate-raw');
+            const stream = new Blob([raw]).stream().pipeThrough(ds);
+            return await new Response(stream).blob();
+        },
+        async text(name) { const b = await this.blob(name); if (!b) throw new Error(name + ' missing'); return await b.text(); },
+    };
 
-function personRow(kind, p, shown) {
-  const img = p.cover ? `<img class="${kind==='body'?'body':''}" data-src="${esc(p.cover)}" alt="">`
-                      : `<img class="${kind==='body'?'body':''}" alt="">`;
-  const sel = (kind === 'face' ? S.filter.person === p.id : S.filter.body === p.id) ? ' sel' : '';
-  const n = kind === 'face' ? p.n_photos : p.n_photos;
-  const tag = kind === 'body'
-      ? `<small class="dim">${p.n_bodies} cut-outs${p.person_id ? ' · face-confirmed' : ''}</small>`
-      : `<small class="dim">${p.n_faces} faces</small>`;
-  return `<div class="person${sel}" data-${kind}="${p.id}">${img}
+    /* --------------------------------------------------------------- url glue -- */
+    async function urlFor(rel) {
+        if (!rel) return '';
+        if (S.urls.has(rel)) return S.urls.get(rel);
+        let url = '';
+        if (S.source.kind === 'relative') url = rel;
+        else if (S.source.kind === 'map') {
+            const f = S.source.map.get(rel) || S.source.map.get(rel.split('/').pop());
+            url = f ? URL.createObjectURL(f) : '';
+        } else {
+            try { const b = await S.zip.blob(rel); url = b ? URL.createObjectURL(b) : ''; }
+            catch (e) { url = ''; }
+        }
+        S.urls.set(rel, url);
+        return url;
+    }
+
+    /* ------------------------------------------------------------------ boot -- */
+    function boot(m) {
+        S.m = m; S.images = m.images || []; S.people = m.persons || [];
+        S.bodies = m.body_groups || []; S.tags = m.tags || {};
+        S.opt = m.options || {};
+        el('drop').hidden = true; el('app').hidden = false; el('topbar').hidden = false;
+        const c = m.counts || {};
+        el('title').textContent = m.library.name || 'library';
+        el('sub').textContent = `${c.images || S.images.length} items · ${c.photos||0} photos · ` +
+            `${c.videos||0} videos · ${c.people||S.people.length} people · ` +
+            `${c.body_groups||S.bodies.length} whole-body groups · exported ${m.generated}`;
+        applyOptions();
+        loadMarks();
+        buildMedia(); buildTags(); buildPeople(); buildBodies(); buildMisc();
+        render();
+    }
+
+    /* respect what the owner chose to include: hide the parts that are not there */
+    function applyOptions() {
+        const o = S.opt, has = k => o[k] !== false;      // absent options = legacy = everything
+        const toggle = (id, on) => { const n = el(id); if (n) n.hidden = !on; };
+        toggle('gTags', has('tags'));
+        toggle('gPeople', has('people'));
+        toggle('gBodies', has('bodies'));
+        toggle('gMisc', has('metadata') || has('location'));
+        const missing = [];
+        if (!has('thumbs')) missing.push('photo previews (this is a metadata catalogue)');
+        if (!has('tags')) missing.push('tags');
+        if (!has('people')) missing.push('people recognised from faces');
+        if (!has('bodies')) missing.push('whole-body people');
+        if (!has('metadata')) missing.push('camera/lens/exposure');
+        if (!has('location')) missing.push('GPS and place names');
+        if (!has('paths')) missing.push('original file paths');
+        if (missing.length) {
+            el('gOmitted').hidden = false;
+            el('omittedList').innerHTML = missing.map(x => '· ' + esc(x)).join('<br>');
+        }
+        if (!has('thumbs')) {
+            const b = document.querySelector('.banner');
+            b.innerHTML = '<b>No photo previews in this export.</b> ' +
+                'It is a metadata catalogue: names, dates, tags and people only. ' +
+                'Ask the owner for the full-resolution files.';
+        }
+    }
+
+    function buildMedia() {
+        const kinds = [['all','everything'], ['photo','photos'], ['video','videos']];
+        el('mediaChips').innerHTML = kinds.map(([k,label]) =>
+            `<span class="chip${S.filter.media===k?' sel':''}" data-media="${k}">${label}</span>`).join('');
+        el('mediaChips').onclick = e => { const k = e.target.dataset.media;
+            if (k) { S.filter.media = k; buildMedia(); render(); } };
+    }
+
+    function buildTags() {
+        const counts = new Map();
+        for (const im of S.images) for (const [t] of (im.tags||[])) counts.set(t, (counts.get(t)||0)+1);
+        const list = [...counts.entries()].sort((a,b) => b[1]-a[1]).slice(0, 70);
+        el('tagMode').textContent = list.length ? '(any of)' : '';
+        el('tagChips').innerHTML = list.map(([t,n]) =>
+            `<span class="chip${S.filter.tags.has(t)?' sel':''}" data-tag="${esc(t)}">${esc(t)} <small>${n}</small></span>`).join('');
+        el('tagChips').onclick = e => { const t = e.target.closest('[data-tag]');
+            if (!t) return; const name = t.dataset.tag;
+            S.filter.tags.has(name) ? S.filter.tags.delete(name) : S.filter.tags.add(name);
+            buildTags(); render(); };
+    }
+
+    function personRow(kind, p, shown) {
+        const img = p.cover ? `<img class="${kind==='body'?'body':''}" data-src="${esc(p.cover)}" alt="">`
+            : `<img class="${kind==='body'?'body':''}" alt="">`;
+        const sel = (kind === 'face' ? S.filter.person === p.id : S.filter.body === p.id) ? ' sel' : '';
+        const n = kind === 'face' ? p.n_photos : p.n_photos;
+        const tag = kind === 'body'
+            ? `<small class="dim">${p.n_bodies} cut-outs${p.person_id ? ' · face-confirmed' : ''}</small>`
+            : `<small class="dim">${p.n_faces} faces</small>`;
+        return `<div class="person${sel}" data-${kind}="${p.id}">${img}
       <div><div>${esc(p.name || (kind==='face' ? 'Person #'+p.id : 'Group #'+p.id))}</div>${tag}</div></div>`;
-}
+    }
 
-function buildPeople() {
-  const list = S.people.slice().sort((a,b) => (b.name?1:0)-(a.name?1:0) || b.n_photos-a.n_photos);
-  el('peopleList').innerHTML = list.slice(0, 300).map(p => personRow('face', p)).join('') ||
-    '<span class="dim">no faces exported</span>';
-  el('peopleList').onclick = e => { const d = e.target.closest('[data-face]'); if (!d) return;
-    const id = +d.dataset.face; S.filter.person = S.filter.person === id ? null : id;
-    buildPeople(); render(); };
-}
+    /* Named people are listed; the anonymous groups (usually the large majority)
+       stay collapsed behind a toggle so the list is scannable. A selected unnamed
+       group forces the section open, otherwise you could not see what is filtering. */
+    function buildPeopleList(kind) {
+        const all = (kind === 'face' ? S.people : S.bodies).slice().sort(
+            (a, b) => (b.name ? 1 : 0) - (a.name ? 1 : 0) || b.n_photos - a.n_photos);
+        const named = all.filter(p => p.name);
+        const unnamed = all.filter(p => !p.name);
+        const sel = kind === 'face' ? S.filter.person : S.filter.body;
+        const expanded = S.showUnnamed[kind] || (sel != null && unnamed.some(p => p.id === sel));
 
-function buildBodies() {
-  const list = S.bodies.slice().sort((a,b) => (b.name?1:0)-(a.name?1:0) || b.n_photos-a.n_photos);
-  el('bodyList').innerHTML = list.slice(0, 300).map(p => personRow('body', p)).join('') ||
-    '<span class="dim">no cut-outs exported</span>';
-  el('bodyList').onclick = e => { const d = e.target.closest('[data-body]'); if (!d) return;
-    const id = +d.dataset.body; S.filter.body = S.filter.body === id ? null : id;
-    buildBodies(); render(); };
-}
+        let html = named.length
+            ? named.map(p => personRow(kind, p)).join('')
+            : '<span class="dim">no named people yet</span>';
+        if (unnamed.length) {
+            html += `<div class="person toggle" data-toggle="${kind}" title="groups without a name">
+        <span class="caret">${expanded ? '▾' : '▸'}</span>
+        <div><div>${unnamed.length} unnamed group${unnamed.length > 1 ? 's' : ''}</div>
+        <small class="dim">${expanded ? 'tap to hide' : 'tap to show'}</small></div></div>`;
+            if (expanded) html += unnamed.slice(0, 300).map(p => personRow(kind, p)).join('');
+        }
+        el(kind === 'face' ? 'peopleList' : 'bodyList').innerHTML = html;
+    }
 
-function buildMisc() {
-  const cams = new Map(), places = new Map();
-  for (const im of S.images) {
-    if (im.camera) cams.set(im.camera, (cams.get(im.camera)||0)+1);
-    if (im.place) places.set(im.place, (places.get(im.place)||0)+1);
-  }
-  const chip = (kind, name, n) => {
-    const sel = (kind==='cam' ? S.filter.cam===name : S.filter.place===name) ? ' sel' : '';
-    return `<span class="chip${sel}" data-${kind}="${esc(name)}">${esc(name)} <small>${n}</small></span>`;
-  };
-  el('miscChips').innerHTML =
-    [...cams.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,n])=>chip('cam',k,n)).join('') +
-    [...places.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,n])=>chip('place',k,n)).join('') +
-    `<span class="chip${S.filter.withFaces?' sel':''}" data-faces="1">has people</span>`;
-  el('miscChips').onclick = e => { const t = e.target.closest('.chip'); if (!t) return;
-    if (t.dataset.cam) S.filter.cam = S.filter.cam === t.dataset.cam ? null : t.dataset.cam;
-    else if (t.dataset.place) S.filter.place = S.filter.place === t.dataset.place ? null : t.dataset.place;
-    else if (t.dataset.faces) S.filter.withFaces = !S.filter.withFaces;
-    buildMisc(); render(); };
-}
+    function wirePeopleList(kind) {
+        const host = el(kind === 'face' ? 'peopleList' : 'bodyList');
+        host.onclick = e => {
+            const t = e.target.closest('[data-toggle]');
+            if (t) {
+                const k = t.dataset.toggle;
+                S.showUnnamed[k] = !S.showUnnamed[k];
+                buildPeopleList(kind);
+                return;
+            }
+            const d = e.target.closest(kind === 'face' ? '[data-face]' : '[data-body]');
+            if (!d) return;
+            const id = +d.dataset[kind === 'face' ? 'face' : 'body'];
+            if (kind === 'face') S.filter.person = S.filter.person === id ? null : id;
+            else S.filter.body = S.filter.body === id ? null : id;
+            buildPeopleList(kind); updateClearButton(); render();
+        };
+    }
 
-/* ---------------------------------------------------------------- marks -- */
-/* A visitor ticks the pictures they want, then hands the owner a small JSON so
-   the owner can find exactly those files. Marks survive a reload (localStorage). */
-function markKey() { return 'ie-marked:' + ((S.m && S.m.library && S.m.library.name) || 'library'); }
+    function buildPeople() { buildPeopleList('face'); wirePeopleList('face'); }
 
-function loadMarks() {
-  try { S.marked = new Set(JSON.parse(localStorage.getItem(markKey()) || '[]')); }
-  catch (e) { S.marked = new Set(); }
-  updateMarkBar();
-}
+    function buildBodies() { buildPeopleList('body'); wirePeopleList('body'); }
 
-function saveMarks() {
-  try { localStorage.setItem(markKey(), JSON.stringify([...S.marked])); } catch (e) {}
-}
+    function buildMisc() {
+        const cams = new Map(), places = new Map();
+        for (const im of S.images) {
+            if (im.camera) cams.set(im.camera, (cams.get(im.camera)||0)+1);
+            if (im.place) places.set(im.place, (places.get(im.place)||0)+1);
+        }
+        const chip = (kind, name, n) => {
+            const sel = (kind==='cam' ? S.filter.cam===name : S.filter.place===name) ? ' sel' : '';
+            return `<span class="chip${sel}" data-${kind}="${esc(name)}">${esc(name)} <small>${n}</small></span>`;
+        };
+        el('miscChips').innerHTML =
+            [...cams.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,n])=>chip('cam',k,n)).join('') +
+            [...places.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,n])=>chip('place',k,n)).join('') +
+            `<span class="chip${S.filter.withFaces?' sel':''}" data-faces="1">has people</span>`;
+        el('miscChips').onclick = e => { const t = e.target.closest('.chip'); if (!t) return;
+            if (t.dataset.cam) S.filter.cam = S.filter.cam === t.dataset.cam ? null : t.dataset.cam;
+            else if (t.dataset.place) S.filter.place = S.filter.place === t.dataset.place ? null : t.dataset.place;
+            else if (t.dataset.faces) S.filter.withFaces = !S.filter.withFaces;
+            buildMisc(); render(); };
+    }
 
-function toggleMark(id) {
-  if (S.marked.has(id)) S.marked.delete(id); else S.marked.add(id);
-  saveMarks(); updateMarkBar();
-  const card = document.querySelector(`.card[data-id="${id}"]`);
-  if (card) { card.classList.toggle('marked', S.marked.has(id));
-              card.querySelector('.star').textContent = S.marked.has(id) ? '★' : '☆'; }
-  updateMarkBar();
-}
+    /* ------------------------------------------------------- clear filters -- */
+    function activeFilterCount() {
+        const f = S.filter;
+        return (f.tags.size ? 1 : 0) + (f.person != null ? 1 : 0) + (f.body != null ? 1 : 0)
+            + (f.media !== 'all' ? 1 : 0) + (f.cam ? 1 : 0) + (f.place ? 1 : 0)
+            + (f.withFaces ? 1 : 0) + (f.marked ? 1 : 0) + (S.q ? 1 : 0);
+    }
 
-function updateMarkBar() {
-  el('markedCount').textContent = `${S.marked.size} marked`;
-  el('btnOnlyMarked').classList.toggle('on', !!S.filter.marked);
-  el('btnExportMarked').disabled = S.marked.size === 0;
-}
+    function updateClearButton() {
+        const n = activeFilterCount();
+        const b = el('clearFilters');
+        b.hidden = n === 0;
+        b.classList.toggle('active', n > 0);
+        b.textContent = n ? `✕ Clear filters (${n})` : '✕ Clear filters';
+    }
 
-function buildRequest() {
-  const picked = S.images.filter(im => S.marked.has(im.id));
-  return {
-    format: 'imageexplorer-request/1',
-    library: (S.m && S.m.library && S.m.library.name) || '',
-    generated: new Date().toISOString().replace('T', ' ').slice(0, 19),
-    count: picked.length,
-    note: 'Pictures marked in the shared viewer by the recipient.',
-    images: picked.map(im => ({
-      id: im.id, name: im.name, path: im.path || '', taken: im.taken || '',
-      type: im.type, people: (im.faces || []).map(f => f.person).filter(Boolean),
-    })),
-  };
-}
+    function clearFilters() {
+        S.filter = {tags:new Set(), person:null, body:null, media:'all', cam:null, place:null,
+            withFaces:false, marked:false};
+        S.q = '';
+        const q = el('q');
+        if (q) q.value = '';
+        buildMedia(); buildTags(); buildPeople(); buildBodies(); buildMisc();
+        updateClearButton();
+        render();
+    }
+    el('clearFilters').onclick = clearFilters;
 
-function downloadRequest() {
-  if (!S.marked.size) return;
-  const data = JSON.stringify(buildRequest(), null, 1);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([data], {type: 'application/json'}));
-  a.download = ((S.m.library && S.m.library.name) || 'library') + '.requested.json';
-  document.body.appendChild(a); a.click(); a.remove();
-}
+    /* ------------------------------------------------------- mobile drawer -- */
+    /* Under 900px the sidebar becomes an off-canvas panel with a Filters button. */
+    function narrowScreen() { return window.matchMedia('(max-width: 900px)').matches; }
+    function toggleSidebar(on) {
+        const open = (typeof on === 'boolean') ? on : !el('sidebar').classList.contains('open');
+        el('sidebar').classList.toggle('open', open);
+        el('scrim').classList.toggle('open', open);
+    }
+    el('sidebarToggle').onclick = () => toggleSidebar();
+    el('scrim').onclick = () => toggleSidebar(false);
+    /* picking a filter should reveal the grid again on a phone.
+       Capture phase on purpose: the filter handlers re-render their lists, which
+       detaches the clicked chip before a bubbling listener could inspect it. */
+    document.addEventListener('click', e => {
+        if (!narrowScreen()) return;
+        if (e.target.closest && e.target.closest('#sidebar .chip, #sidebar .person'))
+            toggleSidebar(false);
+    }, true);
 
-el('btnOnlyMarked').onclick = () => { S.filter.marked = !S.filter.marked; updateMarkBar(); render(); };
-el('btnExportMarked').onclick = downloadRequest;
-el('btnClearMarks').onclick = () => { S.marked.clear(); saveMarks(); render(); };
+    /* ---------------------------------------------------------------- marks -- */
+    /* A visitor ticks the pictures they want, then hands the owner a small JSON so
+       the owner can find exactly those files. Marks survive a reload (localStorage). */
+    function markKey() { return 'ie-marked:' + ((S.m && S.m.library && S.m.library.name) || 'library'); }
 
-/* ---------------------------------------------------------------- render -- */
-function match(im) {
-  const f = S.filter;
-  if (f.marked && !S.marked.has(im.id)) return false;
-  if (f.media !== 'all' && im.type !== f.media) return false;
-  if (f.cam && im.camera !== f.cam) return false;
-  if (f.place && im.place !== f.place) return false;
-  if (f.withFaces && !(im.faces||[]).length && !(im.bodies||[]).length) return false;
-  const names = new Set((im.faces||[]).map(x => x.person).filter(Boolean));
-  if (f.person != null) {
-    const p = S.people.find(x => x.id === f.person);
-    const want = (p && (p.name || null)) || null;
-    if (want ? !names.has(want) : false) return false;
-    if (!want) { if (!(im.faces||[]).some(x => x.person === '#' + f.person)) return false; }
-  }
-  if (f.body != null) {
-    const g = S.bodies.find(x => x.id === f.body);
-    const want = (g && g.name) || null;
-    const has = (im.bodies||[]).some(x => want ? x.group === want : x.group === '#' + g.id);
-    if (!has) return false;
-  }
-  if (f.tags.size) {
-    const own = new Set((im.tags||[]).map(t => t[0]));
-    let hit = false; for (const t of f.tags) if (own.has(t)) { hit = true; break; }
-    if (!hit) return false;
-  }
-  if (S.q) {
-    const hay = [im.name, im.place, im.camera, im.path, ...(im.faces||[]).map(x=>x.person||''),
-                 ...(im.tags||[]).map(t=>t[0])].join(' ').toLowerCase();
-    if (!hay.includes(S.q)) return false;
-  }
-  return true;
-}
+    function loadMarks() {
+        try { S.marked = new Set(JSON.parse(localStorage.getItem(markKey()) || '[]')); }
+        catch (e) { S.marked = new Set(); }
+        updateMarkBar();
+    }
 
-function sortImages(list) {
-  const s = S.sort;
-  if (s === 'old') list.sort((a,b) => (a.taken||'').localeCompare(b.taken||''));
-  else if (s === 'name') list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
-  else if (s === 'faces') list.sort((a,b) => (b.faces||[]).length - (a.faces||[]).length);
-  else list.sort((a,b) => (b.taken||'').localeCompare(a.taken||''));
-}
+    function saveMarks() {
+        try { localStorage.setItem(markKey(), JSON.stringify([...S.marked])); } catch (e) {}
+    }
 
-const io = new IntersectionObserver(entries => {
-  for (const e of entries) {
-    if (!e.isIntersecting) continue;
-    const img = e.target; io.unobserve(img);
-    urlFor(img.dataset.src).then(u => { if (u) img.src = u; });
-  }
-}, {rootMargin:'600px'});
+    function toggleMark(id) {
+        if (S.marked.has(id)) S.marked.delete(id); else S.marked.add(id);
+        saveMarks(); updateMarkBar();
+        const card = document.querySelector(`.card[data-id="${id}"]`);
+        if (card) { card.classList.toggle('marked', S.marked.has(id));
+            card.querySelector('.star').textContent = S.marked.has(id) ? '★' : '☆'; }
+        updateMarkBar();
+    }
 
-function fmtDur(sec) {
-  if (!sec && sec !== 0) return '';
-  const s = Math.round(sec);
-  return (s >= 3600) ? `${Math.floor(s/3600)}:${String(Math.floor(s%3600/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`
-                     : `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-}
+    function updateMarkBar() {
+        el('markedCount').textContent = `${S.marked.size} marked`;
+        el('btnOnlyMarked').classList.toggle('on', !!S.filter.marked);
+        el('btnExportMarked').disabled = S.marked.size === 0;
+    }
 
-function render() {
-  const list = S.images.filter(match); sortImages(list);
-  el('count').textContent = `${list.length} of ${S.images.length} items`;
-  const grid = el('grid');
-  grid.innerHTML = list.map((im,i) => {
-    const bits = [];
-    if (im.type === 'video') bits.push('video' + (im.duration ? ' · ' + fmtDur(im.duration) : ''));
-    if (im.taken) bits.push(im.taken.slice(0,10));
-    if ((im.faces||[]).length) bits.push(im.faces.length + ' face' + (im.faces.length>1?'s':''));
-    if (im.place) bits.push(im.place);
-    const thumb = im.thumb
-        ? `<img class="thumb" data-src="${esc(im.thumb)}" alt="">`
-        : `<div class="thumb noimg">${esc(im.type === 'video' ? 'video' : 'no preview')}</div>`;
-    const badges = im.type === 'video'
-        ? `<span class="playbadge">▶</span>` +
-          (im.duration ? `<span class="durpill">${fmtDur(im.duration)}</span>` : '')
-        : '';
-    const marked = S.marked.has(im.id);
-    return `<div class="card${marked ? ' marked' : ''}" data-i="${i}" data-id="${im.id}">
+    function buildRequest() {
+        const picked = S.images.filter(im => S.marked.has(im.id));
+        return {
+            format: 'imageexplorer-request/1',
+            library: (S.m && S.m.library && S.m.library.name) || '',
+            generated: new Date().toISOString().replace('T', ' ').slice(0, 19),
+            count: picked.length,
+            note: 'Pictures marked in the shared viewer by the recipient.',
+            images: picked.map(im => ({
+                id: im.id, name: im.name, path: im.path || '', taken: im.taken || '',
+                type: im.type, people: (im.faces || []).map(f => f.person).filter(Boolean),
+            })),
+        };
+    }
+
+    function downloadRequest() {
+        if (!S.marked.size) return;
+        const data = JSON.stringify(buildRequest(), null, 1);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([data], {type: 'application/json'}));
+        a.download = ((S.m.library && S.m.library.name) || 'library') + '.requested.json';
+        document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    el('btnOnlyMarked').onclick = () => { S.filter.marked = !S.filter.marked; updateMarkBar(); render(); };
+    el('btnExportMarked').onclick = downloadRequest;
+
+    /* ---------------------------------------------------------------- render -- */
+    function match(im) {
+        const f = S.filter;
+        if (f.marked && !S.marked.has(im.id)) return false;
+        if (f.media !== 'all' && im.type !== f.media) return false;
+        if (f.cam && im.camera !== f.cam) return false;
+        if (f.place && im.place !== f.place) return false;
+        if (f.withFaces && !(im.faces||[]).length && !(im.bodies||[]).length) return false;
+        const names = new Set((im.faces||[]).map(x => x.person).filter(Boolean));
+        if (f.person != null) {
+            const p = S.people.find(x => x.id === f.person);
+            const want = (p && (p.name || null)) || null;
+            if (want ? !names.has(want) : false) return false;
+            if (!want) { if (!(im.faces||[]).some(x => x.person === '#' + f.person)) return false; }
+        }
+        if (f.body != null) {
+            const g = S.bodies.find(x => x.id === f.body);
+            const want = (g && g.name) || null;
+            const has = (im.bodies||[]).some(x => want ? x.group === want : x.group === '#' + g.id);
+            if (!has) return false;
+        }
+        if (f.tags.size) {
+            const own = new Set((im.tags||[]).map(t => t[0]));
+            let hit = false; for (const t of f.tags) if (own.has(t)) { hit = true; break; }
+            if (!hit) return false;
+        }
+        if (S.q) {
+            const hay = [im.name, im.place, im.camera, im.path, ...(im.faces||[]).map(x=>x.person||''),
+                ...(im.tags||[]).map(t=>t[0])].join(' ').toLowerCase();
+            if (!hay.includes(S.q)) return false;
+        }
+        return true;
+    }
+
+    function sortImages(list) {
+        const s = S.sort;
+        if (s === 'old') list.sort((a,b) => (a.taken||'').localeCompare(b.taken||''));
+        else if (s === 'name') list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+        else if (s === 'faces') list.sort((a,b) => (b.faces||[]).length - (a.faces||[]).length);
+        else list.sort((a,b) => (b.taken||'').localeCompare(a.taken||''));
+    }
+
+    const io = new IntersectionObserver(entries => {
+        for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            const img = e.target; io.unobserve(img);
+            urlFor(img.dataset.src).then(u => { if (u) img.src = u; });
+        }
+    }, {rootMargin:'600px'});
+
+    function fmtDur(sec) {
+        if (!sec && sec !== 0) return '';
+        const s = Math.round(sec);
+        return (s >= 3600) ? `${Math.floor(s/3600)}:${String(Math.floor(s%3600/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`
+            : `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    }
+
+    function render() {
+        const list = S.images.filter(match); sortImages(list);
+        el('count').textContent = `${list.length} of ${S.images.length} items`;
+        const grid = el('grid');
+        grid.innerHTML = list.map((im,i) => {
+            const bits = [];
+            if (im.type === 'video') bits.push('video' + (im.duration ? ' · ' + fmtDur(im.duration) : ''));
+            if (im.taken) bits.push(im.taken.slice(0,10));
+            if ((im.faces||[]).length) bits.push(im.faces.length + ' face' + (im.faces.length>1?'s':''));
+            if (im.place) bits.push(im.place);
+            const thumb = im.thumb
+                ? `<img class="thumb" data-src="${esc(im.thumb)}" alt="">`
+                : `<div class="thumb noimg">${esc(im.type === 'video' ? 'video' : 'no preview')}</div>`;
+            const badges = im.type === 'video'
+                ? `<span class="playbadge">▶</span>` +
+                (im.duration ? `<span class="durpill">${fmtDur(im.duration)}</span>` : '')
+                : '';
+            const marked = S.marked.has(im.id);
+            return `<div class="card${marked ? ' marked' : ''}" data-i="${i}" data-id="${im.id}">
       <span class="thumbwrap">${thumb}${badges}</span>
       <span class="star" data-star="${im.id}" title="mark this picture for the owner">${marked ? '★' : '☆'}</span>
       <div class="meta"><b>${esc(im.name||'')}</b>${esc(bits.join(' · '))}</div></div>`;
-  }).join('');
-  S.list = list;
-  grid.querySelectorAll('img.thumb').forEach(img => io.observe(img));
-  grid.onclick = e => {
-    const star = e.target.closest('[data-star]');
-    if (star) { e.stopPropagation(); toggleMark(+star.dataset.star); return; }
-    const c = e.target.closest('.card');
-    if (c) open2(+c.dataset.i);
-  };
-  loadPeopleThumbs();
-}
+        }).join('');
+        S.list = list;
+        grid.querySelectorAll('img.thumb').forEach(img => io.observe(img));
+        updateClearButton();
+        grid.onclick = e => {
+            const star = e.target.closest('[data-star]');
+            if (star) { e.stopPropagation(); toggleMark(+star.dataset.star); return; }
+            const c = e.target.closest('.card');
+            if (c) open2(+c.dataset.i);
+        };
+        loadPeopleThumbs();
+    }
 
-async function loadPeopleThumbs() {
-  for (const img of document.querySelectorAll('#peopleList img[data-src],#bodyList img[data-src]')) {
-    const u = await urlFor(img.dataset.src);
-    if (u) { img.src = u; img.removeAttribute('data-src'); }
-  }
-}
+    async function loadPeopleThumbs() {
+        for (const img of document.querySelectorAll('#peopleList img[data-src],#bodyList img[data-src]')) {
+            const u = await urlFor(img.dataset.src);
+            if (u) { img.src = u; img.removeAttribute('data-src'); }
+        }
+    }
 
-/* ------------------------------------------------------------------ view -- */
-function open2(i) {
-  S.idx = i;
-  const im = S.list[i];
-  const d = el('detail');
-  el('dTitle').textContent = im.name || '';
-  const faces = (im.faces||[]).map(f => f.person || 'unnamed').join(', ');
-  const bodies = (im.bodies||[]).map(b => b.group || 'unnamed').join(', ');
-  const kv = [
-    ['type', im.type + (im.type === 'video' && im.duration ? ` (${Math.round(im.duration)}s)` : '')],
-    ['taken', im.taken || ''],
-    ['size', im.w && im.h ? `${im.w} × ${im.h}` : ''],
-    ['camera', [im.camera, im.lens].filter(Boolean).join(' · ')],
-    ['exposure', [im.exposure, im.fnumber && 'f/' + im.fnumber, im.iso && 'ISO ' + im.iso,
-                  im.focal && im.focal + ' mm'].filter(Boolean).join('  ')],
-    ['place', [im.place, im.region, im.cc].filter(Boolean).join(', ')],
-    ['tags', (im.tags||[]).map(t => `${t[0]} ${t[1]}`).join(', ')],
-    ['faces', faces], ['whole-body', bodies],
-    ['original', im.path],
-  ].filter(([, v]) => v);
-  el('dMeta').innerHTML = kv.map(([k,v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join('');
-  el('dMeta').innerHTML += `<div></div><div><button id="dMark">${S.marked.has(im.id) ? '★ marked — unmark' : '☆ mark for the owner'}</button></div>`;
-  el('dMark').onclick = () => { toggleMark(im.id);
-    el('dMark').textContent = S.marked.has(im.id) ? '★ marked — unmark' : '☆ mark for the owner'; };
-  urlFor(im.thumb).then(u => { el('dImg').src = u || ''; });
-  if (!d.open) d.showModal();
-}
-function step(delta) {
-  if (S.idx < 0 || !S.list) return;
-  const n = S.list.length;
-  open2(((S.idx + delta) % n + n) % n);
-}
+    /* ------------------------------------------------------------------ view -- */
+    function open2(i) {
+        S.idx = i;
+        const im = S.list[i];
+        const d = el('detail');
+        el('dTitle').textContent = im.name || '';
+        const faces = (im.faces||[]).map(f => f.person || 'unnamed').join(', ');
+        const bodies = (im.bodies||[]).map(b => b.group || 'unnamed').join(', ');
+        const kv = [
+            ['type', im.type + (im.type === 'video' && im.duration ? ` (${Math.round(im.duration)}s)` : '')],
+            ['taken', im.taken || ''],
+            ['size', im.w && im.h ? `${im.w} × ${im.h}` : ''],
+            ['camera', [im.camera, im.lens].filter(Boolean).join(' · ')],
+            ['exposure', [im.exposure, im.fnumber && 'f/' + im.fnumber, im.iso && 'ISO ' + im.iso,
+                im.focal && im.focal + ' mm'].filter(Boolean).join('  ')],
+            ['place', [im.place, im.region, im.cc].filter(Boolean).join(', ')],
+            ['tags', (im.tags||[]).map(t => `${t[0]} ${t[1]}`).join(', ')],
+            ['faces', faces], ['whole-body', bodies],
+            ['original', im.path],
+        ].filter(([, v]) => v);
+        el('dMeta').innerHTML = kv.map(([k,v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join('');
+        el('dMeta').innerHTML += `<div></div><div><button id="dMark">${S.marked.has(im.id) ? '★ marked — unmark' : '☆ mark for the owner'}</button></div>`;
+        el('dMark').onclick = () => { toggleMark(im.id);
+            el('dMark').textContent = S.marked.has(im.id) ? '★ marked — unmark' : '☆ mark for the owner'; };
+        urlFor(im.thumb).then(u => { el('dImg').src = u || ''; });
+        if (!d.open) d.showModal();
+    }
+    function step(delta) {
+        if (S.idx < 0 || !S.list) return;
+        const n = S.list.length;
+        open2(((S.idx + delta) % n + n) % n);
+    }
 
-/* ---------------------------------------------------------------- inputs -- */
-el('q').addEventListener('input', e => { S.q = e.target.value.trim().toLowerCase(); render(); });
-el('sort').addEventListener('change', e => { S.sort = e.target.value; render(); });
-document.addEventListener('keydown', e => {
-  const d = el('detail');
-  if (!d.open) return;
-  if (e.key === 'ArrowRight') step(1);
-  else if (e.key === 'ArrowLeft') step(-1);
-});
+    /* ---------------------------------------------------------------- inputs -- */
+    el('q').addEventListener('input', e => { S.q = e.target.value.trim().toLowerCase(); render(); });
+    el('sort').addEventListener('change', e => { S.sort = e.target.value; render(); });
+    document.addEventListener('keydown', e => {
+        const d = el('detail');
+        if (!d.open) return;
+        if (e.key === 'ArrowRight') step(1);
+        else if (e.key === 'ArrowLeft') step(-1);
+    });
 
-/* auto-load only makes sense when someone parked the data next to the page;
-   on a hosted page this simply fails and the picker is used instead */
-tryAuto().then(ok => {
-  if (!ok) el('loadMsg').textContent =
-    'Select the .zip that the library owner sent you (or the whole unzipped folder).';
-});
+    /* auto-load only makes sense when someone parked the data next to the page;
+       on a hosted page this simply fails and the picker is used instead */
+    tryAuto().then(ok => {
+        if (!ok) el('loadMsg').textContent =
+            'Select the .zip that the library owner sent you (or the whole unzipped folder).';
+    });
 </script>
 </body>
 </html>
