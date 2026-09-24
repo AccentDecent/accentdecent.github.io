@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExcaliLite — Agentic Excalidraw DSL Studio</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #131b2e;
+      --border: #232f48;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: #10b981;
+      --accent-hover: #059669;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      padding: 12px 24px;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.72rem;
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    select, button {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      outline: none;
+    }
+    select {
+      background: #090d16;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ai {
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      color: white;
+      border: none;
+    }
+    .btn-ai:hover { opacity: 0.9; }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .panel:last-child { border-right: none; }
+    .panel-header {
+      padding: 8px 16px;
+      background: #101726;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    textarea {
+      flex: 1;
+      padding: 16px;
+      background: #060911;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      border: none;
+      resize: none;
+      outline: none;
+      white-space: pre;
+    }
+    #json-output {
+      background: #080c14;
+      color: #94a3b8;
+    }
+    footer {
+      padding: 8px 20px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span>✏️ ExcaliLite</span>
+      <span class="badge">Agentic AI DSL</span>
+    </div>
+    <div class="controls">
+      <select id="preset-selector">
+        <option value="roman">History: Sallust Roman Historiography</option>
+        <option value="chem">Chemistry: Alkene Hydrogenation</option>
+        <option value="benzene">Chemistry: Substituted Benzene</option>
+        <option value="flowchart">Architecture: OAuth2 Flow</option>
+      </select>
+      <button class="btn-ai" id="btn-copy-docs">✨ Copy Docs for AI</button>
+      <button class="btn-primary" id="btn-copy-clipboard">📋 Copy for Excalidraw</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel">
+      <div class="panel-header">
+        <span>DSL Input</span>
+        <span id="dsl-stats">0 chars</span>
+      </div>
+      <textarea id="dsl-input" spellcheck="false"></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>Excalidraw Clipboard JSON (Live Preview)</span>
+        <span id="json-stats">0 chars</span>
+      </div>
+      <textarea id="json-output" readonly spellcheck="false"></textarea>
+    </div>
+  </main>
+
+  <footer>
+    <div id="compression-stats">Compression: 0%</div>
+    <div>Tip: Click <b>"Copy for Excalidraw"</b>, then press <b>Ctrl+V</b> inside <a href="https://excalidraw.com" target="_blank" style="color: #60a5fa; text-decoration: none;">excalidraw.com</a></div>
+  </footer>
+
+  <div class="toast" id="toast">Notification</div>
+
+  <script>
+    // --- PRESETS ---
+    const PRESETS = {
+      roman: `# ==========================================
+# PHASE 1: Aufstieg & Höhepunkt (Republic)
+# ==========================================
+node s1 "1. Aufstieg & Höhepunkt\\n(Tugendhafte Republik)" shape=box at 300, 250 w=240 h=90 bg=#fef3c7 color=#b45309
+
+# Explanatory note (Left) & Latin quotes (Top / Bottom)
+node s1_note "Fleiß & Recht als Basis;\\nFeinde bezwungen" shape=box at 40, 250 w=200 h=70 bg=#ffffff color=#d97706
+node s1_q_top "\\"labore atque iustitia res publica crevit\\"\\n(durch Arbeit & Gerechtigkeit wuchs d. Staat)" shape=box at 300, 80 w=300 h=80 bg=#fffbeb color=#b45309
+node s1_q_bot "\\"reges magni domiti [...] Carthago interiit\\"\\n(große Könige bezwungen, Karthago völlig untergegangen)" shape=box at 300, 420 w=300 h=90 bg=#fffbeb color=#b45309
+
+# Phase 1 Connections
+s1 -> s1_note
+s1 -> s1_q_top style=dotted
+s1 -> s1_q_bot style=dotted
+
+# Main Transition Arrow to Phase 2
+arrow right 140 from 420, 250 color=#334155 width=2.5
+
+# ==========================================
+# PHASE 2: Die Wende (Fluch der Muße / Otium)
+# ==========================================
+node s2 "2. Die Wende\\n(Fluch der Muße / Otium)" shape=box at 760, 250 w=240 h=90 bg=#ffedd5 color=#c2410c
+
+# Explanatory note (Above) & Latin quotes (Top / Bottom)
+node s2_note "Keine Aufgaben mehr;\\nFreizeit wird unerträglich" shape=box at 760, 140 w=220 h=65 bg=#ffffff color=#ea580c
+node s2_q_top "\\"saevire fortuna ac miscere omnia coepit\\"\\n(Fortuna begann zu wüten & alles durcheinanderzubringen)" shape=box at 760, 0 w=310 h=85 bg=#fff7ed color=#c2410c
+node s2_q_bot "\\"iis otium divitiaeque [...] oneri miseriaeque fuere\\"\\n(denen wurden Muße & Reichtum zur Last & zum Elend)" shape=box at 760, 420 w=310 h=90 bg=#fff7ed color=#c2410c
+
+# Phase 2 Connections
+s2 -> s2_note
+s2_note -> s2_q_top style=dotted
+s2 -> s2_q_bot style=dotted
+
+# Main Transition Arrow onward
+arrow right 140 from 880, 250 color=#334155 width=2.5`,
+
+      chem: `# Title & Subtitle
+title "A1: Hydrierung von Ethen und Dehydrierung von Ethan" at -540, 610 size=20
+text "Additionsreaktion (Hydrierung):" at -540, 640 size=16 color=#2b8a3e
+
+# 1. Ethene Molecule (C=C with 4 H's)
+mol at -500, 710:
+  c1: atom C
+  c2: atom C right 60 from c1
+  bond = c1 c2
+  atom H ul 35 from c1
+  atom H dl 35 from c1
+  atom H ur 35 from c2
+  atom H dr 35 from c2
+
+text "+" at -360, 710 size=24
+
+# 2. H2 Molecule (Blue)
+mol at -320, 710 color=#1971c2:
+  h1: atom H
+  h2: atom H right 45 from h1
+  bond - h1 h2
+
+# 3. Catalyst Reaction Arrow
+arrow right 60 from -255, 710 label="[Kat.]"
+
+# 4. Ethane (C-C with 6 H's)
+mol at -140, 710:
+  c1: atom C
+  c2: atom C right 60 from c1
+  bond - c1 c2
+  atom H left 42 from c1 color=#1971c2
+  atom H up 45 from c1
+  atom H down 45 from c1
+  atom H up 45 from c2
+  atom H down 45 from c2
+  atom H right 42 from c2 color=#1971c2`,
+
+      benzene: `# Toluene to Benzoic Acid
+title "Oxidation of Methylbenzene" at 0, 0 size=20
+
+mol at 100, 160:
+  c1: atom C
+  c2: atom C ur 45 from c1
+  c3: atom C right 45 from c2
+  c4: atom C dr 45 from c3
+  c5: atom C dl 45 from c4
+  c6: atom C left 45 from c5
+  bond = c1 c2
+  bond - c2 c3
+  bond = c3 c4
+  bond - c4 c5
+  bond = c5 c6
+  bond - c6 c1
+  atom CH3 up 45 from c2 color=#d9480f
+
+arrow right 80 from 260, 160 label="KMnO4 / H+"
+
+mol at 420, 160:
+  c1: atom C
+  c2: atom C ur 45 from c1
+  c3: atom C right 45 from c2
+  c4: atom C dr 45 from c3
+  c5: atom C dl 45 from c4
+  c6: atom C left 45 from c5
+  bond = c1 c2
+  bond - c2 c3
+  bond = c3 c4
+  bond - c4 c5
+  bond = c5 c6
+  bond - c6 c1
+  atom COOH up 45 from c2 color=#2b8a3e`,
+
+      flowchart: `# Microservice Auth Architecture
+title "OAuth2 Authorization Code Flow" at 50, 40 size=22
+
+node client "SPA Client" shape=box at 100, 150 w=140 h=60 bg=#e3fafc
+node auth "Auth Server" shape=box at 350, 150 w=140 h=60 bg=#fff3bf
+node api "Resource API" shape=box at 600, 150 w=140 h=60 bg=#d3f9d8
+node db "Database" shape=circle at 600, 300 w=90 h=90 bg=#ffe3e3
+
+client -> auth "1. Auth Code Request"
+auth -> client "2. Grant JWT Token"
+client -> api "3. Bearer Token API Call"
+api -> db "4. Query Data" style=dashed`
+    };
+
+    // --- AI SYSTEM PROMPT / DOCUMENTATION ---
+    const AI_DOCS = `You are an expert technical illustrator. When asked to generate diagrams, architecture flowcharts, timelines, or chemical formulas for Excalidraw, emit ONLY an \`\`\`excalidraw-dsl code block using this lightweight grammar:
+
+### Grammar & Syntax
+1. Text & Titles:
+   title "Title text" at <x>, <y> [size=20] [color=#hex]
+   text "Label text" at <x>, <y> [size=16] [color=#hex]
+
+2. Nodes & Shapes (Flowcharts & Timelines):
+   node <id> "<label>" shape=<box|circle|diamond> at <x>, <y> [w=<width>] [h=<height>] [bg=#hex] [color=#hex]
+   * Multiline labels: Use \\n for linebreaks (e.g. "Line 1\\nLine 2").
+   * Quotes inside labels: Escape quotes with \\" (e.g. "\\"Sample Quote\\"").
+
+3. Connections:
+   <id1> -> <id2> ["Optional edge label"] [style=solid|dotted|dashed] [color=#hex]
+
+4. Directional Arrows:
+   arrow <dir> <dist> from <x>, <y> [label="Text"] [color=#hex] [width=<stroke_width>] [style=solid|dotted|dashed]
+
+5. Chemistry & Molecules:
+   mol at <x>, <y> [color=#hex]:
+     <id>: atom <Symbol>
+     <id>: atom <Symbol> <dir> <dist> from <ref_id> [color=#hex]
+     bond <type> <id1> <id2> [color=#hex]
+
+   * Directions (<dir>): up, down, left, right, ul (up-left), ur (up-right), dl (down-left), dr (down-right).
+   * Bond distances: Typically 35 to 60.
+   * Bond types (<type>): single (-), double (=), triple (#).
+   * Note: Specifying an atom relative to a parent (e.g. \`atom H ul 35 from c1\`) automatically creates the single bond!
+
+### Few-Shot Example 1 (Historiography / Timeline with annotations):
+\`\`\`excalidraw-dsl
+node s1 "1. Aufstieg & Höhepunkt\\n(Tugendhafte Republik)" shape=box at 300, 250 w=240 h=90 bg=#fef3c7 color=#b45309
+node s1_note "Fleiß & Recht als Basis;\\nFeinde bezwungen" shape=box at 40, 250 w=200 h=70 bg=#ffffff color=#d97706
+node s1_q_top "\\"labore atque iustitia res publica crevit\\"\\n(durch Arbeit & Gerechtigkeit)" shape=box at 300, 80 w=300 h=80 bg=#fffbeb color=#b45309
+
+s1 -> s1_note
+s1 -> s1_q_top style=dotted
+arrow right 140 from 420, 250 color=#334155 width=2.5
+\`\`\`
+
+### Few-Shot Example 2 (Chemistry Reaction):
+\`\`\`excalidraw-dsl
+title "Hydrogenation of Ethene" at 0, 0 size=20
+mol at 50, 100:
+  c1: atom C
+  c2: atom C right 60 from c1
+  bond = c1 c2
+  atom H ul 35 from c1
+  atom H dl 35 from c1
+  atom H ur 35 from c2
+  atom H dr 35 from c2
+text "+" at 180, 100 size=24
+mol at 220, 100 color=#1971c2:
+  h1: atom H
+  h2: atom H right 45 from h1
+  bond - h1 h2
+arrow right 60 from 280, 100 label="[Kat.]"
+\`\`\`
+
+Always use normalized coordinates (e.g., origin centered or 0, 50, 100...) with adequate spacing.`;
+
+    // --- COMPILER ENGINE ---
+    const DIR_ANGLES = {
+      r: 0, right: 0,
+      ur: -45, "up-right": -45,
+      u: -90, up: -90,
+      ul: -135, "up-left": -135,
+      l: 180, left: 180,
+      dl: 135, "down-left": 135,
+      d: 90, down: 90,
+      dr: 45, "down-right": 45
+    };
+
+    function randId() {
+      return Math.random().toString(36).substring(2, 10);
+    }
+
+    function randSeed() {
+      return Math.floor(Math.random() * 2000000000);
+    }
+
+    function unescapeStr(str) {
+      return str.replace(/\\n/g, "\n").replace(/\\"/g, '"');
+    }
+
+    class ExcaliCompiler {
+      constructor() {
+        this.elements = [];
+        this.vars = {};
+      }
+
+      baseProps(type, x, y, w, h, stroke = "#1e1e1e", bg = "transparent", strokeWidth = 2, strokeStyle = "solid") {
+        return {
+          id: randId(),
+          type,
+          x: Math.round(x * 100) / 100,
+          y: Math.round(y * 100) / 100,
+          width: Math.round(w * 100) / 100,
+          height: Math.round(h * 100) / 100,
+          angle: 0,
+          strokeColor: stroke,
+          backgroundColor: bg,
+          fillStyle: "solid",
+          strokeWidth,
+          strokeStyle,
+          roughness: 0,
+          opacity: 100,
+          groupIds: [],
+          frameId: null,
+          roundness: (type === "rectangle" || type === "diamond") ? { type: 3 } : null,
+          seed: randSeed(),
+          version: 1,
+          versionNonce: randSeed(),
+          isDeleted: false,
+          boundElements: [],
+          updated: Date.now(),
+          link: null,
+          locked: false
+        };
+      }
+
+      addText(text, x, y, size = 18, color = "#1e1e1e", align = "center") {
+        const clean = unescapeStr(text);
+        const lines = clean.split("\n");
+        const maxLen = Math.max(...lines.map(l => l.length));
+        const w = Math.max(12, maxLen * (size * 0.58));
+        const h = lines.length * (size * 1.3);
+        const elem = this.baseProps(
+          "text",
+          align === "center" ? x - w / 2 : x,
+          y - h / 2,
+          w,
+          h,
+          color,
+          "transparent",
+          1
+        );
+        Object.assign(elem, {
+          text: clean,
+          rawText: clean,
+          originalText: clean,
+          fontSize: size,
+          fontFamily: 1,
+          textAlign: align,
+          verticalAlign: "middle",
+          autoResize: true,
+          lineHeight: 1.25,
+          containerId: null
+        });
+        this.elements.push(elem);
+        return elem;
+      }
+
+      addLine(p1, p2, stroke = "#1e1e1e", strokeWidth = 2, isArrow = false, strokeStyle = "solid") {
+        const [x1, y1] = p1;
+        const [x2, y2] = p2;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const elem = this.baseProps(isArrow ? "arrow" : "line", x1, y1, Math.abs(dx), Math.abs(dy), stroke, "transparent", strokeWidth, strokeStyle);
+        Object.assign(elem, {
+          points: [[0, 0], [Math.round(dx * 100) / 100, Math.round(dy * 100) / 100]],
+          polygon: false,
+          startBinding: null,
+          endBinding: null,
+          startArrowhead: null,
+          endArrowhead: isArrow ? "arrow" : null
+        });
+        this.elements.push(elem);
+        return elem;
+      }
+
+      addShape(type, text, x, y, w = 140, h = 60, stroke = "#1e1e1e", bg = "transparent", strokeWidth = 1.5) {
+        const shapeType = type === "box" ? "rectangle" : (type === "circle" ? "ellipse" : "diamond");
+        const elem = this.baseProps(shapeType, x - w / 2, y - h / 2, w, h, stroke, bg, strokeWidth);
+        this.elements.push(elem);
+        if (text) {
+          this.addText(text, x, y, 14, stroke, "center");
+        }
+        return elem;
+      }
+
+      // Trims lines neatly to the box border so arrows don't collide
+      intersectRect(center, target, w, h) {
+        const dx = target[0] - center[0];
+        const dy = target[1] - center[1];
+        if (dx === 0 && dy === 0) return [center[0], center[1]];
+        const sx = Math.abs(dx) > 0 ? (w / 2) / Math.abs(dx) : 1e9;
+        const sy = Math.abs(dy) > 0 ? (h / 2) / Math.abs(dy) : 1e9;
+        const scale = Math.min(sx, sy);
+        return [center[0] + dx * scale, center[1] + dy * scale];
+      }
+
+      addBond(p1, p2, bondType = "-", stroke = "#1e1e1e") {
+        let [x1, y1] = p1;
+        let [x2, y2] = p2;
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        const length = Math.hypot(dx, dy);
+        if (length === 0) return;
+
+        const pad = 12.0;
+        if (length > pad * 2) {
+          x1 += (dx / length) * pad;
+          y1 += (dy / length) * pad;
+          x2 -= (dx / length) * pad;
+          y2 -= (dy / length) * pad;
+        }
+
+        const nx = -dy / length;
+        const ny = dx / length;
+
+        if (bondType === "=") {
+          const off = 3.5;
+          this.addLine([x1 + nx * off, y1 + ny * off], [x2 + nx * off, y2 + ny * off], stroke);
+          this.addLine([x1 - nx * off, y1 - ny * off], [x2 - nx * off, y2 - ny * off], stroke);
+        } else if (bondType === "#") {
+          const off = 4.5;
+          this.addLine([x1, y1], [x2, y2], stroke);
+          this.addLine([x1 + nx * off, y1 + ny * off], [x2 + nx * off, y2 + ny * off], stroke);
+          this.addLine([x1 - nx * off, y1 - ny * off], [x2 - nx * off, y2 - ny * off], stroke);
+        } else {
+          this.addLine([x1, y1], [x2, y2], stroke);
+        }
+      }
+
+      compile(dsl) {
+        const lines = dsl.split("\n");
+        let currentMol = null;
+
+        for (let rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line || line.startsWith("#")) continue;
+
+          if (!rawLine.startsWith(" ") && !rawLine.startsWith("\t")) {
+            currentMol = null;
+          }
+
+          // 1. Text & Titles
+          if (line.startsWith("title ") || line.startsWith("text ")) {
+            const m = line.match(/^(?:title|text)\s+"((?:[^"\\]|\\.)*)"(?:\s+at\s+([-\d.]+),\s*([-\d.]+))?(.*)$/);
+            if (m) {
+              const [, content, xStr, yStr, rest] = m;
+              const x = xStr ? parseFloat(xStr) : 0;
+              const y = yStr ? parseFloat(yStr) : 0;
+              let size = line.startsWith("title") ? 20 : 16;
+              let color = "#1e1e1e";
+              const sm = rest.match(/size=(\d+)/);
+              const cm = rest.match(/color=(#[0-9a-fA-F]+|\w+)/);
+              if (sm) size = parseInt(sm[1], 10);
+              if (cm) color = cm[1];
+              this.addText(content, x, y, size, color, "left");
+            }
+            continue;
+          }
+
+          // 2. Molecule Block
+          if (line.startsWith("mol")) {
+            const m = line.match(/^mol(?:\s+at\s+([-\d.]+),\s*([-\d.]+))?(.*):?$/);
+            const mx = (m && m[1]) ? parseFloat(m[1]) : 0;
+            const my = (m && m[2]) ? parseFloat(m[2]) : 0;
+            let color = "#1e1e1e";
+            if (m && m[3]) {
+              const cm = m[3].match(/color=(#[0-9a-fA-F]+|\w+)/);
+              if (cm) color = cm[1];
+            }
+            currentMol = { origin: [mx, my], atoms: {}, color };
+            continue;
+          }
+
+          // 3. Atoms
+          if (line.includes("atom ")) {
+            const m = line.match(/^(?:(\w+):\s*)?atom\s+([A-Za-z0-9]+)(?:\s+([a-zA-Z\-]+)\s+([-\d.]+)\s+from\s+(\w+))?(.*)$/);
+            if (m) {
+              const [, varName, symbol, dir, distStr, refAtom, rest] = m;
+              let color = currentMol ? currentMol.color : "#1e1e1e";
+              const cm = rest.match(/color=(#[0-9a-fA-F]+|\w+)/);
+              if (cm) color = cm[1];
+
+              let ax = 0, ay = 0;
+              if (refAtom && currentMol && currentMol.atoms[refAtom]) {
+                const [rx, ry] = currentMol.atoms[refAtom];
+                const deg = DIR_ANGLES[dir.toLowerCase()] ?? 0;
+                const rad = (deg * Math.PI) / 180;
+                const dist = parseFloat(distStr);
+                ax = rx + dist * Math.cos(rad);
+                ay = ry + dist * Math.sin(rad);
+                this.addBond([rx, ry], [ax, ay], "-", color);
+              } else if (currentMol) {
+                [ax, ay] = currentMol.origin;
+              }
+
+              this.addText(symbol, ax, ay, 18, color, "center");
+              const key = varName || randId();
+              if (currentMol) currentMol.atoms[key] = [ax, ay];
+              this.vars[key] = { pt: [ax, ay], w: 24, h: 24 };
+            }
+            continue;
+          }
+
+          // 4. Chemical Bonds
+          if (line.startsWith("bond")) {
+            const m = line.match(/^bond\s+(=|-|#)\s+(\w+)\s+(\w+)(.*)$/);
+            if (m) {
+              const [, bType, a1, a2, rest] = m;
+              const p1 = currentMol?.atoms[a1] || this.vars[a1]?.pt;
+              const p2 = currentMol?.atoms[a2] || this.vars[a2]?.pt;
+              let color = currentMol?.color || "#1e1e1e";
+              const cm = rest.match(/color=(#[0-9a-fA-F]+|\w+)/);
+              if (cm) color = cm[1];
+              if (p1 && p2) this.addBond(p1, p2, bType, color);
+            }
+            continue;
+          }
+
+          // 5. Directional Arrows
+          if (line.startsWith("arrow")) {
+            const m = line.match(/^arrow\s+([a-zA-Z\-]+)\s+([-\d.]+)(?:\s+from\s+([-\d.]+),\s*([-\d.]+))?(.*)$/);
+            if (m) {
+              const [, dir, distStr, fxStr, fyStr, rest] = m;
+              const x1 = fxStr ? parseFloat(fxStr) : 0;
+              const y1 = fyStr ? parseFloat(fyStr) : 0;
+              const deg = DIR_ANGLES[dir.toLowerCase()] ?? 0;
+              const rad = (deg * Math.PI) / 180;
+              const dist = parseFloat(distStr);
+              const x2 = x1 + dist * Math.cos(rad);
+              const y2 = y1 + dist * Math.sin(rad);
+
+              let color = "#1e1e1e";
+              let strokeWidth = 2;
+              let strokeStyle = "solid";
+
+              const cm = rest.match(/color=(#[0-9a-fA-F]+|\w+)/);
+              const wm = rest.match(/width=([-\d.]+)/);
+              const sm = rest.match(/style=(\w+)/);
+              if (cm) color = cm[1];
+              if (wm) strokeWidth = parseFloat(wm[1]);
+              if (sm) strokeStyle = sm[1];
+
+              this.addLine([x1, y1], [x2, y2], color, strokeWidth, true, strokeStyle);
+
+              const lm = rest.match(/label="((?:[^"\\]|\\.)*)"/);
+              if (lm) {
+                this.addText(lm[1], (x1 + x2) / 2, ((y1 + y2) / 2) - 16, 14, "#868e96", "center");
+              }
+            }
+            continue;
+          }
+
+          // 6. Flowchart Nodes
+          if (line.startsWith("node")) {
+            const m = line.match(/^node\s+(\w+)\s+"((?:[^"\\]|\\.)*)"(?:\s+shape=(\w+))?(?:\s+at\s+([-\d.]+),\s*([-\d.]+))?(.*)$/);
+            if (m) {
+              const [, nid, text, shape, xStr, yStr, rest] = m;
+              const x = xStr ? parseFloat(xStr) : 0;
+              const y = yStr ? parseFloat(yStr) : 0;
+              let bg = "transparent";
+              let color = "#1e1e1e";
+              let w = 150, h = 60;
+              let strokeWidth = 1.5;
+
+              const bm = rest.match(/bg=(#[0-9a-fA-F]+|\w+)/);
+              const cm = rest.match(/color=(#[0-9a-fA-F]+|\w+)/);
+              const wm = rest.match(/w=(\d+)/);
+              const hm = rest.match(/h=(\d+)/);
+              const sm = rest.match(/stroke=(\d+)/);
+
+              if (bm) bg = bm[1];
+              if (cm) color = cm[1];
+              if (wm) w = parseInt(wm[1], 10);
+              if (hm) h = parseInt(hm[1], 10);
+              if (sm) strokeWidth = parseFloat(sm[1]);
+
+              this.addShape(shape || "box", text, x, y, w, h, color, bg, strokeWidth);
+              this.vars[nid] = { pt: [x, y], w, h };
+            }
+            continue;
+          }
+
+          // 7. Connectors: A -> B
+          if (line.includes("->")) {
+            const m = line.match(/^(\w+)\s*->\s*(\w+)(?:\s+"((?:[^"\\]|\\.)*)")?(.*)$/);
+            if (m) {
+              const [, src, dst, lbl, rest] = m;
+              if (this.vars[src] && this.vars[dst]) {
+                const node1 = this.vars[src];
+                const node2 = this.vars[dst];
+
+                // Auto-clip arrows to box edges
+                const p1 = this.intersectRect(node1.pt, node2.pt, node1.w, node1.h);
+                const p2 = this.intersectRect(node2.pt, node1.pt, node2.w, node2.h);
+
+                let strokeStyle = "solid";
+                let color = "#1e1e1e";
+                let strokeWidth = 1.5;
+
+                const sm = rest.match(/style=(\w+)/);
+                const cm = rest.match(/color=(#[0-9a-fA-F]+|\w+)/);
+                const wm = rest.match(/width=([-\d.]+)/);
+
+                if (sm) strokeStyle = sm[1];
+                if (cm) color = cm[1];
+                if (wm) strokeWidth = parseFloat(wm[1]);
+
+                this.addLine(p1, p2, color, strokeWidth, true, strokeStyle);
+                if (lbl) {
+                  this.addText(lbl, (p1[0] + p2[0]) / 2, ((p1[1] + p2[1]) / 2) - 12, 12, "#495057", "center");
+                }
+              }
+            }
+            continue;
+          }
+        }
+
+        return {
+          type: "excalidraw/clipboard",
+          elements: this.elements,
+          files: {}
+        };
+      }
+    }
+
+    // --- UI CONTROLLER & EVENT LISTENERS ---
+    const dslInput = document.getElementById("dsl-input");
+    const jsonOutput = document.getElementById("json-output");
+    const dslStats = document.getElementById("dsl-stats");
+    const jsonStats = document.getElementById("json-stats");
+    const compressionStats = document.getElementById("compression-stats");
+    const presetSelector = document.getElementById("preset-selector");
+    const btnCopyDocs = document.getElementById("btn-copy-docs");
+    const btnCopyClipboard = document.getElementById("btn-copy-clipboard");
+    const toast = document.getElementById("toast");
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    function runCompile() {
+      const src = dslInput.value;
+      const compiler = new ExcaliCompiler();
+      try {
+        const result = compiler.compile(src);
+        const jsonText = JSON.stringify(result, null, 2);
+        jsonOutput.value = jsonText;
+
+        const dslLen = src.length;
+        const jsonLen = jsonText.length;
+        dslStats.textContent = `${dslLen} chars (~${Math.round(dslLen / 4)} tokens)`;
+        jsonStats.textContent = `${jsonLen} chars (~${Math.round(jsonLen / 4)} tokens)`;
+
+        const saved = Math.max(0, Math.round(((jsonLen - dslLen) / jsonLen) * 100));
+        compressionStats.innerHTML = `Compression Ratio: <b>${saved}% token savings</b> vs raw Excalidraw JSON`;
+      } catch (err) {
+        jsonOutput.value = `// Compilation Error:\n${err.message}`;
+      }
+    }
+
+    dslInput.addEventListener("input", runCompile);
+
+    presetSelector.addEventListener("change", (e) => {
+      dslInput.value = PRESETS[e.target.value] || "";
+      runCompile();
+    });
+
+    btnCopyClipboard.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(jsonOutput.value);
+        showToast("✅ Copied! Press Ctrl+V inside excalidraw.com");
+      } catch (e) {
+        showToast("❌ Could not copy to clipboard");
+      }
+    });
+
+    btnCopyDocs.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(AI_DOCS);
+        showToast("✨ AI Prompt & Docs copied! Paste into Claude/ChatGPT");
+      } catch (e) {
+        showToast("❌ Could not copy docs");
+      }
+    });
+
+    // Initialize with Roman historiography cycle
+    dslInput.value = PRESETS.roman;
+    runCompile();
+  </script>
+</body>
+</html>
