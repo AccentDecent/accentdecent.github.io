@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Stowasser · Latin–German Dictionary Lookup</title>
+<title>Stowasser · Lateinisch–Deutsches Wörterbuch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -54,7 +54,7 @@ input, select { font-family: inherit; }
 
 ::selection { background: var(--accent-bg); color: var(--accent); }
 
-/* ===== Landing / file picker ===== */
+/* ===== Landing / File Picker ===== */
 #landing {
   min-height: 100vh;
   display: flex;
@@ -90,8 +90,24 @@ input, select { font-family: inherit; }
   color: var(--ink-mute);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
+
+.stored-file-banner {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+}
+.stored-file-banner strong { color: var(--accent); }
+
 .dropzone {
   border: 2px dashed var(--line);
   border-radius: 12px;
@@ -100,6 +116,10 @@ input, select { font-family: inherit; }
   transition: all 0.18s ease;
   background: var(--bg-soft);
   cursor: pointer;
+  user-select: none;
+}
+.dropzone * {
+  pointer-events: none;
 }
 .dropzone:hover, .dropzone.drag {
   border-color: var(--accent);
@@ -113,7 +133,6 @@ input, select { font-family: inherit; }
 }
 .dropzone-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
 .dropzone-hint { font-size: 13px; color: var(--ink-mute); }
-.dropzone input[type="file"] { display: none; }
 
 .btn {
   display: inline-flex;
@@ -122,7 +141,7 @@ input, select { font-family: inherit; }
   border: 1px solid var(--line);
   background: var(--card);
   color: var(--ink);
-  padding: 9px 14px;
+  padding: 9px 15px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
@@ -135,8 +154,11 @@ input, select { font-family: inherit; }
   border-color: var(--accent);
 }
 .btn-primary:hover { background: var(--accent-soft); color: #fff; border-color: var(--accent-soft); }
-.btn-ghost { background: transparent; border-color: transparent; color: var(--ink-soft); }
-.btn-ghost:hover { color: var(--accent); background: var(--accent-bg); }
+.btn-danger {
+  color: #a12b2b;
+  border-color: #e5c4c4;
+}
+.btn-danger:hover { background: #fae8e8; border-color: #a12b2b; }
 
 .landing-meta {
   margin-top: 26px;
@@ -172,7 +194,7 @@ input, select { font-family: inherit; }
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { color: var(--ink-soft); font-size: 14px; }
+.loading-text { color: var(--ink-soft); font-size: 14px; font-weight: 500; }
 
 /* ===== Dictionary layout ===== */
 #dict { display: none; height: 100vh; flex-direction: column; }
@@ -311,7 +333,7 @@ input, select { font-family: inherit; }
 }
 .icon-btn:hover { background: var(--bg-soft); color: var(--accent); border-color: var(--line); }
 
-/* layout */
+/* Layout */
 .main {
   flex: 1;
   display: flex;
@@ -422,7 +444,7 @@ input, select { font-family: inherit; }
 }
 .show-more:hover { background: var(--accent-bg); }
 
-/* content area */
+/* Content area */
 .content {
   flex: 1;
   overflow-y: auto;
@@ -526,7 +548,7 @@ input, select { font-family: inherit; }
 
 .entry-body { font-size: 15px; line-height: 1.65; }
 
-/* senses */
+/* Senses */
 .sense {
   margin: 10px 0;
   padding-left: 28px;
@@ -569,10 +591,8 @@ input, select { font-family: inherit; }
 .note::before { content: '('; }
 .note::after { content: ')'; }
 .note + .note { margin-left: 4px; }
-.note::before { content: '('; }
 .note + .trans::before, .trans + .note::before { content: ' ('; }
 .trans + .note::after { content: ') '; }
-.trans + .note + .trans::before { content: ''; }
 
 .mwe {
   margin: 8px 0 10px;
@@ -732,7 +752,7 @@ input, select { font-family: inherit; }
   line-height: 1.5;
 }
 
-/* history bar */
+/* History Bar */
 .history-bar {
   padding: 8px 14px;
   border-bottom: 1px solid var(--line-soft);
@@ -765,7 +785,6 @@ input, select { font-family: inherit; }
 }
 .history-chip:hover { color: var(--accent); border-color: var(--accent-soft); }
 
-/* keyboard shortcut hint */
 .kbd {
   display: inline-block;
   font-family: 'SF Mono', Menlo, monospace;
@@ -778,7 +797,6 @@ input, select { font-family: inherit; }
   box-shadow: 0 1px 0 var(--line);
 }
 
-/* responsive */
 @media (max-width: 900px) {
   .sidebar { width: 260px; }
   .entry { padding: 24px 20px 60px; }
@@ -795,7 +813,6 @@ input, select { font-family: inherit; }
   .lemma-main { font-size: 26px; }
 }
 
-/* scrollbars */
 .results-list::-webkit-scrollbar, .content::-webkit-scrollbar { width: 10px; }
 .results-list::-webkit-scrollbar-thumb, .content::-webkit-scrollbar-thumb {
   background: var(--line); border-radius: 5px; border: 2px solid var(--bg);
@@ -805,38 +822,53 @@ input, select { font-family: inherit; }
 </head>
 <body>
 
-<!-- ============== LOADING ============== -->
+<!-- ============== LOADING OVERLAY ============== -->
 <div id="loading">
   <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">Parsing dictionary…</div>
+  <div class="loading-text" id="loadingText">Wörterbuch wird geladen…</div>
 </div>
 
-<!-- ============== LANDING ============== -->
+<!-- ============== LANDING SCREEN ============== -->
 <section id="landing">
   <div class="landing-card">
     <div class="brand-mark">Stowasser <em>Lexicon</em></div>
-    <div class="brand-sub">Latin – German · XML Lookup</div>
+    <div class="brand-sub">Latein – Deutsch · XML-Suche</div>
 
-    <label class="dropzone" id="dropzone" for="fileInput">
+    <!-- Gespeicherte Datei Banner -->
+    <div id="storedFileBanner" class="stored-file-banner" style="display:none;">
+      <div>
+        <span>💾 Gespeichert:</span>
+        <strong id="storedFileName">—</strong>
+        <span id="storedFileSize" style="color:var(--ink-mute); font-size:11.5px; margin-left:4px;"></span>
+      </div>
+      <button class="btn btn-danger" id="deleteStoredBtn" style="padding:4px 8px; font-size:11.5px;">Entfernen</button>
+    </div>
+
+    <!-- Dropzone (Div statt Label für stabile Events) -->
+    <div class="dropzone" id="dropzone">
       <div class="dropzone-icon">⚙</div>
-      <div class="dropzone-title">Choose XML file or drop it here</div>
-      <div class="dropzone-hint">e.g. <code>stowasser.xml</code> · runs entirely offline in your browser</div>
-      <input type="file" id="fileInput" accept=".xml,application/xml,text/xml">
-    </label>
+      <div class="dropzone-title">XML-Datei hier ablegen oder klicken</div>
+      <div class="dropzone-hint">z. B. <code>stowasser.xml</code> · wird dauerhaft im Browser gespeichert (IndexedDB)</div>
+    </div>
+    
+    <!-- Unsichtbares File-Input separat -->
+    <input type="file" id="fileInput" accept=".xml,text/xml,application/xml" style="display:none;">
 
     <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Choose file</button>
-      <button class="btn" id="trySampleBtn">Load sample entries</button>
+      <button class="btn btn-primary" id="chooseFileBtn">Datei auswählen</button>
+      <button class="btn" id="resumeStoredBtn" style="display:none;">Wörterbuch öffnen</button>
+      <button class="btn" id="trySampleBtn">Beispiel-Einträge laden</button>
+      <button class="btn btn-ghost" id="cancelReplaceBtn" style="display:none;">Zurück zur Suche</button>
     </div>
 
     <div class="landing-meta">
-      <p>Search 23 000+ Latin lemmas with macron-insensitive matching.<br>
-      Press <span class="kbd">Ctrl/Cmd + K</span> to focus search, <span class="kbd">↑</span> <span class="kbd">↓</span> to navigate, <span class="kbd">Enter</span> to open, <span class="kbd">Esc</span> to clear.</p>
+      <p>Suche in 23.000+ lateinischen Lemmata mit Makronen-Ignoranz.<br>
+      Mit <span class="kbd">Ctrl/Cmd + K</span> Suche fokussieren, <span class="kbd">↑</span> <span class="kbd">↓</span> navigieren, <span class="kbd">Enter</span> öffnen, <span class="kbd">Esc</span> leeren.</p>
     </div>
   </div>
 </section>
 
-<!-- ============== DICTIONARY ============== -->
+<!-- ============== DICTIONARY VIEW ============== -->
 <section id="dict">
   <header class="topbar">
     <div class="brand">
@@ -845,39 +877,39 @@ input, select { font-family: inherit; }
     </div>
 
     <div class="search-wrap">
-      <input type="search" id="search" placeholder="Search Latin lemma (e.g. amo, amare, amicus…)" autocomplete="off" spellcheck="false">
-      <button class="search-clear" id="searchClear" title="Clear (Esc)">×</button>
+      <input type="search" id="search" placeholder="Lateinisches Lemma suchen (z. B. amo, amare, amicus…)" autocomplete="off" spellcheck="false">
+      <button class="search-clear" id="searchClear" title="Leeren (Esc)">×</button>
     </div>
 
     <div class="toolbar">
-      <div class="seg" id="matchSeg" title="Match mode">
-        <button data-mode="prefix" class="on">Prefix</button>
-        <button data-mode="contains">Contains</button>
+      <div class="seg" id="matchSeg" title="Suchmodus">
+        <button data-mode="prefix" class="on">Präfix</button>
+        <button data-mode="contains">Enthält</button>
         <button data-mode="fuzzy">Fuzzy</button>
       </div>
-      <div class="seg" id="langSeg" title="Search scope">
-        <button data-lang="lat" class="on">Latin</button>
-        <button data-lang="both">Latin + German</button>
+      <div class="seg" id="langSeg" title="Suchbereich">
+        <button data-lang="lat" class="on">Latein</button>
+        <button data-lang="both">Latein + Deutsch</button>
       </div>
-      <div class="seg" id="macronSeg" title="Macron handling">
+      <div class="seg" id="macronSeg" title="Makronen">
         <button data-macron="ignore" class="on">ā = a</button>
-        <button data-macron="strict">strict</button>
+        <button data-macron="strict">exakt</button>
       </div>
-      <button class="icon-btn" id="randomBtn" title="Random entry">🎲</button>
-      <button class="icon-btn" id="statsBtn" title="Statistics">📊</button>
-      <button class="icon-btn" id="newFileBtn" title="Load another file">📂</button>
+      <button class="icon-btn" id="randomBtn" title="Zufälliger Eintrag">🎲</button>
+      <button class="icon-btn" id="statsBtn" title="Statistik">📊</button>
+      <button class="icon-btn" id="newFileBtn" title="Datei austauschen oder neu laden">📂</button>
     </div>
   </header>
 
   <div class="history-bar" id="historyBar">
-    <span class="label">Recent</span>
+    <span class="label">Verlauf</span>
     <div id="historyChips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
   </div>
 
   <div class="main">
     <aside class="sidebar">
       <div class="sidebar-head">
-        <span><span id="resultsLabel">All entries</span> · <span id="resultsCount">0</span></span>
+        <span><span id="resultsLabel">Alle Einträge</span> · <span id="resultsCount">0</span></span>
         <span id="resultsFilter" class="filter-tag" style="display:none;"></span>
       </div>
       <div class="results-list" id="resultsList"></div>
@@ -886,8 +918,8 @@ input, select { font-family: inherit; }
     <main class="content" id="content">
       <div class="content-empty" id="contentEmpty">
         <div class="big">📜</div>
-        <div class="title">No entry selected</div>
-        <div class="hint">Pick a lemma from the list on the left, or type a word in the search box above. Try <em>amo</em>, <em>res</em>, <em>domus</em> or <em>causa</em>.</div>
+        <div class="title">Kein Eintrag ausgewählt</div>
+        <div class="hint">Wähle links ein Lemma aus oder tippe einen Suchbegriff ein. Versuche z. B. <em>amo</em>, <em>res</em>, <em>domus</em> oder <em>causa</em>.</div>
       </div>
       <article class="entry" id="entry" style="display:none;"></article>
     </main>
@@ -901,18 +933,93 @@ input, select { font-family: inherit; }
 //  State
 // ============================================================
 const state = {
-  doc: null,            // parsed XMLDocument
-  entries: [],          // [{ node, lemmas:[{text, norm}], preview, pos, homnum, allForms }]
-  matchMode: 'prefix',  // prefix | contains | fuzzy
-  macronMode: 'ignore', // ignore | strict
-  langMode: 'lat',      // lat | both (Latin only or Latin+German)
+  doc: null,
+  fileName: '',
+  entries: [],
+  matchMode: 'prefix',
+  macronMode: 'ignore',
+  langMode: 'lat',
   search: '',
   currentIdx: -1,
   history: [],
 };
 
 // ============================================================
-//  Helpers — strings & normalization
+//  IndexedDB - Dauerhafter Speicher für beliebig große Dateien
+// ============================================================
+const DB_NAME = 'StowasserDictDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'lexicon';
+const DB_KEY = 'active_lexicon_xml';
+
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveToPermanentStorage(name, text, size) {
+  try {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const data = {
+        name: name,
+        size: size || text.length,
+        text: text,
+        timestamp: Date.now()
+      };
+      const req = store.put(data, DB_KEY);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Konnte nicht in IndexedDB speichern:', err);
+  }
+}
+
+async function getFromPermanentStorage() {
+  try {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(DB_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Konnte IndexedDB nicht lesen:', err);
+    return null;
+  }
+}
+
+async function deleteFromPermanentStorage() {
+  try {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.delete(DB_KEY);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Konnte IndexedDB nicht löschen:', err);
+  }
+}
+
+// ============================================================
+//  Strings & Normalisierung
 // ============================================================
 const MACRON_MAP = {
   'ā':'a','ē':'e','ī':'i','ō':'o','ū':'u','ȳ':'y',
@@ -924,71 +1031,36 @@ const MACRON_MAP = {
   'ō':'o','oe':'oe','æ':'ae','Æ':'AE','œ':'oe','Œ':'OE',
   'ç':'c','Ç':'C','ñ':'n','Ñ':'N',
 };
+
 function stripMacrons(s){
   return s.replace(/[āēīōūȳĀĒĪŌŪȲăĕĭŏŭўéèêëáàâäïîíìçñÇÑ]/g, c => MACRON_MAP[c] || c);
 }
+
 function normalize(s){
   if (!s) return '';
   s = s.toLowerCase().trim();
   if (state.macronMode === 'ignore') s = stripMacrons(s);
   return s;
 }
+
 function xmlEscape(s){
   return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 }
-function xmlUnescape(s){
-  return String(s).replace(/&#x([0-9a-fA-F]+);/g, (_,h)=>String.fromCodePoint(parseInt(h,16)))
-                  .replace(/&#([0-9]+);/g, (_,n)=>String.fromCodePoint(parseInt(n,10)))
-                  .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&amp;/g,'&');
-}
-function romanize(n){
-  // small numbers for sense numbering I.1.a style — return lowercase letters for >0
-  // we only use I and 1 and a here from NUM_I / NUM_1 / NUM_a, so we just pass tag info
-  return n;
-}
 
 // ============================================================
-//  File loading
+//  UI Helpers & Dateiauswahl
 // ============================================================
-const fileInput   = document.getElementById('fileInput');
-const dropzone    = document.getElementById('dropzone');
-const loadingEl   = document.getElementById('loading');
-const loadingText = document.getElementById('loadingText');
-
-fileInput.addEventListener('change', e => {
-  const f = e.target.files[0];
-  if (f) loadFile(f);
-});
-['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => {
-  e.preventDefault(); e.stopPropagation();
-  dropzone.classList.add('drag');
-}));
-['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => {
-  e.preventDefault(); e.stopPropagation();
-  dropzone.classList.remove('drag');
-}));
-dropzone.addEventListener('drop', e => {
-  const f = e.dataTransfer.files[0];
-  if (f) loadFile(f);
-});
-
-document.getElementById('trySampleBtn').addEventListener('click', () => {
-  loadSampleXML();
-});
-
-async function loadFile(file){
-  showLoading('Reading ' + file.name + '…');
-  try {
-    const text = await file.text();
-    showLoading('Parsing XML…');
-    await new Promise(r => setTimeout(r, 30));
-    parseXML(text);
-  } catch (err) {
-    alert('Could not read file: ' + err.message);
-  } finally {
-    hideLoading();
-  }
-}
+const fileInput          = document.getElementById('fileInput');
+const chooseFileBtn      = document.getElementById('chooseFileBtn');
+const dropzone           = document.getElementById('dropzone');
+const loadingEl          = document.getElementById('loading');
+const loadingText        = document.getElementById('loadingText');
+const storedFileBanner   = document.getElementById('storedFileBanner');
+const storedFileName     = document.getElementById('storedFileName');
+const storedFileSize     = document.getElementById('storedFileSize');
+const deleteStoredBtn    = document.getElementById('deleteStoredBtn');
+const resumeStoredBtn    = document.getElementById('resumeStoredBtn');
+const cancelReplaceBtn   = document.getElementById('cancelReplaceBtn');
 
 function showLoading(msg){
   loadingText.textContent = msg;
@@ -996,22 +1068,151 @@ function showLoading(msg){
 }
 function hideLoading(){ loadingEl.classList.remove('show'); }
 
-// ============================================================
-//  Parsing & indexing
-// ============================================================
-function parseXML(text){
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(text, 'application/xml');
-  if (doc.querySelector('parsererror')) {
-    alert('XML parse error:\n' + doc.querySelector('parsererror').textContent.slice(0, 400));
-    return;
+// Verhindere Standard-Browser-Aktionen bei Drag & Drop im gesamten Fenster
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+
+// Klick auf Button oder Dropzone öffnet Datei-Dialog
+chooseFileBtn.addEventListener('click', () => {
+  fileInput.value = '';
+  fileInput.click();
+});
+dropzone.addEventListener('click', () => {
+  fileInput.value = '';
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) processFile(f);
+});
+
+// Drag & Drop ohne Flackern
+let dragCounter = 0;
+dropzone.addEventListener('dragenter', e => {
+  e.preventDefault();
+  dragCounter++;
+  dropzone.classList.add('drag');
+});
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('drag');
+});
+dropzone.addEventListener('dragleave', e => {
+  e.preventDefault();
+  dragCounter--;
+  if (dragCounter <= 0) {
+    dragCounter = 0;
+    dropzone.classList.remove('drag');
   }
-  buildIndex(doc);
+});
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dragCounter = 0;
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    processFile(e.dataTransfer.files[0]);
+  }
+});
+
+// Gespeichertes Wörterbuch löschen
+deleteStoredBtn.addEventListener('click', async (e) => {
+  e.stopPropagation();
+  if (confirm('Gespeichertes Wörterbuch aus dem Browserspeicher löschen?')) {
+    await deleteFromPermanentStorage();
+    updateStoredBanner(null);
+  }
+});
+
+// Zurück zur Wörterbuchansicht falls Abbruch beim Wechseln
+cancelReplaceBtn.addEventListener('click', () => {
+  if (state.entries.length > 0) {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('dict').classList.add('active');
+  }
+});
+
+resumeStoredBtn.addEventListener('click', () => {
+  if (state.entries.length > 0) {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('dict').classList.add('active');
+  }
+});
+
+// ============================================================
+//  Datei einlesen & Kodierung erkennen
+// ============================================================
+async function processFile(file){
+  showLoading(`Lese ${file.name}…`);
+  try {
+    const buffer = await file.arrayBuffer();
+    
+    // Kodierung prüfen (ISO-8859-1 vs. UTF-8)
+    const headerSample = new TextDecoder('ascii').decode(buffer.slice(0, 250));
+    let encoding = 'utf-8';
+    const match = /encoding=["']([^"']+)["']/i.exec(headerSample);
+    if (match && match[1]) {
+      const enc = match[1].toLowerCase();
+      if (enc.includes('8859-1') || enc.includes('latin1')) encoding = 'iso-8859-1';
+      else if (enc.includes('1252')) encoding = 'windows-1252';
+    }
+
+    let text;
+    try {
+      text = new TextDecoder(encoding).decode(buffer);
+    } catch (_) {
+      text = new TextDecoder('utf-8').decode(buffer);
+    }
+
+    showLoading('Analysiere XML…');
+    await new Promise(r => setTimeout(r, 20));
+
+    const success = parseAndIndex(text, file.name);
+    if (success) {
+      // In IndexedDB sichern
+      showLoading('Speichere für nächste Sitzung…');
+      await saveToPermanentStorage(file.name, text, file.size);
+      updateStoredBanner({ name: file.name, size: file.size });
+    }
+  } catch (err) {
+    alert('Fehler beim Laden der Datei: ' + err.message);
+  } finally {
+    hideLoading();
+    fileInput.value = '';
+  }
 }
 
-function buildIndex(doc){
+// ============================================================
+//  XML parsen & Index aufbauen
+// ============================================================
+function parseAndIndex(xmlText, fileName, persist = true){
+  let parser = new DOMParser();
+  let doc = parser.parseFromString(xmlText, 'application/xml');
+  let err = doc.querySelector('parsererror');
+
+  // Fallback bei undeclared entities (&nbsp; etc.)
+  if (err) {
+    const cleaned = xmlText.replace(/&nbsp;/g, '&#160;');
+    doc = parser.parseFromString(cleaned, 'application/xml');
+    err = doc.querySelector('parsererror');
+    if (err) {
+      alert('XML-Parsefehler:\n' + err.textContent.slice(0, 300));
+      return false;
+    }
+  }
+
   state.doc = doc;
-  const ents = Array.from(doc.getElementsByTagName('ENT'));
+  state.fileName = fileName;
+
+  // Suche nach ENT oder ent (Groß-/Kleinschreibung tolerant)
+  let ents = Array.from(doc.getElementsByTagName('ENT'));
+  if (!ents.length) ents = Array.from(doc.getElementsByTagName('ent'));
+
+  if (!ents.length) {
+    alert('Keine Wörterbucheinträge (<ENT>) in dieser XML-Datei gefunden.');
+    return false;
+  }
+
   state.entries = ents.map(node => {
     const lemmas = collectLemmas(node);
     const preview = firstPreview(node);
@@ -1022,48 +1223,55 @@ function buildIndex(doc){
     return { node, lemmas, preview, pos, homnum, allForms, transTokens };
   });
 
-  // switch view
+  // Ansicht umschalten
   document.getElementById('landing').style.display = 'none';
   document.getElementById('dict').classList.add('active');
-  document.getElementById('entryCount').textContent = state.entries.length.toLocaleString();
-  // initial results = all (limited)
+  document.getElementById('entryCount').textContent = state.entries.length.toLocaleString('de-DE');
+  cancelReplaceBtn.style.display = 'inline-flex';
+  
   state.search = '';
   document.getElementById('search').value = '';
   renderResults();
   loadHistory();
-  // focus search
-  setTimeout(() => document.getElementById('search').focus(), 50);
+  setTimeout(() => document.getElementById('search').focus(), 80);
+  return true;
 }
 
-// ---- XML tag-name-safe helpers ----
-// CSS selectors treat '.' as class selector, so for XML tags like "LEM.CNT"
-// we must use getElementsByTagName() instead of querySelector().
-function descByTag(node, tag){ return Array.from(node.getElementsByTagName(tag)); }
+// DOM Hilfsfunktionen
+function descByTag(node, tag){
+  let list = node.getElementsByTagName(tag);
+  if (!list.length) list = node.getElementsByTagName(tag.toLowerCase());
+  return Array.from(list);
+}
+function firstDescByTag(node, tag){
+  let list = node.getElementsByTagName(tag);
+  if (!list.length) list = node.getElementsByTagName(tag.toLowerCase());
+  return list.length ? list[0] : null;
+}
 function childByTag(node, tag){
-  // returns direct children matching the literal tag name (which may contain dots)
-  for (const c of node.children) if (c.tagName === tag) return c;
+  const upper = tag.toUpperCase();
+  for (const c of node.children) {
+    if (c.tagName.toUpperCase() === upper) return c;
+  }
   return null;
 }
 function childrenByTag(node, tag){
-  return Array.from(node.children).filter(c => c.tagName === tag);
-}
-function firstDescByTag(node, tag){
-  const list = node.getElementsByTagName(tag);
-  return list.length ? list[0] : null;
+  const upper = tag.toUpperCase();
+  return Array.from(node.children).filter(c => c.tagName.toUpperCase() === upper);
 }
 
 function collectLemmas(ent){
   const out = [];
   const grp = childByTag(ent, 'LEM.GRP');
-  if (!grp) return out;
-  childrenByTag(grp, 'LEM.CNT').forEach(cnt => {
-    childrenByTag(cnt, 'LEM').forEach(l => {
-      const t = l.textContent.trim();
-      if (t) out.push({ text: t, norm: stripMacrons(t.toLowerCase()) });
+  if (grp) {
+    childrenByTag(grp, 'LEM.CNT').forEach(cnt => {
+      childrenByTag(cnt, 'LEM').forEach(l => {
+        const t = l.textContent.trim();
+        if (t) out.push({ text: t, norm: stripMacrons(t.toLowerCase()) });
+      });
     });
-  });
+  }
   if (out.length === 0) {
-    // fallback: any LEM in the entry
     const any = firstDescByTag(ent, 'LEM');
     if (any) {
       const t = any.textContent.trim();
@@ -1077,7 +1285,7 @@ function firstPos(ent){
   const grp = childByTag(ent, 'LEM.GRP');
   if (!grp) return '';
   const p = childByTag(grp, 'POS');
-  return p ? (p.getAttribute('Wortart') || '') : '';
+  return p ? (p.getAttribute('Wortart') || p.getAttribute('wortart') || '') : '';
 }
 
 function firstHomnum(ent){
@@ -1102,7 +1310,6 @@ function firstPreview(ent){
 }
 
 function collectAllForms(ent, lemmas){
-  // for searching inflected forms — gather LEM, FLEX, PAT (tokenized)
   const set = new Set();
   lemmas.forEach(l => set.add(l.norm));
   descByTag(ent, 'FLEX').forEach(f => {
@@ -1123,23 +1330,22 @@ function collectAllForms(ent, lemmas){
   return Array.from(set);
 }
 
-// collect German translation tokens for reverse lookup (de → lat)
 function collectTransTokens(ent){
   const set = new Set();
-  descByTag(ent, 'TRANS').forEach(t => {
-    const txt = t.textContent.trim().toLowerCase();
-    if (!txt) return;
-    // split on whitespace and common punctuation
-    txt.split(/[\s,;:().\/]+/).forEach(w => {
+  const ts = descByTag(ent, 'TRANS');
+  for (let i = 0; i < ts.length; i++) {
+    const txt = ts[i].textContent.trim().toLowerCase();
+    if (!txt) continue;
+    txt.split(/[\s,;:().\/\-]+/).forEach(w => {
       const clean = w.replace(/[!"'()]/g, '');
       if (clean.length > 2) set.add(clean);
     });
-  });
+  }
   return Array.from(set);
 }
 
 // ============================================================
-//  Search
+//  Suche & Filter
 // ============================================================
 const searchInput = document.getElementById('search');
 const searchClear = document.getElementById('searchClear');
@@ -1189,7 +1395,6 @@ function searchMatches(){
   const includeGerman = state.langMode === 'both' && mode !== 'prefix';
 
   if (mode === 'fuzzy') {
-    // simple subsequence fuzzy match — Latin only
     return state.entries.filter(e =>
       e.lemmas.some(l => fuzzyMatch(normalize(l.text), qn)) ||
       e.allForms.some(f => fuzzyMatch(f, qn))
@@ -1217,19 +1422,19 @@ function searchMatches(){
 
 function fuzzyMatch(text, q){
   let i = 0;
-  for (const ch of text) {
-    if (ch === q[i]) i++;
+  for (let j = 0; j < text.length; j++) {
+    if (text[j] === q[i]) i++;
     if (i === q.length) return true;
   }
   return false;
 }
 
 // ============================================================
-//  Render — results list
+//  Ergebnisliste Rendern
 // ============================================================
-const resultsList  = document.getElementById('resultsList');
-const resultsCount = document.getElementById('resultsCount');
-const resultsLabel = document.getElementById('resultsLabel');
+const resultsList   = document.getElementById('resultsList');
+const resultsCount  = document.getElementById('resultsCount');
+const resultsLabel  = document.getElementById('resultsLabel');
 const resultsFilter = document.getElementById('resultsFilter');
 
 let visibleCount = 300;
@@ -1237,18 +1442,16 @@ let currentMatches = [];
 
 function renderResults(){
   currentMatches = searchMatches();
-  // sort: by length of first lemma (shorter first when prefix mode and no exact match yet)
   const qn = normalize(state.search.trim());
   const germanMode = state.langMode === 'both' && state.matchMode !== 'prefix' && qn;
+  
   if (qn) {
     currentMatches.sort((a, b) => {
       const aL = a.lemmas[0] ? a.lemmas[0].norm : 'zzz';
       const bL = b.lemmas[0] ? b.lemmas[0].norm : 'zzz';
-      // exact Latin lemma always wins
       const aExact = aL === qn ? 0 : 1;
       const bExact = bL === qn ? 0 : 1;
       if (aExact !== bExact) return aExact - bExact;
-      // In German mode, exact German transToken wins next
       if (germanMode) {
         const aG = a.transTokens.includes(qn) ? 0 : 1;
         const bG = b.transTokens.includes(qn) ? 0 : 1;
@@ -1265,8 +1468,8 @@ function renderResults(){
     });
   }
 
-  resultsCount.textContent = currentMatches.length.toLocaleString();
-  resultsLabel.textContent = state.search ? 'Matches' : 'All entries';
+  resultsCount.textContent = currentMatches.length.toLocaleString('de-DE');
+  resultsLabel.textContent = state.search ? 'Treffer' : 'Alle Einträge';
   resultsFilter.style.display = state.search ? 'inline' : 'none';
   resultsFilter.textContent = '“' + state.search + '”';
 
@@ -1284,14 +1487,14 @@ function renderResultsList(){
     return `
       <div class="result-item" data-idx="${i}" tabindex="0">
         <div class="result-lemma">${xmlEscape(main)}${hom}${pos}${alt ? ' <span style="font-size:13px;color:var(--ink-mute);font-family:var(--ui);font-weight:400;">, '+xmlEscape(alt)+'</span>' : ''}</div>
-        <div class="result-preview">${xmlEscape(e.preview) || '<em style="color:var(--ink-mute)">(no translation)</em>'}</div>
+        <div class="result-preview">${xmlEscape(e.preview) || '<em style="color:var(--ink-mute)">(keine Übersetzung)</em>'}</div>
       </div>
     `;
   }).join('');
   const more = currentMatches.length > visibleCount
-    ? `<button class="show-more" id="showMoreBtn">Show more · ${currentMatches.length - visibleCount} remaining</button>`
+    ? `<button class="show-more" id="showMoreBtn">Mehr anzeigen · ${currentMatches.length - visibleCount} verbleibend</button>`
     : '';
-  resultsList.innerHTML = html + more || `<div class="empty-results">No matches for <strong>“${xmlEscape(state.search)}”</strong>.<br>Try Contains mode or check macron setting.</div>`;
+  resultsList.innerHTML = html + more || `<div class="empty-results">Keine Treffer für <strong>“${xmlEscape(state.search)}”</strong>.<br>Versuche den Enthält-Modus oder die Makronen-Einstellung.</div>`;
 
   resultsList.querySelectorAll('.result-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -1307,18 +1510,16 @@ function renderResultsList(){
 }
 
 // ============================================================
-//  Render — single entry
+//  Einzelne Einträge Anzeigen
 // ============================================================
-const entryEl     = document.getElementById('entry');
+const entryEl      = document.getElementById('entry');
 const contentEmpty = document.getElementById('contentEmpty');
 
 function openEntry(entry){
   state.currentIdx = currentMatches.indexOf(entry);
-  // mark active in sidebar
   resultsList.querySelectorAll('.result-item').forEach(it => {
     it.classList.toggle('active', +it.dataset.idx === state.currentIdx);
   });
-  // scroll into view
   const activeEl = resultsList.querySelector('.result-item.active');
   if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
 
@@ -1327,7 +1528,6 @@ function openEntry(entry){
   entryEl.innerHTML = renderEntry(entry);
   entryEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
 
-  // history
   pushHistory(entry);
 }
 
@@ -1335,7 +1535,6 @@ function renderEntry(entry){
   const ent = entry.node;
   const parts = [];
 
-  // head: lemmas + pos + gen + flex
   parts.push('<div class="entry-head">');
   const lemmas = entry.lemmas;
   if (lemmas.length) {
@@ -1347,7 +1546,6 @@ function renderEntry(entry){
     parts.push('</div>');
   }
 
-  // flex forms (FLEX.GRP > FLEX or flx inside LEM.CNT)
   const flexForms = [];
   const grp = childByTag(ent, 'LEM.GRP');
   if (grp) {
@@ -1361,48 +1559,43 @@ function renderEntry(entry){
     });
   }
   if (flexForms.length) {
-    parts.push('<div class="flex-forms"><span class="label">Forms</span>');
+    parts.push('<div class="flex-forms"><span class="label">Formen</span>');
     flexForms.forEach(f => parts.push(`<span class="flex">${xmlEscape(f)}</span>`));
     parts.push('</div>');
   }
 
-  // meta badges
   const badges = [];
   if (entry.pos) badges.push(`<span class="badge pos">${xmlEscape(entry.pos)}</span>`);
   if (grp) {
     const posAttr = childByTag(grp, 'POS');
     if (posAttr) {
-      const flex = posAttr.getAttribute('Flexion_Substantiv');
-      if (flex) badges.push(`<span class="badge">decl: ${xmlEscape(flex)}</span>`);
+      const flex = posAttr.getAttribute('Flexion_Substantiv') || posAttr.getAttribute('flexion_substantiv');
+      if (flex) badges.push(`<span class="badge">Dekl: ${xmlEscape(flex)}</span>`);
     }
     const gen = childByTag(grp, 'GEN');
     if (gen) {
-      const g = gen.getAttribute('Genus') || gen.textContent.trim();
+      const g = gen.getAttribute('Genus') || gen.getAttribute('genus') || gen.textContent.trim();
       const cls = g === 'm' ? 'gen-m' : g === 'f' ? 'gen-f' : g === 'n' ? 'gen-n' : '';
       badges.push(`<span class="badge ${cls}">${xmlEscape(g)}</span>`);
     }
-    // grammar usage notes attached at the LEM.GRP level
     childrenByTag(grp, 'GRAM').forEach(g => {
-      const v = g.getAttribute('Verwendung') || g.textContent.trim();
+      const v = g.getAttribute('Verwendung') || g.getAttribute('verwendung') || g.textContent.trim();
       if (v) badges.push(`<span class="badge">${xmlEscape(v)}</span>`);
     });
   }
   if (badges.length) {
     parts.push('<div class="meta-badges">' + badges.join('') + '</div>');
   }
-  parts.push('</div>'); // entry-head
+  parts.push('</div>');
 
-  // body
   parts.push('<div class="entry-body">');
-  // walk through SENSE.GRP and LEMCOMP.CNT etc. in document order
-  const bodyNodes = Array.from(ent.children).filter(n => n.tagName !== 'LEM.GRP');
+  const bodyNodes = Array.from(ent.children).filter(n => n.tagName.toUpperCase() !== 'LEM.GRP');
   bodyNodes.forEach(n => parts.push(walkNode(n, { depth: 0 })));
   parts.push('</div>');
 
-  // raw XML
   parts.push(`
     <details class="raw-toggle">
-      <summary>Show raw XML</summary>
+      <summary>Original-XML anzeigen</summary>
       <pre>${xmlEscape(ent.outerHTML)}</pre>
     </details>
   `);
@@ -1410,14 +1603,13 @@ function renderEntry(entry){
   return parts.join('');
 }
 
-// recursive walker — each tag becomes semantic HTML
 function walkNode(node, ctx){
-  if (node.nodeType === 3) { // text
+  if (node.nodeType === 3) {
     const t = node.textContent;
     return t.trim() ? xmlEscape(t) : '';
   }
   if (node.nodeType !== 1) return '';
-  const tag = node.tagName;
+  const tag = node.tagName.toUpperCase();
 
   switch (tag) {
     case 'SENSE.GRP': {
@@ -1426,16 +1618,15 @@ function walkNode(node, ctx){
     }
     case 'NUM_I':
     case 'NUM_1':
-    case 'NUM_a':
+    case 'NUM_A':
     case 'NUM_2':
     case 'NUM_3':
-    case 'NUM_b':
-    case 'NUM_c': {
-      const cnt = node.getAttribute('cnt');
-      const numLabel = cnt || '';
-      const cls = tag === 'NUM_I' ? 'sense-i' : tag === 'NUM_a' || tag === 'NUM_b' || tag === 'NUM_c' ? 'sense-a' : '';
+    case 'NUM_B':
+    case 'NUM_C': {
+      const cnt = node.getAttribute('cnt') || node.getAttribute('CNT') || '';
+      const cls = tag === 'NUM_I' ? 'sense-i' : (tag === 'NUM_A' || tag === 'NUM_B' || tag === 'NUM_C') ? 'sense-a' : '';
       const out = Array.from(node.children).map(c => walkNode(c, { ...ctx, depth: ctx.depth + 1 })).join('');
-      return `<div class="sense ${cls}"><span class="sense-num">${xmlEscape(numLabel)}.</span>${out}</div>`;
+      return `<div class="sense ${cls}"><span class="sense-num">${xmlEscape(cnt)}.</span>${out}</div>`;
     }
     case 'TRANS.GRP': {
       const out = Array.from(node.children).map(c => walkNode(c, ctx)).join('');
@@ -1450,45 +1641,44 @@ function walkNode(node, ctx){
       return t ? `<span class="note">${xmlEscape(t)}</span>` : '';
     }
     case 'GRAM': {
-      const v = node.getAttribute('Verwendung') || node.textContent.trim();
+      const v = node.getAttribute('Verwendung') || node.getAttribute('verwendung') || node.textContent.trim();
       return v ? `<span class="badge">${xmlEscape(v)}</span>` : '';
     }
     case 'POS': {
-      const v = node.getAttribute('Wortart');
+      const v = node.getAttribute('Wortart') || node.getAttribute('wortart');
       return v ? `<span class="badge pos">${xmlEscape(v)}</span>` : '';
     }
     case 'GEN': {
-      const g = node.getAttribute('Genus') || node.textContent.trim();
+      const g = node.getAttribute('Genus') || node.getAttribute('genus') || node.textContent.trim();
       const cls = g === 'm' ? 'gen-m' : g === 'f' ? 'gen-f' : g === 'n' ? 'gen-n' : '';
       return `<span class="badge ${cls}">${xmlEscape(g)}</span>`;
     }
     case 'TG': {
-      const v = node.getAttribute('Textgattung');
+      const v = node.getAttribute('Textgattung') || node.getAttribute('textgattung');
       return v ? `<span class="badge" style="background:var(--tg-bg);color:var(--tg-ink);">${xmlEscape(v)}</span>` : '';
     }
     case 'AGE': {
-      const v = node.getAttribute('Epoche');
+      const v = node.getAttribute('Epoche') || node.getAttribute('epoche');
       return v ? `<span class="badge" style="background:var(--age-bg);color:var(--age-ink);">${xmlEscape(v)}</span>` : '';
     }
     case 'USE': {
-      const v = node.getAttribute('Use');
+      const v = node.getAttribute('Use') || node.getAttribute('use');
       return v ? `<span class="badge" style="background:var(--use-bg);color:var(--use-ink);">${xmlEscape(v)}</span>` : '';
     }
     case 'FLD': {
-      const d = node.getAttribute('Diatechnik');
-      const tt = node.getAttribute('TT');
+      const d = node.getAttribute('Diatechnik') || node.getAttribute('diatechnik');
       return d ? `<span class="badge" style="background:var(--field-bg);color:var(--field-ink);">${xmlEscape(d)}</span>` : '';
     }
     case 'LEV': {
-      const d = node.getAttribute('Diastratik');
+      const d = node.getAttribute('Diastratik') || node.getAttribute('diastratik');
       return d ? `<span class="badge">${xmlEscape(d)}</span>` : '';
     }
     case 'AUTHOR': {
-      const n = node.getAttribute('Name');
+      const n = node.getAttribute('Name') || node.getAttribute('name');
       return n ? `<span class="author-tag">${xmlEscape(shortenAuthor(n))}</span>` : '';
     }
     case 'OP': {
-      const w = node.getAttribute('Werk');
+      const w = node.getAttribute('Werk') || node.getAttribute('werk');
       return w ? `<span class="author-tag">${xmlEscape(w)}</span>` : '';
     }
     case 'MWE.GRP': {
@@ -1517,7 +1707,7 @@ function walkNode(node, ctx){
     }
     case 'IDM': {
       const t = node.textContent.trim();
-      return t ? `<span class="idm-label">Idiom</span><span class="idm-latin">${xmlEscape(t)}</span>` : '';
+      return t ? `<span class="idm-label">Redewendung</span><span class="idm-latin">${xmlEscape(t)}</span>` : '';
     }
     case 'LEMCOMP.CNT': {
       const out = Array.from(node.children).map(c => walkNode(c, ctx)).join('');
@@ -1525,7 +1715,7 @@ function walkNode(node, ctx){
     }
     case 'LEMCOMP': {
       const t = node.textContent.trim();
-      return t ? `<span class="lemcomp-label">compound</span><span class="lemcomp-text">${xmlEscape(t)}</span>` : '';
+      return t ? `<span class="lemcomp-label">Kompositum</span><span class="lemcomp-text">${xmlEscape(t)}</span>` : '';
     }
     case 'COLL.GRP': {
       const out = Array.from(node.children).map(c => walkNode(c, ctx)).join('');
@@ -1541,19 +1731,15 @@ function walkNode(node, ctx){
     }
     case 'SYN': {
       const t = node.textContent.trim();
-      return t ? `<span class="syn-block"><span class="syn-label">syn</span>${xmlEscape(t)}</span>` : '';
-    }
-    case 'OP': {
-      const w = node.getAttribute('Werk');
-      return w ? `<span class="author-tag">${xmlEscape(w)}</span>` : '';
+      return t ? `<span class="syn-block"><span class="syn-label">Synonym</span>${xmlEscape(t)}</span>` : '';
     }
     case 'DEF': {
       const t = node.textContent.trim();
-      return t ? `<div class="def-block"><span class="def-label">definition</span>${xmlEscape(t)}</div>` : '';
+      return t ? `<div class="def-block"><span class="def-label">Definition</span>${xmlEscape(t)}</div>` : '';
     }
     case 'XREF.LEM': {
       const t = node.textContent.trim();
-      const addr = node.getAttribute('Adresstext');
+      const addr = node.getAttribute('Adresstext') || node.getAttribute('adresstext');
       return t ? `<span class="xref" data-lem="${xmlEscape(t)}">${addr ? xmlEscape(addr)+' ' : ''}${xmlEscape(t)}</span>` : '';
     }
     case 'LEM.WF': {
@@ -1563,7 +1749,7 @@ function walkNode(node, ctx){
     }
     case 'HZ': {
       const t = node.textContent.trim();
-      return t ? `<span class="badge">freq ${xmlEscape(t)}/5</span>` : '';
+      return t ? `<span class="badge">Häufigkeit: ${xmlEscape(t)}/5</span>` : '';
     }
     default: {
       const out = Array.from(node.children).map(c => walkNode(c, ctx)).join('');
@@ -1576,31 +1762,21 @@ function walkNode(node, ctx){
 
 function shortenAuthor(name){
   if (!name) return '';
-  // common ones have well-known short forms
   const map = {
     'Caesar':'Caes.','Cicero':'Cic.','Livius':'Liv.','Ovid':'Ov.','Horaz':'Hor.',
     'Vergil':'Verg.','Tacitus':'Tac.','Seneca':'Sen.','Plinius der Ältere':'Plin. nat.',
     'Plinius der Jüngere':'Plin. ep.','Plinius':'Plin.','Quintilian':'Quint.','Sueton':'Suet.',
-    'Tacitus':'Tac.',' Martial':'Mart.','Juvenal':'Juv.','Plautus':'Plaut.','Terenz':'Ter.',
-    'Cato':'Cat.','Catull':'Catull.','Lukrez':'Lucr.','Propert':'Prop.','Tibull':'Tib.',
-    'Nepos':'Nep.','Sallust':'Sall.','Curtius Rufus':'Curt.','Velleius':'Vell.','Valerius Maximus':'Val. Max.',
+    'Martial':'Mart.','Juvenal':'Juv.','Plautus':'Plaut.','Terenz':'Ter.','Cato':'Cat.',
+    'Catull':'Catull.','Lukrez':'Lucr.','Propert':'Prop.','Tibull':'Tib.','Nepos':'Nep.',
+    'Sallust':'Sall.','Curtius Rufus':'Curt.','Velleius':'Vell.','Valerius Maximus':'Val. Max.',
     'Gellius':'Gell.','Apuleius':'Apul.','Macrobius':'Macr.','Ammian':'Amm.','Boethius':'Boeth.',
-    'Augustinus':'Aug.','Hieronymus':'Hier.','Laktanz':'Lact.','Tertullian':'Tert.','Vitruv':'Vitr.',
-    'Celsus':'Cels.','Scribonius Largus':'Scrib.','Palladius':'Pall.','Vegetius':'Veg.',
-    'Columella':'Col.','Palladius':'Pall.','Frontin':'Frontin.','Gaius':'Gai.','Ulpian':'Ulp.',
-    'Papinian':'Pap.','Hygin':'Hyg.','Pomponius Mela':'Pomp. Mela','Plinius der Jüngere':'Plin. ep.',
-    'Aulus Gellius':'Gell.','Martianus Capella':'Mart. Cap.','Einhard':'Einh.','Erasmus':'Eras.',
-    'Accius':'Acc.','Naevius':'Naev.','Ennius':'Enn.','Lucilius':'Lucil.','Lukan':'Lucan.',
-    'Persius':'Pers.','Statius':'Stat.','Silius Italicus':'Sil.','Valerius Flaccus':'Val. Flacc.',
-    'Iuvenal':'Juv.','Phaedrus':'Phaedr.','Iustinus':'Iust.','Eutrop':'Eutrop.','Florus':'Flor.',
-    'Apicius':'Apic.','Festus':'Fest.','Fulgentius':'Fulg.','Isidor':'Isid.','Beda':'Beda',
-    'Hrabanus Maurus':'Hrab.','Walafrid Strabo':'Wal. Strab.','Lupus von Ferrières':'Lup.',
+    'Augustinus':'Aug.','Hieronymus':'Hier.','Laktanz':'Lact.','Tertullian':'Tert.','Vitruv':'Vitr.'
   };
   return map[name] || name;
 }
 
 // ============================================================
-//  History
+//  Verlauf & Tastatursteuerung
 // ============================================================
 function loadHistory(){
   try {
@@ -1622,7 +1798,7 @@ function renderHistory(){
   const chips = document.getElementById('historyChips');
   if (!state.history.length) { bar.classList.remove('show'); return; }
   bar.classList.add('show');
-  chips.innerHTML = state.history.map((h, i) => {
+  chips.innerHTML = state.history.map(h => {
     const txt = h.lemmas[0] || h.key;
     return `<span class="history-chip" data-key="${xmlEscape(h.key)}">${xmlEscape(txt)}</span>`;
   }).join('');
@@ -1632,24 +1808,18 @@ function renderHistory(){
       state.search = c.dataset.key;
       searchClear.classList.add('show');
       renderResults();
-      // open first match
       if (currentMatches.length) openEntry(currentMatches[0]);
     });
   });
 }
 
-// ============================================================
-//  Keyboard
-// ============================================================
 document.addEventListener('keydown', e => {
-  // Ctrl/Cmd+K → focus search
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault();
     searchInput.focus();
     searchInput.select();
     return;
   }
-  // Esc → clear search
   if (e.key === 'Escape' && document.activeElement === searchInput) {
     searchInput.value = '';
     state.search = '';
@@ -1657,10 +1827,8 @@ document.addEventListener('keydown', e => {
     renderResults();
     return;
   }
-  // Only handle nav when dict is active
   if (!document.getElementById('dict').classList.contains('active')) return;
-  // if user is typing in search and there are results
-  if (document.activeElement === searchInput || document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('result-item')) {
+  if (document.activeElement === searchInput || (document.activeElement && document.activeElement.classList.contains('result-item'))) {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       const items = Array.from(resultsList.querySelectorAll('.result-item'));
@@ -1670,7 +1838,6 @@ document.addEventListener('keydown', e => {
       else idx = e.key === 'ArrowDown' ? Math.min(idx + 1, items.length - 1) : Math.max(idx - 1, 0);
       items[idx].focus();
       items[idx].classList.add('active');
-      // open if not yet opened
       if (currentMatches[idx]) openEntry(currentMatches[idx]);
       return;
     }
@@ -1682,38 +1849,30 @@ document.addEventListener('keydown', e => {
 });
 
 // ============================================================
-//  Misc buttons
+//  Toolbar Buttons
 // ============================================================
 document.getElementById('randomBtn').addEventListener('click', () => {
   if (!state.entries.length) return;
   const e = state.entries[Math.floor(Math.random() * state.entries.length)];
-  // set search empty so we can navigate
   searchInput.value = '';
   state.search = '';
   searchClear.classList.remove('show');
   renderResults();
-  // open directly
-  entryEl.style.display = 'block';
-  contentEmpty.style.display = 'none';
-  entryEl.innerHTML = renderEntry(e);
-  entryEl.scrollIntoView({ block: 'start' });
-  pushHistory(e);
+  openEntry(e);
 });
 
 document.getElementById('statsBtn').addEventListener('click', showStats);
 
+// Datei austauschen Button
 document.getElementById('newFileBtn').addEventListener('click', () => {
-  if (confirm('Load a different XML file? Current dictionary will be unloaded.')) {
-    document.getElementById('dict').classList.remove('active');
-    document.getElementById('landing').style.display = 'flex';
-    fileInput.value = '';
-  }
+  document.getElementById('dict').classList.remove('active');
+  document.getElementById('landing').style.display = 'flex';
+  cancelReplaceBtn.style.display = 'inline-flex';
 });
 
 function showStats(){
   if (!state.entries.length) return;
   const total = state.entries.length;
-  // letter distribution
   const letters = {};
   state.entries.forEach(e => {
     const l = (e.lemmas[0] && e.lemmas[0].text) || '';
@@ -1729,17 +1888,17 @@ function showStats(){
       <div style="flex:1;height:14px;background:var(--bg-soft);border-radius:7px;overflow:hidden;">
         <div style="width:${pct}%;height:100%;background:var(--accent-soft);"></div>
       </div>
-      <span style="font-size:12px;color:var(--ink-soft);min-width:50px;text-align:right;">${v.toLocaleString()}</span>
+      <span style="font-size:12px;color:var(--ink-soft);min-width:50px;text-align:right;">${v.toLocaleString('de-DE')}</span>
     </div>`;
   }).join('');
   const html = `
     <div style="max-width:560px;margin:0 auto;padding:40px 30px;">
-      <h2 style="font-family:var(--lat);font-weight:600;color:var(--accent);margin:0 0 6px;">Dictionary statistics</h2>
-      <p style="color:var(--ink-soft);margin:0 0 24px;">Total entries: <strong>${total.toLocaleString()}</strong></p>
-      <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-mute);margin:0 0 10px;">By first letter</h3>
+      <h2 style="font-family:var(--lat);font-weight:600;color:var(--accent);margin:0 0 6px;">Wörterbuch-Statistik</h2>
+      <p style="color:var(--ink-soft);margin:0 0 24px;">Geladene Datei: <strong>${xmlEscape(state.fileName || 'Unbenannt')}</strong> (${total.toLocaleString('de-DE')} Einträge)</p>
+      <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-mute);margin:0 0 10px;">Nach Anfangsbuchstabe</h3>
       ${bars}
       <div style="margin-top:30px;text-align:center;">
-        <button class="btn btn-primary" onclick="document.getElementById('entry').style.display='none';document.getElementById('contentEmpty').style.display='flex';">Close</button>
+        <button class="btn btn-primary" onclick="document.getElementById('entry').style.display='none';document.getElementById('contentEmpty').style.display='flex';">Schließen</button>
       </div>
     </div>`;
   entryEl.style.display = 'block';
@@ -1748,26 +1907,61 @@ function showStats(){
   entryEl.scrollIntoView({ block: 'start' });
 }
 
+// Banner für bestehende Datei aktualisieren
+function updateStoredBanner(data) {
+  if (data && data.name) {
+    storedFileName.textContent = data.name;
+    const mb = (data.size / (1024 * 1024)).toFixed(1);
+    storedFileSize.textContent = `(~${mb} MB)`;
+    storedFileBanner.style.display = 'flex';
+    resumeStoredBtn.style.display = 'inline-flex';
+  } else {
+    storedFileBanner.style.display = 'none';
+    resumeStoredBtn.style.display = 'none';
+  }
+}
+
 // ============================================================
-//  Sample XML (for instant demo without a file)
+//  Initialisierung: Automatisches Wiederherstellen aus IndexedDB
+// ============================================================
+async function init() {
+  try {
+    const saved = await getFromPermanentStorage();
+    if (saved && saved.text) {
+      updateStoredBanner(saved);
+      showLoading(`Stelle ${saved.name} wieder her…`);
+      await new Promise(r => setTimeout(r, 60));
+      parseAndIndex(saved.text, saved.name, false);
+    }
+  } catch (err) {
+    console.warn('Auto-Load fehlgeschlagen:', err);
+  } finally {
+    hideLoading();
+  }
+}
+
+// ============================================================
+//  Beispiel-XML für Schnelltest
 // ============================================================
 const SAMPLE_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <dps-data>
 <ENT title="a"><LEM.GRP><LEM.CNT><LEM>a</LEM><HOMNUM>1</HOMNUM><NOTE>als Abkürzung bei Datumsangaben</NOTE></LEM.CNT></LEM.GRP><SENSE.GRP cnt="1"><NUM_I cnt="2"><NUM_1><TRANS.GRP><TRANS>seit</TRANS><MWE.GRP><PAT.CNT><PAT>a(b) u(rbe) c(ondita)</PAT><TRANS>seit Roms Gründung</TRANS></PAT.CNT></MWE.GRP></TRANS.GRP></NUM_1><NUM_1><TRANS.GRP><TRANS>vor</TRANS><MWE.GRP><PAT.CNT><PAT>a(nte) Chr(istum) n(atum)</PAT><TG Textgattung="christlich"/><TRANS>vor Christi Geburt</TRANS></PAT.CNT></MWE.GRP></TRANS.GRP></NUM_1></NUM_I></SENSE.GRP></ENT>
-<ENT><LEM.GRP><LEM.CNT><LEM>&#x0101;</LEM><HOMNUM>2</HOMNUM></LEM.CNT><LEM.CNT><LEM>ab</LEM></LEM.CNT><LEM.CNT><LEM>abs</LEM></LEM.CNT><POS Wortart="Präposition"/></LEM.GRP><SENSE.GRP cnt="1"><NUM_I cnt="3"><GRAM Verwendung="mit Ablativ"/><NUM_1><TRANS.GRP><NOTE>örtlich</NOTE><TRANS>von</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><TRANS>von ... her</TRANS><MWE.GRP><EX.CNT><EX>ab urbe proficisci</EX><AUTHOR Name="Caesar"/><AUTHOR Name="Livius"/><TRANS>von Rom aufbrechen</TRANS></EX.CNT><PAT.CNT><PAT>a fundamentis</PAT><TRANS>von Grund auf</TRANS></PAT.CNT></MWE.GRP></TRANS.GRP></NUM_a><NUM_a><TRANS.GRP><TRANS>von ... herab</TRANS><MWE.GRP><EX.CNT><EX>sagittae pendebant ab umero</EX><AUTHOR Name="Cicero"/><TRANS>Pfeile hingen von der Schulter herab</TRANS></EX.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1><NUM_1><TRANS.GRP><NOTE>zeitlich</NOTE><TRANS>von ... an</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><TRANS>seit</TRANS><MWE.GRP><PAT.CNT><PAT>ab urbe condita</PAT><TRANS>seit Roms Gründung</TRANS></PAT.CNT><PAT.CNT><PAT>ab initio</PAT><TRANS>von Anfang an</TRANS></PAT.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1><NUM_1><TRANS.GRP><USE Use="übertragen"/><TRANS>von</TRANS><TRANS>durch</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><NOTE>beim Passiv</NOTE><TRANS>von</TRANS><MWE.GRP><EX.CNT><EX>laudatur ab his, culpatur ab illis</EX><AUTHOR Name="Horaz"/><TRANS>er wird von diesen gelobt, von jenen getadelt</TRANS></EX.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1></NUM_I></SENSE.GRP></ENT>
-<ENT><LEM.GRP><LEM.CNT><LEM>amicus</LEM><flx>&#x012B;</flx></LEM.CNT><POS Wortart="Substantiv" Flexion_Substantiv="-us {2. Dekl}"/><GEN Genus="m"/></LEM.GRP><SENSE.GRP cnt="1"><NUM_I cnt="1"><NUM_1><TRANS.GRP><TRANS>Freund</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><MWE.GRP><EX.CNT><EX>amicus certus in re incerta cernitur</EX><AUTHOR Name="Ennius"/><TRANS>Ein echter Freund zeigt sich in unsicherer Sache</TRANS></EX.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1><NUM_1><TRANS.GRP><TRANS>Verbündeter</TRANS><TRANS>anhänger</TRANS></TRANS.GRP></NUM_1></NUM_I></SENSE.GRP></ENT>
+<ENT><LEM.GRP><LEM.CNT><LEM>&#x0101;</LEM><HOMNUM>2</HOMNUM></LEM.CNT><LEM.CNT><LEM>ab</LEM></LEM.CNT><LEM.CNT><LEM>abs</LEM></LEM.CNT><POS Wortart="Präposition"/></LEM.GRP><SENSE.GRP cnt="1"><NUM_I cnt="3"><GRAM Verwendung="mit Ablativ"/><NUM_1><TRANS.GRP><NOTE>örtlich</NOTE><TRANS>von</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><TRANS>von ... her</TRANS><MWE.GRP><EX.CNT><EX>ab urbe proficisci</EX><AUTHOR Name="Caesar"/><AUTHOR Name="Livius"/><TRANS>von Rom aufbrechen</TRANS></EX.CNT><PAT.CNT><PAT>a fundamentis</PAT><TRANS>von Grund auf</TRANS></PAT.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1><NUM_1><TRANS.GRP><NOTE>zeitlich</NOTE><TRANS>von ... an</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><TRANS>seit</TRANS><MWE.GRP><PAT.CNT><PAT>ab urbe condita</PAT><TRANS>seit Roms Gründung</TRANS></PAT.CNT><PAT.CNT><PAT>ab initio</PAT><TRANS>von Anfang an</TRANS></PAT.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1><NUM_1><TRANS.GRP><USE Use="übertragen"/><TRANS>von</TRANS><TRANS>durch</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><NOTE>beim Passiv</NOTE><TRANS>von</TRANS><MWE.GRP><EX.CNT><EX>laudatur ab his, culpatur ab illis</EX><AUTHOR Name="Horaz"/><TRANS>er wird von diesen gelobt, von jenen getadelt</TRANS></EX.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1></NUM_I></SENSE.GRP></ENT>
+<ENT><LEM.GRP><LEM.CNT><LEM>amicus</LEM><flx>&#x012B;</flx></LEM.CNT><POS Wortart="Substantiv" Flexion_Substantiv="-us {2. Dekl}"/><GEN Genus="m"/></LEM.GRP><SENSE.GRP cnt="1"><NUM_I cnt="1"><NUM_1><TRANS.GRP><TRANS>Freund</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><MWE.GRP><EX.CNT><EX>amicus certus in re incerta cernitur</EX><AUTHOR Name="Ennius"/><TRANS>Ein echter Freund zeigt sich in unsicherer Sache</TRANS></EX.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1><NUM_1><TRANS.GRP><TRANS>Verbündeter</TRANS><TRANS>Anhänger</TRANS></TRANS.GRP></NUM_1></NUM_I></SENSE.GRP></ENT>
 <ENT><LEM.GRP><LEM.CNT><LEM>amor</LEM><flx>&#x014D;ris</flx></LEM.CNT><POS Wortart="Substantiv" Flexion_Substantiv="konson Stämme {3. Dekl}"/><GEN Genus="m"/></LEM.GRP><SENSE.GRP cnt="1"><NUM_I cnt="1"><NUM_1><TRANS.GRP><TRANS>Liebe</TRANS><MWE.GRP><EX.CNT><EX>amor virtutis</EX><AUTHOR Name="Cicero"/><TRANS>Liebe zur Tugend</TRANS></EX.CNT><EX.CNT><EX>omnia vincit amor</EX><AUTHOR Name="Vergil"/><TRANS>die Liebe besiegt alles</TRANS></EX.CNT></MWE.GRP></TRANS.GRP></NUM_1></NUM_I></SENSE.GRP></ENT>
 <ENT><LEM.GRP><LEM.CNT><LEM>c&#x0101;rus</LEM><flx>a, um</flx></LEM.CNT><POS Wortart="Adjektiv" Flexion_Substantiv="-a {1. Dekl}"/></LEM.GRP><SENSE.GRP cnt="1"><NUM_I cnt="1"><NUM_1><TRANS.GRP><TRANS>teuer</TRANS><TRANS>lieb</TRANS><TRANS>werthold</TRANS></TRANS.GRP><NUM_a><TRANS.GRP><MWE.GRP><EX.CNT><EX>carus est illi pater</EX><AUTHOR Name="Cicero"/><TRANS>der Vater ist ihm teuer</TRANS></EX.CNT><PAT.CNT><PAT>carus caro</PAT><TRANS>der Nächste seinem Nächsten</TRANS></PAT.CNT></MWE.GRP></TRANS.GRP></NUM_a></NUM_1><NUM_1><TRANS.GRP><NOTE>vom Preis</NOTE><TRANS>teuer</TRANS><TRANS>hoch</TRANS></TRANS.GRP></NUM_1></NUM_I></SENSE.GRP></ENT>
 </dps-data>`;
 
-function loadSampleXML(){
-  showLoading('Loading sample…');
+document.getElementById('trySampleBtn').addEventListener('click', () => {
+  showLoading('Lade Beispieldaten…');
   setTimeout(() => {
-    parseXML(SAMPLE_XML);
+    parseAndIndex(SAMPLE_XML, 'sample.xml', false);
     hideLoading();
   }, 100);
-}
+});
 
+// App starten
+init();
 </script>
 </body>
 </html>
