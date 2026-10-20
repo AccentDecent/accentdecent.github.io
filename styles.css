@@ -95,6 +95,13 @@ body {
     color: var(--text-secondary);
 }
 
+.tool-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
 .tool-tag {
     display: inline-block;
     padding: 4px 10px;
@@ -102,8 +109,22 @@ body {
     font-size: 0.75rem;
     background: rgba(45, 158, 211, 0.2);
     color: var(--accent-color);
-    margin-bottom: 15px;
     width: fit-content;
+}
+
+.tool-tag-status {
+    background: rgba(255, 190, 75, 0.18);
+    color: #ffbe4b;
+}
+
+.tool-tag-ai {
+    background: rgba(156, 107, 255, 0.18);
+    color: #b99aff;
+}
+
+.tool-tag-refined {
+    background: rgb(139 255 107 / 0.18);
+    color: #9dff9a;
 }
 
 /* Utils Section (Zip Viewer) */
