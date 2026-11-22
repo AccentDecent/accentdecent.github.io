@@ -134,14 +134,6 @@ Generate one complete HTML document for the requested math or chemistry topic. U
 
 ## Load the library
 
-**Offline with a sidecar file:** Download `js-render-lib.min.js` once, save it next to the HTML, and load it before the lesson code:
-
-```html
-<script src="./js-render-lib.min.js"></script>
-```
-
-**One offline HTML file:** Read the actual contents of that bundle and insert them in a classic `<script>` before the lesson code. Escape any literal closing-script sequence in the embedded source. If you lack the bundle bytes, use the sidecar approach and provide both files. Keep all lesson code, styles, and other assets local or inline. Avoid module imports and fetches in offline pages.
-
 **Online:** Use the library URL below. If it contains placeholders, use the URL shown in the hosted showcase’s Online tab or fill in the GitHub owner, repository, public tag or commit, and path to the bundle. Online references require a network connection.
 
 ```html
