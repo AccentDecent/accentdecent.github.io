@@ -55,11 +55,9 @@ Chemistry
 
 ---
 
-**Excalidraw Dsl**
-Use this for longer/bigger diagrams/illustrations.
+**Excalidraw DSL**
 
-Docs
-Draw the requested visual in Excalidraw DSL v1.2. Return one fenced code block tagged excalidraw-dsl with no prose or JSON. Use short IDs and labels. Use only the syntax below.
+Draw the requested visual in Excalidraw DSL v1.3. Return one fenced code block tagged excalidraw-dsl with no prose or JSON. Use short IDs and labels. Use only the syntax below.
 
 One command per line. Blank lines and // comments are ignored. End each block with end. Blocks stack vertically. Optional @colors: yellow amber orange green teal blue purple pink red gray or hex (e.g. @#2563eb).
 
@@ -103,6 +101,11 @@ o-h1
 o-h2
 end
 
+LATEX
+latex \frac{a}{b}+\sqrt{x}
+Use $...$ or \(...\) inside text and note. Use latex @color on its own line, TeX on the following lines, then end for a multiline formula. Standalone $$...$$ or \[...\] also works.
+Use LaTeX on the right side of plot equations, e.g. y=$\frac{x^2}{4}$. Numeric plots support arithmetic, powers, fractions, roots, and the listed plot functions (e.g. \sin(x)). A plot legend can be LaTeX too, e.g. | $y=x^2$.
+
 2D MATH (plot xMin..xMax yMin..yMax; default ranges -5..5)
 plot -6..6 -4..4
 y=x^2/4 @purple | Parabola
@@ -110,7 +113,7 @@ y=2sin(x) @teal
 circle 0 0 2 @blue
 point 0 0 Origin @red
 end
-Use y=expression with x, pi, e, + - * / ^, parentheses, and sin cos tan asin acos atan sqrt abs ln log exp floor ceil. Trig uses radians. Multiplication can be implicit (2x, 2sin(x)). Optional @color, curve legend and point label. Shapes: circle x y r, ellipse x y rx ry, rect x1 y1 x2 y2, poly x1,y1 x2,y2 x3,y3 ..., segment x1 y1 x2 y2. Put fill before @color for a filled shape. aspect equal uses equal units; aspect fit stretches to the plot frame. Closed shapes default to equal units.
+Use y=expression with x, pi, e, + - * / ^, parentheses, and sin cos tan asin acos atan sqrt abs sign ln log exp floor ceil. Trig uses radians. Multiplication can be implicit (2x, 2sin(x)). Optional @color, curve legend and point label. Shapes: circle x y r, ellipse x y rx ry, rect x1 y1 x2 y2, poly x1,y1 x2,y2 x3,y3 ..., segment x1 y1 x2 y2. Put fill before @color for a filled shape. aspect equal uses equal units; aspect fit stretches to the plot frame. Closed shapes default to equal units.
 
 3D MATH (plot3d xMin..xMax yMin..yMax zMin..zMax; default ranges -5..5)
 plot3d -4..4 -4..4 -2..4
@@ -121,8 +124,6 @@ sphere -1.6 1.5 2 .9 @purple
 point 0 0 0 Origin @red
 end
 Use z=expression in x and y with the same operators and functions. Camera is eye x y z -> target x y z, or camera azimuth elevation [distance] in degrees around the plot center. Azimuth goes from +x toward +y; elevation is −90° to 90°. Use ortho [zoom] (default zoom 1) or perspective [vertical FOV in degrees] (default 50). mesh 4–26 changes surface density. Shapes are wireframes: sphere x y z r, box x1 y1 z1 x2 y2 z2, cube x y z side (min corner), cylinder x y z r h or cone x y z r h (base center, along +z), and segment x1 y1 z1 x2 y2 z2. Output is an editable 2D projection.
-
-
 ---
 
 If the user asks for an interactive explanation in html form. Use this dedicated library if applicable:
