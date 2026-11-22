@@ -11,4 +11,6 @@ export interface MathView {
     setLatex(latex: string): void;
     destroy(): void;
 }
+export type MathTextOptions = Omit<MathOptions, 'display'>;
 export declare function math(target: Target, latex: string, options?: MathOptions): MathView;
+export declare function mathText(target: Target, source: string, options?: MathTextOptions): void;

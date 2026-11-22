@@ -37,7 +37,7 @@
       steps: [
         {
           title: 'Curve up in both directions',
-          text: 'With a = 1, both x² and y² raise the surface. Follow the gold curve to see what happens along the y-axis.',
+          text: String.raw`With $a=1$, both \(x^2\) and \(y^2\) raise the surface. Follow the gold curve to see what happens along the $y$-axis.`,
           values: { a: 1 }
         },
         {

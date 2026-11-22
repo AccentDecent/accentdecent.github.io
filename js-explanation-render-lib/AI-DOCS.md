@@ -18,7 +18,7 @@ Generate one complete HTML document for the requested math or chemistry topic. U
 <script src="https://cdn.jsdelivr.net/gh/OWNER/JsRenderLib@RELEASE/dist/js-render-lib.min.js"></script>
 ```
 
-Every function is on the browser global `JsRenderLib`. The browser bundle contains everything the pages need, including LaTeX rendering. Use JavaScript functions for math formulas. Plain text passed to the API is shown as text. Use the equation field or the math renderer for LaTeX. For styled prose, use your own HTML outside the lesson or add elements to the render stage.
+Every function is on the browser global `JsRenderLib`. The browser bundle contains everything the pages need, including LaTeX rendering. Use JavaScript functions for math formulas. Use inline LaTeX delimiters in lesson titles and descriptions, or call mathText for standalone prose. Use the equation field or math for a standalone formula. For styled prose, use your own HTML outside the lesson or add elements to the render stage.
 
 ## Complete lesson pattern
 
@@ -56,7 +56,7 @@ const demo = lesson('#lesson', {
 ## Lessons
 
 - `lesson(target, { steps, sliders?, startStep?, labels?, render })` mounts a visualization stage and sidebar. Every target is an HTML element or a matching CSS selector. Mounting replaces the target's children.
-- Each step is `{ title, text?, equation?, values? }`. The optional equation is a LaTeX string displayed below the step text. Presets apply each time that step is entered. Sliders absent from the presets retain their values. Step indices start at zero.
+- Each step is `{ title, text?, equation?, values? }`. The title and text support inline `$...$` and `\(...\)`. The optional equation is a LaTeX string displayed below the step text. Presets apply each time that step is entered. Sliders absent from the presets retain their values. Step indices start at zero.
 - Each slider is `{ id, label, min, max, step?, value?, unit?, format? }`. `step` defaults to 1 and `value` defaults to the minimum. `format(value)` can provide a custom readout.
 - `render(stage, { step, current, values })` runs on mount, step changes, and each slider input. To preserve camera and focus, create a view once and call its update method, as above. Use a wrapper inside the stage if you also want captions or multiple visuals. An optional function returned by `render` runs before the next render or on destroy.
 - The lesson returns `{ element, stage, state, setStep(index), setValue(id, value), destroy() }`. Call the view's `destroy()` when removing a persistent view. For localization, pass `labels: { previous, next, progress: (current, total) => ... }`. The progress callback uses a one-based current step number.
@@ -89,6 +89,16 @@ Use `plot.setPlot(newModel)` to update all curves and points, or `plot.destroy()
 - Use `areas: [{ fn, domain: [left, right], baseline?, color?, negativeColor?, opacity? }]` to shade between two functions. The baseline defaults to zero. A negative color applies where the curve lies below the baseline. Return NaN for gaps. Omit an area when the integration limits coincide. Areas draw the shape. Calculate the integral separately for the numeric explanation.
 
 ## LaTeX
+
+Wrap inline formulas in `$...$` or `\(...\)`. These work automatically in a lesson step’s `title` and `text`. In other HTML, mount a paragraph with an ID and call:
+
+```js
+JsRenderLib.mathText('#paragraph', String.raw`For $a=2$, we have \(f_a(x)=x^2-2\).`);
+```
+
+`mathText(target, prose, options?)` replaces the target’s children. It accepts the math styling and macro options below. Keep each inline formula on one line, and omit spaces immediately inside dollar delimiters. Use `\$` for a literal dollar sign. Use the display API below for a standalone or multi-line equation.
+
+Use `math` for a formula without surrounding prose:
 
 ```js
 const formula = JsRenderLib.math('#formula', String.raw`\int_0^b x^2\,\mathrm{d}x = \frac{b^3}{3}`, {
