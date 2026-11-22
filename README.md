@@ -76,3 +76,8 @@ bx lr
 HEX:
 0F 07 02 E3 1E FF 2F E1
 ```
+
+## My super AI prompt
+
+See @SUPER_AI_PROMPT.md
+
