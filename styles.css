@@ -127,6 +127,11 @@ body {
     color: #9dff9a;
 }
 
+.tool-tag-aiuse {
+    background: rgb(88 145 130);
+    color: #9affe4;
+}
+
 /* Utils Section (Zip Viewer) */
 .utils-section {
     width: 100%;
