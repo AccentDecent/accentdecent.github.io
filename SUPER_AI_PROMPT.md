@@ -144,7 +144,7 @@ Generate one complete HTML document for the requested math or chemistry topic. U
 **Online:** Use the library URL below. If it contains placeholders, use the URL shown in the hosted showcase’s Online tab or fill in the GitHub owner, repository, public tag or commit, and path to the bundle. Online references require a network connection.
 
 ```html
-<script src="http://localhost:63342/accentdecent.github.io/js-explanation-render-lib/js-render-lib.min.js"></script>
+<script src="https://accentdecent.github.io/js-explanation-render-lib/js-render-lib.min.js"></script>
 ```
 
 Every function is on the browser global `JsRenderLib`. The browser bundle contains everything the pages need, including LaTeX rendering. Use JavaScript functions for math formulas. Use inline LaTeX delimiters in lesson titles and descriptions, or call mathText for standalone prose. Use the equation field or math for a standalone formula. For styled prose, use your own HTML outside the lesson or add elements to the render stage.
