@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create interactive math and chemistry lessons with a single offline-ready JavaScript library.">
+  <meta name="theme-color" content="#0b1020">
+  <title>JsRenderLib — Interactive math and chemistry lessons</title>
+  <link rel="icon" href="showcase/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="showcase/style.css">
+  <script src="./js-render-lib.min.js" defer></script>
+  <script src="showcase/ai-docs.js" defer></script>
+  <script src="showcase/demo.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="JsRenderLib home">
+        <span class="brand-icon" aria-hidden="true"></span>
+        <span>JsRenderLib</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#examples">Examples</a>
+        <a href="#start">Quick start</a>
+      </nav>
+      <button type="button" class="button button-quiet copy-docs">
+        <span class="copy-icon" aria-hidden="true"></span>Copy AI docs
+      </button>
+    </div>
+  </header>
+
+  <main id="top" class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> A JavaScript library for interactive lessons</p>
+        <h1 id="hero-title">Make the<br>abstract <em>move.</em></h1>
+        <p class="lede">Turn equations and Lewis structures into hands-on lessons with 3D scenes, live sliders, and step-by-step explanations.</p>
+        <div class="actions">
+          <a class="button button-primary" href="#examples">Explore the examples</a>
+          <a id="download-bundle" class="button button-text" href="./js-render-lib.min.js" download>Download the bundle</a>
+        </div>
+      </div>
+      <figure class="hero-art">
+        <div id="hero-graph" aria-hidden="true"></div>
+        <figcaption><span></span> Saddle surface <strong id="hero-equation">z = ½(x² − y²)</strong></figcaption>
+      </figure>
+    </section>
+
+    <section class="examples" id="examples" aria-labelledby="examples-title">
+      <div class="section-intro">
+        <p class="eyebrow">Live examples</p>
+        <h2 id="examples-title">Change a value. See what happens.</h2>
+      </div>
+      <div class="example-shell">
+        <div class="tabbar">
+          <div class="tabs" role="tablist" aria-label="Example topics">
+            <button id="tab-surface" type="button" role="tab" aria-selected="true" aria-controls="demo-surface">
+              <span class="tab-icon" aria-hidden="true">◇</span> 3D math
+            </button>
+            <button id="tab-lewis" type="button" role="tab" aria-selected="false" aria-controls="demo-lewis" tabindex="-1">
+              <span class="tab-icon" aria-hidden="true">∷</span> Lewis structures
+            </button>
+            <button id="tab-plot" type="button" role="tab" aria-selected="false" aria-controls="demo-plot" tabindex="-1">
+              <span class="tab-icon" aria-hidden="true">∿</span> 2D plots
+            </button>
+          </div>
+        </div>
+
+        <div class="example" id="demo-surface" role="tabpanel" aria-labelledby="tab-surface"></div>
+        <div class="example" id="demo-lewis" role="tabpanel" aria-labelledby="tab-lewis" hidden></div>
+        <div class="example" id="demo-plot" role="tabpanel" aria-labelledby="tab-plot" hidden></div>
+        <noscript>Enable JavaScript to explore the lessons and use the copy button.</noscript>
+      </div>
+      <aside class="lesson-link" aria-labelledby="german-lesson-title">
+        <div>
+          <h3 id="german-lesson-title" lang="de">Funktionsscharen und Integrale</h3>
+          <p>A full lesson in German with LaTeX and live integral shading.</p>
+        </div>
+        <div class="actions">
+          <a class="button button-quiet" href="showcase/funktionsscharen.html">Open lesson</a>
+          <a class="button button-text" href="showcase/funktionsscharen.html" download>Download HTML</a>
+        </div>
+      </aside>
+    </section>
+
+    <section id="start" class="start" aria-labelledby="start-title">
+      <div class="start-copy">
+        <p class="eyebrow">Quick start</p>
+        <h2 id="start-title">One script. Works offline.</h2>
+        <p>Give your AI the API guide and describe the lesson you want to make. Save the bundle beside the HTML or embed it to share a single file.</p>
+        <div class="actions">
+          <button type="button" class="button button-primary copy-docs">
+            <span class="copy-icon" aria-hidden="true"></span>Copy AI docs
+          </button>
+          <a class="button button-text" href="showcase/offline-example.html" download>Download offline example</a>
+        </div>
+      </div>
+      <div class="code-card">
+        <div class="code-top">
+          <span>lesson.html</span>
+          <div class="mode-select" role="group" aria-label="Script source">
+            <button type="button" aria-pressed="true" data-mode="offline">Offline</button>
+            <button type="button" aria-pressed="false" data-mode="online">Online</button>
+          </div>
+        </div>
+        <pre id="quick-code"><code><span class="code-tag">&lt;div</span> <span class="code-prop">id</span>=<span class="code-string">"diagram"</span><span class="code-tag">&gt;&lt;/div&gt;</span>
+<span class="code-tag">&lt;script</span> <span class="code-prop">src</span>=<span class="code-string" id="code-source">"./js-render-lib.min.js"</span><span class="code-tag">&gt;&lt;/script&gt;</span>
+<span class="code-tag">&lt;script&gt;</span>
+  JsRenderLib.<span class="code-fn">lewis</span>(<span class="code-string">'#diagram'</span>, <span class="code-string">'water'</span>);
+<span class="code-tag">&lt;/script&gt;</span></code></pre>
+        <p id="code-note">Put the bundle in the same folder as the HTML.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>JsRenderLib <span id="version"></span></span>
+      <a id="download-docs" href="AI-DOCS.md" download="AI-DOCS.md">Download the API guide</a>
+    </div>
+  </footer>
+
+  <p id="copy-status" class="toast" role="status"></p>
+  <dialog id="docs-dialog" aria-labelledby="docs-title">
+    <form method="dialog"><button class="button button-quiet">Close</button></form>
+    <h2 id="docs-title">AI docs</h2>
+    <p>Copy the selected text and paste it into your AI chat.</p>
+    <textarea id="docs-text" readonly aria-label="AI documentation"></textarea>
+  </dialog>
+</body>
+</html>
